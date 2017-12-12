@@ -1,0 +1,78 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.reder.zcan20.impl;
+
+import com.reder.zcan20.CommandGroup;
+import com.reder.zcan20.CommandMode;
+import com.reder.zcan20.packet.Packet;
+import com.reder.zcan20.packet.impl.DefaultPacket;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import javax.validation.constraints.NotNull;
+
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public final class UDPMarshaller
+{
+
+  public static ByteBuffer adaptByteBuffer(@NotNull ByteBuffer bufferToFill)
+  {
+    ByteBuffer buffer = bufferToFill.slice();
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    return buffer;
+  }
+
+  public static int marshalPacket(@NotNull Packet packet,
+                                  @NotNull ByteBuffer bufferToFill)
+  {
+    ByteBuffer buffer = bufferToFill.duplicate();
+    ByteBuffer data = packet.getData();
+    int dlc = data.remaining();
+    buffer.limit(6 + dlc);
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    buffer.putShort((short) dlc);
+    buffer.putShort((short) 0);
+    buffer.put(packet.getCommandGroup().getMagic());
+    int cmd = (packet.getCommand() & 0x3f) << 2;
+    int mode = packet.getCommandMode().getMagic() & 0x3;
+    buffer.put((byte) (cmd + mode));
+    buffer.put(data);
+    return buffer.position();
+  }
+
+  public static Packet unmarshalPacket(@NotNull ByteBuffer buffer) throws IOException
+  {
+    ByteBuffer packetBytes = buffer.duplicate();
+    if (packetBytes.limit() < 8) {
+      throw new IOException("Received ZCAN Packet too small");
+    }
+    packetBytes.order(ByteOrder.LITTLE_ENDIAN);
+    final int dlc = packetBytes.getShort() & 0xffff;
+    if (packetBytes.limit() < (8 + dlc)) {
+      throw new IOException("Received ZCAN Packet too small");
+    }
+    packetBytes.getShort();// these 16bits are currently (4.10public) not used
+    final CommandGroup group = CommandGroup.valueOf(packetBytes.get());
+    final byte mcmd = packetBytes.get();
+    final CommandMode mode = CommandMode.valueOfMagic(mcmd);
+    final byte command = (byte) (mcmd >> 2);
+    final short senderNID = packetBytes.getShort();
+    final byte[] data = new byte[dlc];
+    packetBytes.get(data);
+    return new DefaultPacket.Builder().
+            senderNID(senderNID).
+            command(command).
+            commandGroup(group).
+            commandMode(mode).
+            data(data).
+            build();
+
+  }
+
+}

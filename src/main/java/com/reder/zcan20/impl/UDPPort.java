@@ -1,0 +1,163 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.reder.zcan20.impl;
+
+import com.reder.zcan20.packet.Packet;
+import com.reder.zcan20.util.BufferPool;
+import com.reder.zcan20.util.Utils;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author reder
+ */
+public final class UDPPort implements ZPort
+{
+
+  public static final Logger LOGGER = Logger.getLogger("com.reder.zcan.zport");
+  public static final int SO_TIMEOUT = 5000;
+  public static final int SO_TRAFFIC = 0x14; // IPTOS_RELIABILITY (0x04),IPTOS_LOWDELAY (0x10)
+  private final String name;
+  private final SocketAddress outAddress;
+  private DatagramSocket out;
+  private final SocketAddress inAddress;
+  private DatagramSocket in;
+  private final int mtu;
+  private final BufferPool bufferPool;
+
+  public UDPPort(String address,
+                 int remotePort,
+                 int localPort) throws IOException
+  {
+    this.name = "MX10@" + address + ":" + remotePort;
+    InetAddress inetAddress = InetAddress.getByName(address);
+    InetAddress local2Bound = getMatchingAddress(inetAddress);
+    if (local2Bound == null) {
+      local2Bound = InetAddress.getLocalHost();
+    }
+    NetworkInterface intf = NetworkInterface.getByInetAddress(local2Bound);
+    mtu = intf.getMTU();
+    outAddress = new InetSocketAddress(inetAddress,
+                                       remotePort);
+    inAddress = new InetSocketAddress(local2Bound,
+                                      localPort);
+    bufferPool = new BufferPool(mtu,
+                                Runtime.getRuntime().availableProcessors());
+  }
+
+  private InetAddress getMatchingAddress(InetAddress remoteAddress) throws SocketException
+  {
+    List<InterfaceAddress> addresses = Utils.getAllInterfaceAddresses();
+    for (InterfaceAddress a : addresses) {
+      if (Utils.matchesSubnet(remoteAddress,
+                              a.getAddress(),
+                              a.getNetworkPrefixLength())) {
+        return a.getAddress();
+      }
+    }
+    return null;
+  }
+
+  private boolean isOpen()
+  {
+    synchronized (this) {
+      return out != null && in != null;
+    }
+  }
+
+  @Override
+  public String getName()
+  {
+    return name;
+  }
+
+  @Override
+  public void start() throws IOException
+  {
+    synchronized (this) {
+      if (!isOpen()) {
+        out = null;
+        in = null;
+        out = new DatagramSocket();
+        in = new DatagramSocket(inAddress);
+        in.setSoTimeout(SO_TIMEOUT);
+        in.setTrafficClass(SO_TRAFFIC);
+        out.setSoTimeout(SO_TIMEOUT);
+        out.setTrafficClass(SO_TRAFFIC);
+      }
+    }
+  }
+
+  @Override
+  public void close() throws IOException
+  {
+    synchronized (this) {
+      out.close();
+      in.close();
+      out = null;
+      in = null;
+    }
+  }
+
+  @Override
+  public void sendPacket(Packet packet) throws IOException
+  {
+    LOGGER.log(Level.FINEST,
+               "Sending {0}",
+               packet.toString());
+    try (BufferPool.BufferItem item = bufferPool.getBuffer()) {
+      ByteBuffer buffer = item.getBuffer();
+      int numBytes = UDPMarshaller.marshalPacket(packet,
+                                                 buffer);
+      DatagramSocket socket;
+      synchronized (this) {
+        socket = out;
+      }
+      socket.send(new DatagramPacket(buffer.array(),
+                                     numBytes,
+                                     outAddress));
+    }
+  }
+
+  @Override
+  public Packet readPacket() throws IOException
+  {
+    try (BufferPool.BufferItem item = bufferPool.getBuffer()) {
+      ByteBuffer buffer = item.getBuffer();
+      DatagramPacket packet = new DatagramPacket(buffer.array(),
+                                                 buffer.capacity());
+      DatagramSocket socket;
+      synchronized (this) {
+        socket = in;
+      }
+      try {
+        socket.receive(packet);
+      } catch (SocketTimeoutException ex) {
+        return null;
+      }
+      ByteBuffer packetBytes = ByteBuffer.wrap(packet.getData());
+      Packet result = UDPMarshaller.unmarshalPacket(packetBytes);
+      LOGGER.log(Level.FINEST,
+                 "Reading {0}",
+                 result.toString());
+      return result;
+    }
+  }
+
+}
