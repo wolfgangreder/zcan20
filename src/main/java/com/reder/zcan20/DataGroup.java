@@ -15,37 +15,40 @@
  */
 package com.reder.zcan20;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public final class ProviderID
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public final class DataGroup implements Serializable
 {
 
-  private static final ConcurrentMap<Integer, ProviderID> VALUES = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<Short, DataGroup> INSTANCES = new ConcurrentHashMap<>();
+  public static final DataGroup LOCO = valueOf(0x0000);
+  public static final DataGroup TRAINS = valueOf(0x2f00);
+  public static final DataGroup ACCESSORY = valueOf(0x3000);
+  public static final DataGroup ACCESSORY_EXT = valueOf(0x3200);
+  public static final DataGroup MX8 = valueOf(0x5040);
+  public static final DataGroup MX9 = valueOf(0x5080);
 
-  public static final ProviderID ZIMO = valueOf(0);
-  public static final ProviderID ESTWGJ = valueOf(0x10);
-  public static final ProviderID STP = valueOf(0x20);
-  public static final ProviderID PFUSCH = valueOf(0x21);
-  public static final ProviderID TRAINCONTROLLER = valueOf(0x30);
-  public static final ProviderID TRAINPROGRAMMER = valueOf(0x31);
-  public static final ProviderID RAILMANAGER = valueOf(0x40);
-  public static final ProviderID WOLFI = valueOf(0xff00);
+  private final short magic;
 
-  public static ProviderID valueOf(int magic)
+  public static DataGroup valueOf(int magic)
   {
-    return VALUES.computeIfAbsent(magic,
-                                  ProviderID::new);
+    return INSTANCES.computeIfAbsent(((short) magic),
+                                     DataGroup::new);
   }
 
-  private final int magic;
-
-  private ProviderID(int magic)
+  private DataGroup(short magic)
   {
     this.magic = magic;
   }
 
-  public int getMagic()
+  public short getMagic()
   {
     return magic;
   }
@@ -53,8 +56,8 @@ public final class ProviderID
   @Override
   public int hashCode()
   {
-    int hash = 5;
-    hash = 43 * hash + this.magic;
+    int hash = 3;
+    hash = 31 * hash + this.magic;
     return hash;
   }
 
@@ -65,10 +68,9 @@ public final class ProviderID
     return this == obj;
   }
 
-  @Override
-  public String toString()
+  private Object readResolve() throws ObjectStreamException
   {
-    return "ProviderID{" + "magic=0x" + Integer.toHexString(magic) + '}';
+    return valueOf(magic);
   }
 
 }

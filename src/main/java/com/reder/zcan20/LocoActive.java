@@ -13,12 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.reder.zcan20.util;
+package com.reder.zcan20;
 
-@FunctionalInterface
-public interface ByteConsumer
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public enum LocoActive
 {
+  UNKNOWN(0),
+  ACTIVE(0x01),
+  FORECE_ACTIVE(0x10);
+  private final byte magic;
 
-  public void consumeByte(byte b);
+  private LocoActive(int magic)
+  {
+    this.magic = (byte) magic;
+  }
+
+  public byte getMagic()
+  {
+    return magic;
+  }
+
+  public LocoActive valueOfMagic(byte magic)
+  {
+    for (LocoActive a : values()) {
+      if (a.magic == magic) {
+        return a;
+      }
+    }
+    throw new IllegalArgumentException("Invalid LocoActive magic " + magic);
+  }
 
 }
