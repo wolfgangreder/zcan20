@@ -28,13 +28,11 @@ import com.reder.zcan20.ZCAN;
 import com.reder.zcan20.ZCANFactory;
 import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PacketAdapter;
+import com.reder.zcan20.packet.PacketBuilder;
 import com.reder.zcan20.packet.Ping;
 import com.reder.zcan20.packet.PowerInfo;
-import com.reder.zcan20.packet.impl.DefaultPacket;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -236,7 +234,7 @@ public final class ZCANImpl implements ZCAN
           abortFlag.set(false);
           port.start();
           terminateResult = packetThread.submit(this::packetLoop);
-          Future<Ping> future = doSendPacket(new DefaultPacket.Builder().
+          Future<Ping> future = doSendPacket(ZCANFactory.createPacketBuilder(myNID).
                   commandGroup(CommandGroup.NETWORK).
                   command(CommandGroup.NETWORK_PORT_OPEN).
                   commandMode(CommandMode.COMMAND).build(),
@@ -244,7 +242,7 @@ public final class ZCANImpl implements ZCAN
                                              CommandGroup.NETWORK_PING,
                                              Ping.class,
                                              (p) -> p.getCommand() == CommandGroup.NETWORK_PING && p.getCommandMode()
-                                                                                                   == CommandMode.EVENT);
+                                                                                                           == CommandMode.EVENT);
           Ping ping = future.get(5,
                                  TimeUnit.SECONDS);
           _masterNID.set(ping.getMasterNID());
@@ -331,7 +329,7 @@ public final class ZCANImpl implements ZCAN
           Thread.currentThread().interrupt();
         } catch (ExecutionException | TimeoutException ex) {
         }
-        DefaultPacket.Builder builder = new DefaultPacket.Builder();
+        PacketBuilder builder = ZCANFactory.createPacketBuilder(myNID);
         builder.commandGroup(CommandGroup.NETWORK);
         builder.commandMode(CommandMode.COMMAND);
         builder.command(CommandGroup.NETWORK_PORT_CLOSE);
@@ -461,60 +459,63 @@ public final class ZCANImpl implements ZCAN
   public void setPowerStateInfo(PowerOutput output,
                                 PowerState state) throws IOException
   {
-    if (!isOpen()) {
-      throw new IOException("Port closed");
-    }
-    DefaultPacket.Builder builder = new DefaultPacket.Builder();
-    builder.commandGroup(CommandGroup.SYSTEM);
-    builder.commandMode(CommandMode.COMMAND);
-    builder.command(CommandGroup.SYSTEM_POWER);
-    builder.senderNID(getNID());
-    builder.data((byte) output.getMagic(),
-                 (byte) state.getMagic());
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    if (!isOpen()) {
+//      throw new IOException("Port closed");
+//    }
+//    PacketBuilder builder = ZCANFactory.createPacketBuilder(myNID);
+//    builder.commandGroup(CommandGroup.SYSTEM);
+//    builder.commandMode(CommandMode.COMMAND);
+//    builder.command(CommandGroup.SYSTEM_POWER);
+//    builder.senderNID(getNID());
+//    builder.data((byte) output.getMagic(),
+//                 (byte) state.getMagic());
   }
 
 //  @Override
   public Future<PowerInfo> getOutputState(PowerOutput output) throws IOException, InterruptedException
   {
-    DefaultPacket.Builder builder = new DefaultPacket.Builder();
-    builder.commandGroup(CommandGroup.CONFIG);
-    builder.commandMode(CommandMode.REQUEST);
-    builder.command(CommandGroup.CONFIG_POWER_INFO);
-    builder.senderNID(getNID());
-    byte b = 0;
-    switch (output) {
-      case BOOSTER:
-        b = (byte) 2;
-        break;
-      case OUT_1:
-        b = (byte) 0;
-        break;
-      case OUT_2:
-        b = (byte) 1;
-        break;
-    }
-    builder.data(b);
-    return doSendPacket(builder.build(),
-                        CommandGroup.CONFIG,
-                        CommandGroup.CONFIG_POWER_INFO,
-                        PowerInfo.class,
-                        (p) -> p.getCommand() == CommandGroup.CONFIG_POWER_INFO && p.getCommandMode() == CommandMode.ACK);
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    PacketBuilder builder = ZCANFactory.createPacketBuilder(myNID);
+//    builder.commandGroup(CommandGroup.CONFIG);
+//    builder.commandMode(CommandMode.REQUEST);
+//    builder.command(CommandGroup.CONFIG_POWER_INFO);
+//    builder.senderNID(getNID());
+//    byte b = 0;
+//    switch (output) {
+//      case BOOSTER:
+//        b = (byte) 2;
+//        break;
+//      case OUT_1:
+//        b = (byte) 0;
+//        break;
+//      case OUT_2:
+//        b = (byte) 1;
+//        break;
+//    }
+//    builder.data(b);
+//    return doSendPacket(builder.build(),
+//                        CommandGroup.CONFIG,
+//                        CommandGroup.CONFIG_POWER_INFO,
+//                        PowerInfo.class,
+//                        (p) -> p.getCommand() == CommandGroup.CONFIG_POWER_INFO && p.getCommandMode() == CommandMode.ACK);
   }
 
   //@Override
   public List<Future<PowerInfo>> getOutputState(Collection<? extends PowerOutput> outputs) throws IOException,
                                                                                                   InterruptedException
   {
-    if (!isOpen()) {
-      throw new IOException("Port closed");
-    }
-    List<Future<PowerInfo>> result = new ArrayList<>(outputs.size());
-    for (PowerOutput out : outputs) {
-      if (out != null) {
-        result.add(getOutputState(out));
-      }
-    }
-    return result;
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    if (!isOpen()) {
+//      throw new IOException("Port closed");
+//    }
+//    List<Future<PowerInfo>> result = new ArrayList<>(outputs.size());
+//    for (PowerOutput out : outputs) {
+//      if (out != null) {
+//        result.add(getOutputState(out));
+//      }
+//    }
+//    return result;
   }
 
   //@Override
@@ -533,17 +534,18 @@ public final class ZCANImpl implements ZCAN
   public void readCV(int address,
                      int cv) throws IOException
   {
-    DefaultPacket.Builder builder = new DefaultPacket.Builder();
-    builder.commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
-    builder.command(CommandGroup.TSE_PROG_READ);
-    builder.commandMode(CommandMode.REQUEST);
-//    builder.address((short) getNID());//_masterNID.get());
-    ByteBuffer buffer = ByteBuffer.allocate(6);
-    buffer.order(ByteOrder.LITTLE_ENDIAN);
-    buffer.putShort((short) address);
-    buffer.putInt(cv);
-    builder.data(buffer.array());
-    port.sendPacket(builder.build());
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    PacketBuilder builder = ZCANFactory.createPacketBuilder(myNID);
+//    builder.commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
+//    builder.command(CommandGroup.TSE_PROG_READ);
+//    builder.commandMode(CommandMode.REQUEST);
+////    builder.address((short) getNID());//_masterNID.get());
+//    ByteBuffer buffer = ByteBuffer.allocate(6);
+//    buffer.order(ByteOrder.LITTLE_ENDIAN);
+//    buffer.putShort((short) address);
+//    buffer.putInt(cv);
+//    builder.data(buffer.array());
+//    port.sendPacket(builder.build());
   }
 
   @Override
@@ -557,6 +559,7 @@ public final class ZCANImpl implements ZCAN
   @Override
   public void getMode(int address) throws IOException
   {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //    try {
 //      DefaultPacket.Builder builder = new DefaultPacket.Builder();
 //      builder.commandGroup(CommandGroup.LOCO);
@@ -615,6 +618,7 @@ public final class ZCANImpl implements ZCAN
   @Override
   public void takeOwnership(int address) throws IOException
   {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //    try {
 //      synchronized (lock) {
 //        if (ownerPing != null) {

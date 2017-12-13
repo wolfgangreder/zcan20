@@ -17,8 +17,8 @@ package com.reder.zcan20.impl;
 
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
+import com.reder.zcan20.ZCANFactory;
 import com.reder.zcan20.packet.Packet;
-import com.reder.zcan20.packet.impl.DefaultPacket;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -44,7 +44,7 @@ public final class UDPMarshaller
     ByteBuffer buffer = bufferToFill.duplicate();
     ByteBuffer data = packet.getData();
     int dlc = data.remaining();
-    buffer.limit(6 + dlc);
+    buffer.limit(8 + dlc);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     buffer.putShort((short) dlc);
     buffer.putShort((short) 0);
@@ -52,6 +52,7 @@ public final class UDPMarshaller
     int cmd = (packet.getCommand() & 0x3f) << 2;
     int mode = packet.getCommandMode().getMagic() & 0x3;
     buffer.put((byte) (cmd + mode));
+    buffer.putShort(packet.getSenderNID());
     buffer.put(data);
     return buffer.position();
   }
@@ -73,14 +74,12 @@ public final class UDPMarshaller
     final CommandMode mode = CommandMode.valueOfMagic(mcmd);
     final byte command = (byte) (mcmd >> 2);
     final short senderNID = packetBytes.getShort();
-    final byte[] data = new byte[dlc];
-    packetBytes.get(data);
-    return new DefaultPacket.Builder().
+    return ZCANFactory.createPacketBuilder(senderNID).
             senderNID(senderNID).
             command(command).
             commandGroup(group).
             commandMode(mode).
-            data(data).
+            data(packetBytes).
             build();
 
   }

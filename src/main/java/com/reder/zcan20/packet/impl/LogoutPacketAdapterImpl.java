@@ -17,16 +17,17 @@ package com.reder.zcan20.packet.impl;
 
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
-import com.reder.zcan20.packet.CVInfoAdapter;
+import com.reder.zcan20.packet.LogoutPacketAdapter;
 import com.reder.zcan20.packet.Packet;
-import org.openide.util.lookup.ServiceProvider;
 import com.reder.zcan20.packet.PacketAdapterFactory;
+import com.reder.zcan20.util.Utils;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class CVInfoImpl extends AbstractPacketAdapter implements CVInfoAdapter
+public final class LogoutPacketAdapterImpl extends AbstractPacketAdapter implements LogoutPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -38,38 +39,36 @@ public final class CVInfoImpl extends AbstractPacketAdapter implements CVInfoAda
                            int command,
                            CommandMode mode)
     {
-      return group == CommandGroup.TRACK_CONFIG_PUBLIC && (mode == CommandMode.ACK || mode == CommandMode.EVENT);
+      return group == CommandGroup.NETWORK && command == CommandGroup.NETWORK_PORT_CLOSE && mode == CommandMode.COMMAND;
     }
 
     @Override
-    public CVInfoAdapter createAdapter(Packet packet)
+    public LogoutPacketAdapter createAdapter(Packet packet)
     {
-      return new CVInfoImpl(packet);
+      return new LogoutPacketAdapterImpl(packet);
     }
 
   }
 
-  public CVInfoImpl(Packet packet)
+  public LogoutPacketAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public int getNumber()
+  public short getMasterNID()
   {
-    return buffer.getInt(6) & 0xffff_ffff;
+    return buffer.getShort(0);
   }
 
   @Override
-  public int getValue()
+  public String toString()
   {
-    return buffer.getShort(10) & 0xffff;
-  }
-
-  @Override
-  public short getDecoderAddress()
-  {
-    return buffer.getShort(4);
+    StringBuilder builder = new StringBuilder("LOGOUT(0x");
+    Utils.appendHexString(getMasterNID() & 0xffff,
+                          builder,
+                          4);
+    return builder.append(')').toString();
   }
 
 }

@@ -23,6 +23,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +39,39 @@ import javax.validation.constraints.NotNull;
  */
 public final class Utils
 {
+
+  public static byte byte1(int i)
+  {
+    return (byte) (i & 0xff);
+  }
+
+  public static byte byte2(int i)
+  {
+    return (byte) ((i & 0xff00) >> 8);
+  }
+
+  public static byte byte3(int i)
+  {
+    return (byte) ((i & 0xff0000) >> 16);
+  }
+
+  public static byte byte4(int i)
+  {
+    return (byte) ((i & 0xff000000) >> 24);
+  }
+
+  /**
+   * Allocates a ByteBuffer with byteorder {@code ByteOrder.LITTLE_ENDIAN}.
+   *
+   * @param size size of buffer
+   * @return a Buffer with byteorder {@code ByteOrder.LITTLE_ENDIAN}
+   */
+  public static ByteBuffer allocateLEBuffer(int size)
+  {
+    ByteBuffer result = ByteBuffer.allocate(size);
+    result.order(ByteOrder.LITTLE_ENDIAN);
+    return result;
+  }
 
   /**
    * Converts {@code pValue} to hex and appends the result to {@code builder}.
@@ -56,8 +90,8 @@ public final class Utils
   }
 
   /**
-   * Converts {@code pValue} to hex and appends the result to {@code builder}.
-   * If necessary leading zeros will be added to append at least {@code minimumDigits} to {@code builder}.
+   * Converts {@code pValue} to hex and appends the result to {@code builder}. If necessary leading zeros will be added to append
+   * at least {@code minimumDigits} to {@code builder}.
    *
    * @param pValue The Integer to convert.
    * @param builder The Buidler to append the result to.
@@ -68,7 +102,7 @@ public final class Utils
                                               StringBuilder builder,
                                               int minimumDigits)
   {
-    String tmp = Integer.toHexString(pValue & 0xff);
+    String tmp = Integer.toHexString(pValue);
     for (int i = tmp.length(); i < minimumDigits; ++i) {
       builder.append('0');
     }
@@ -187,17 +221,15 @@ public final class Utils
   }
 
   /**
-   * Prüft ob die beiden Addresse
-   * <code>addr1</code> und
-   * <code>addr2</code> im dur
-   * <code>subnetRange</code> definierten Subnet liegen.
+   * Prüft ob die beiden Addresse <code>addr1</code> und <code>addr2</code> im dur <code>subnetRange</code> definierten Subnet
+   * liegen.
    *
    * @param addr1 erste Adresse
    * @param addr2 zweite Adresse
    * @param subnetRange breite des Subnets in bits
    * @return true falls die beiden Adresse im gleichen Subnet liegen.
-   * @throws IllegalArgumentException falls <code>addr1</code> oder <code>addr2</code> gleich <code>null</code>, * *
-   * oder <code>subnetRange&lt;0</code>
+   * @throws IllegalArgumentException falls <code>addr1</code> oder <code>addr2</code> gleich <code>null</code>, * * oder
+   * <code>subnetRange&lt;0</code>
    */
   public static boolean matchesSubnet(InetAddress addr1,
                                       InetAddress addr2,
@@ -273,8 +305,8 @@ public final class Utils
    *
    * @param value the array
    * @return a String with the length {@code 2*value.length}
-   * @see #byteBuffer2HexString(java.nio.ByteBuffer, java.lang.StringBuilder, char)
-   * @see #byteArray2HexString(@javax.validation.constraints.NotNull byte[], int, int)
+   * @see com.reder.zcan20.util.Utils#byteBuffer2HexString(java.nio.ByteBuffer, java.lang.StringBuilder, char)
+   * @see com.reder.zcan20.util.Utils#byteArray2HexString(@javax.validation.constraints.NotNull byte[], int, int)
    */
   public static String byteArray2HexString(@NotNull byte[] value)
   {
@@ -286,9 +318,8 @@ public final class Utils
   }
 
   /**
-   * Converts the array {@code value} beginnig with {@code offset} to a hex string.
-   * Each byte is 2 digits wide.
-   * if {@code value.length<=offset+len} a {@link java.lang.IndexOutOfBoundsException} is thrown.
+   * Converts the array {@code value} beginnig with {@code offset} to a hex string. Each byte is 2 digits wide. if
+   * {@code value.length<=offset+len} a {@link java.lang.IndexOutOfBoundsException} is thrown.
    *
    * @param value the array
    * @param offset beginning offset
@@ -315,10 +346,9 @@ public final class Utils
   }
 
   /**
-   * Converts the ByteBuffer {@code buffer} to a hex string and appends the result to {@code builder}.
-   * Each byte is 2 digits wide.
-   * If {@code builder} is {@code null} a new {@link java.lang.StringBuilder} is created.
-   * If {@code interByteChar} is {@code !=0} this character is appended between each byte.
+   * Converts the ByteBuffer {@code buffer} to a hex string and appends the result to {@code builder}. Each byte is 2 digits wide.
+   * If {@code builder} is {@code null} a new {@link java.lang.StringBuilder} is created. If {@code interByteChar} is {@code !=0}
+   * this character is appended between each byte.
    *
    * @param buffer The data to convert
    * @param builder The builder to append the result to.
@@ -437,9 +467,9 @@ public final class Utils
   }
 
   /**
-   * Convert the hex string {@code seq} to a {@link java.nio.ByteBuffer}.
-   * If {@code buffer} is null, a {@link java.nio.ByteBuffer} is allocated and returned. Otherwise {@code buffer} is returned.
-   * If {@code buffer.remaining()} is too small to hold all data, {@link java.nio.BufferOverflowException} is thrown.
+   * Convert the hex string {@code seq} to a {@link java.nio.ByteBuffer}. If {@code buffer} is null, a {@link java.nio.ByteBuffer}
+   * is allocated and returned. Otherwise {@code buffer} is returned. If {@code buffer.remaining()} is too small to hold all data,
+   * {@link java.nio.BufferOverflowException} is thrown.
    *
    * @param seq Input hex string
    * @param buffer Outputbuffer. If {@code null} a indirect ByteBuffer will be allocated.
@@ -476,12 +506,12 @@ public final class Utils
   }
 
   /**
-   * Convert the input {@code seq} to bytes.
-   * For each converted byte {@code byteConsumer} is called.
+   * Convert the input {@code seq} to bytes. For each converted byte {@code byteConsumer} is called.
    *
    * @param seq Input sequence
    * @param byteConsumer Consumer of data
-   * @param interByteChar Optional character to separate bytes. If {@code \u0000} no separator char is expected. A trailing separator char is allowed.
+   * @param interByteChar Optional character to separate bytes. If {@code \u0000} no separator char is expected. A trailing
+   * separator char is allowed.
    * @throws ParseException if the input cannot be parsed.
    */
   public static void hexString2ByteConsumer(@NotNull CharSequence seq,

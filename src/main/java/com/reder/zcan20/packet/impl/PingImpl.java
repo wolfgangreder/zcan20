@@ -18,9 +18,10 @@ package com.reder.zcan20.packet.impl;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.packet.Packet;
+import com.reder.zcan20.packet.PacketAdapterFactory;
 import com.reder.zcan20.packet.Ping;
-import com.reder.zcan20.packet.SpecialisationFactory;
 import javax.validation.constraints.NotNull;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -29,8 +30,8 @@ import javax.validation.constraints.NotNull;
 public final class PingImpl extends AbstractPacketAdapter implements Ping
 {
 
-  //@ServiceProvider(service=SpecialisationFactory.class)
-  public static final class Factory implements SpecialisationFactory
+  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+  public static final class Factory implements PacketAdapterFactory
   {
 
     @Override
@@ -42,7 +43,7 @@ public final class PingImpl extends AbstractPacketAdapter implements Ping
     }
 
     @Override
-    public Ping createSpecialisation(Packet packet)
+    public Ping createAdapter(Packet packet)
     {
       return new PingImpl(packet);
     }

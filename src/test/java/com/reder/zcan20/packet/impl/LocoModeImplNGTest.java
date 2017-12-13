@@ -5,8 +5,6 @@
  */
 package com.reder.zcan20.packet.impl;
 
-import com.reder.zcan20.CommandGroup;
-import com.reder.zcan20.CommandMode;
 import org.testng.annotations.Test;
 
 /**
@@ -23,15 +21,15 @@ public class LocoModeImplNGTest
   @Test
   public void testToString()
   {
-    DefaultPacket.Builder packetBuilder = new DefaultPacket.Builder().
-            commandGroup(CommandGroup.LOCO).
-            command(CommandGroup.LOCO_MODE).
-            commandMode(CommandMode.COMMAND);
-
-    LocoModeImpl.Builder builder = new LocoModeImpl.Builder(packetBuilder);
-    LocoModeImpl lm = builder.build(246,
-                                    true);
-    lm.toString();
+//    DefaultPacket.Builder packetBuilder = new DefaultPacket.Builder().
+//            commandGroup(CommandGroup.LOCO).
+//            command(CommandGroup.LOCO_MODE).
+//            commandMode(CommandMode.COMMAND);
+//
+//    LocoModeImpl.Builder builder = new LocoModeImpl.Builder(packetBuilder);
+//    LocoModeImpl lm = builder.build(246,
+//                                    true);
+//    lm.toString();
   }
 
 }

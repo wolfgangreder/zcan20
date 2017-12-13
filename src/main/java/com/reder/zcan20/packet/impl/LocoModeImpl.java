@@ -20,6 +20,7 @@ import com.reder.zcan20.Protocol;
 import com.reder.zcan20.SpeedSteps;
 import com.reder.zcan20.SpeedlimitMode;
 import com.reder.zcan20.packet.Packet;
+import com.reder.zcan20.packet.PacketBuilder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public final class LocoModeImpl extends AbstractPacketAdapter implements LocoMod
   public static final class Builder
   {
 
-    private final DefaultPacket.Builder packetBuilder;
+    private final PacketBuilder packetBuilder;
     private SpeedSteps steps = SpeedSteps.STEP_128;
     private Protocol protocol = Protocol.DCC;
     private int funcCount = 28;
@@ -45,7 +46,7 @@ public final class LocoModeImpl extends AbstractPacketAdapter implements LocoMod
     private boolean analogFunc = false;
     private SpeedlimitMode limitMode = SpeedlimitMode.NO_LIMIT;
 
-    public Builder(@NotNull DefaultPacket.Builder packetBuilder)
+    public Builder(@NotNull PacketBuilder packetBuilder)
     {
       this.packetBuilder = Objects.requireNonNull(packetBuilder,
                                                   "packetBuilder is null");
@@ -113,7 +114,9 @@ public final class LocoModeImpl extends AbstractPacketAdapter implements LocoMod
       buffer.put((byte) m1);
       buffer.put((byte) funcCount);
       buffer.put((byte) m3);
-      packetBuilder.data(buffer.array());
+      buffer.limit(buffer.position());
+      buffer.rewind();
+      packetBuilder.data(buffer);
       return new LocoModeImpl(packetBuilder.build(),
                               used);
     }

@@ -21,9 +21,9 @@ import com.reder.zcan20.PowerOutput;
 import com.reder.zcan20.PowerState;
 import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PowerInfo;
-import com.reder.zcan20.packet.SpecialisationFactory;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
+import com.reder.zcan20.packet.PacketAdapterFactory;
 
 /**
  *
@@ -32,8 +32,8 @@ import javax.validation.constraints.NotNull;
 public final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
 {
 
-  //@ServiceProvider(service=SpecialisationFactory.class)
-  public static final class Factory implements SpecialisationFactory
+  //@ServiceProvider(service=PacketAdapterFactory.class)
+  public static final class Factory implements PacketAdapterFactory
   {
 
     @Override
@@ -46,7 +46,7 @@ public final class PowerInfoImpl extends AbstractPacketAdapter implements PowerI
     }
 
     @Override
-    public PowerInfo createSpecialisation(Packet packet)
+    public PowerInfo createAdapter(Packet packet)
     {
       return new PowerInfoImpl(packet);
     }

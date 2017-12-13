@@ -28,6 +28,10 @@ import com.reder.zcan20.SpeedSteps;
 import com.reder.zcan20.SpeedlimitMode;
 import java.nio.ByteBuffer;
 import java.util.Set;
+import java.util.function.Function;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -42,11 +46,13 @@ public interface PacketBuilder
 
   public PacketBuilder commandMode(@NotNull CommandMode commandMode);
 
-  public PacketBuilder command(byte command);
+  public PacketBuilder command(@Min(0) @Max(0x3f) byte command);
 
   public PacketBuilder senderNID(short senderNID);
 
-  public PacketBuilder data(@NotNull ByteBuffer data);
+  public PacketBuilder data(ByteBuffer data);
+
+  public PacketBuilder adapterFactory(Function<? super Packet, ? extends PacketAdapter> adpaterFactory);
 
   public Packet build();
 
@@ -55,14 +61,14 @@ public interface PacketBuilder
   public Packet buildLogoutPacket(short masterNID);
 
   public Packet buildPowerModePacket(short systemNID,
-                                     @NotNull Set<? extends PowerOutput> outputs,
+                                     @NotNull @NotEmpty Set<? extends PowerOutput> outputs,
                                      @NotNull PowerMode mode);
 
-  public Packet buildLocoStatePacket(short locoID);
+  public Packet buildLocoStatePacket(@Min(0) @Max(0x27ff) short locoID);
 
-  public Packet buildLocoModePacket(short locoID);
+  public Packet buildLocoModePacket(@Min(0) @Max(0x27ff) short locoID);
 
-  public Packet buildLocoModePacket(short locoID,
+  public Packet buildLocoModePacket(@Min(0) @Max(0x27ff) short locoID,
                                     @NotNull SpeedSteps steps,
                                     @NotNull Protocol protocol,
                                     int numFunctions,
@@ -70,18 +76,18 @@ public interface PacketBuilder
                                     boolean pulseFx,
                                     boolean analogFx);
 
-  public Packet buildLocoSpeedPacket(short locoID,
-                                     short speed,
-                                     @NotNull Set<? extends SpeedFlags> speedFlags,
+  public Packet buildLocoSpeedPacket(@Min(0) @Max(0x27ff) short locoID,
+                                     @Min(0) @Max(0x3ff) short speed,
+                                     @NotNull @NotEmpty Set<? extends SpeedFlags> speedFlags,
                                      byte speedDivisor);
 
-  public Packet buildLocoFunctionPacket(short locoID,
+  public Packet buildLocoFunctionPacket(@Min(0) @Max(0x27ff) short locoID,
                                         short fxNumber,
                                         short fxValue);
 
-  public Packet buildLocoActivePacket(short locoID);
+  public Packet buildLocoActivePacket(@Min(0) @Max(0x27ff) short locoID);
 
-  public Packet buildLocoActivePacket(short locoID,
+  public Packet buildLocoActivePacket(@Min(0) @Max(0x27ff) short locoID,
                                       @NotNull LocoActive mode);
 
   public Packet buildReadCVPacket(short locoID,

@@ -17,16 +17,18 @@ package com.reder.zcan20.packet.impl;
 
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
-import com.reder.zcan20.packet.CVInfoAdapter;
+import com.reder.zcan20.DataGroup;
+import com.reder.zcan20.packet.DataGroupCountRequestAdapter;
 import com.reder.zcan20.packet.Packet;
-import org.openide.util.lookup.ServiceProvider;
 import com.reder.zcan20.packet.PacketAdapterFactory;
+import com.reder.zcan20.util.Utils;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class CVInfoImpl extends AbstractPacketAdapter implements CVInfoAdapter
+public final class DataGroupCountRequestAdapterImpl extends AbstractPacketAdapter implements DataGroupCountRequestAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -38,38 +40,45 @@ public final class CVInfoImpl extends AbstractPacketAdapter implements CVInfoAda
                            int command,
                            CommandMode mode)
     {
-      return group == CommandGroup.TRACK_CONFIG_PUBLIC && (mode == CommandMode.ACK || mode == CommandMode.EVENT);
+      return group == CommandGroup.DATA && command == CommandGroup.DATA_GROUP_COUNT && mode == CommandMode.REQUEST;
     }
 
     @Override
-    public CVInfoAdapter createAdapter(Packet packet)
+    public DataGroupCountRequestAdapter createAdapter(Packet packet)
     {
-      return new CVInfoImpl(packet);
+      return new DataGroupCountRequestAdapterImpl(packet);
     }
 
   }
 
-  public CVInfoImpl(Packet packet)
+  public DataGroupCountRequestAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public int getNumber()
+  public short getMasterNID()
   {
-    return buffer.getInt(6) & 0xffff_ffff;
+    return buffer.getShort(0);
   }
 
   @Override
-  public int getValue()
+  public DataGroup getDataGroup()
   {
-    return buffer.getShort(10) & 0xffff;
+    return DataGroup.valueOf(buffer.getShort(2));
   }
 
   @Override
-  public short getDecoderAddress()
+  public String toString()
   {
-    return buffer.getShort(4);
+    StringBuilder builder = new StringBuilder("DATA_COUNT(0x");
+    Utils.appendHexString(getMasterNID() & 0xffff,
+                          builder,
+                          4);
+    builder.append(", ");
+    builder.append(getDataGroup());
+    builder.append(')');
+    return builder.toString();
   }
 
 }

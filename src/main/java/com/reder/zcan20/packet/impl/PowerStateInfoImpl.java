@@ -20,8 +20,9 @@ import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.PowerMode;
 import com.reder.zcan20.PowerOutput;
 import com.reder.zcan20.packet.Packet;
+import com.reder.zcan20.packet.PacketAdapterFactory;
 import com.reder.zcan20.packet.PowerStateInfo;
-import com.reder.zcan20.packet.SpecialisationFactory;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -30,8 +31,8 @@ import com.reder.zcan20.packet.SpecialisationFactory;
 public final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerStateInfo
 {
 
-  //@ServiceProvider(service = SpecialisationFactory.class)
-  public static final class Factory implements SpecialisationFactory
+  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+  public static final class Factory implements PacketAdapterFactory
   {
 
     @Override
@@ -43,7 +44,7 @@ public final class PowerStateInfoImpl extends AbstractPacketAdapter implements P
     }
 
     @Override
-    public Object createSpecialisation(Packet packet)
+    public PowerStateInfo createAdapter(Packet packet)
     {
       return new PowerStateInfoImpl(packet);
     }

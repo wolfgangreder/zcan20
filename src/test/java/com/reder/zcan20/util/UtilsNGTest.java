@@ -64,44 +64,44 @@ public class UtilsNGTest
     String in = "0001020304051a1b1cadafefff";
     AtomicInteger index = new AtomicInteger();
     Utils.hexString2ByteConsumer(in,
-                             (byte b) -> {
-                               int i = index.get();
-                               assertEquals("Missmatch at position " + i,
-                                            Byte.valueOf(b),
-                                            expected.get(i));
-                               index.incrementAndGet();
-                             },
-                             (char) 0);
+                                 (byte b) -> {
+                                   int i = index.get();
+                                   assertEquals("Missmatch at position " + i,
+                                                Byte.valueOf(b),
+                                                expected.get(i));
+                                   index.incrementAndGet();
+                                 },
+                                 (char) 0);
     in = "00 01 02 03 04 05 1a 1b 1c ad af ef ff";
     index.set(0);
     Utils.hexString2ByteConsumer(in,
-                             (byte b) -> {
-                               int i = index.get();
-                               assertEquals("Missmatch at position " + i,
-                                            Byte.valueOf(b),
-                                            expected.get(i));
-                               index.incrementAndGet();
-                             },
-                             ' ');
+                                 (byte b) -> {
+                                   int i = index.get();
+                                   assertEquals("Missmatch at position " + i,
+                                                Byte.valueOf(b),
+                                                expected.get(i));
+                                   index.incrementAndGet();
+                                 },
+                                 ' ');
     in = "00:01:02:03:04:05:1a:1b:1c:ad:af:eF:ff";
     index.set(0);
     Utils.hexString2ByteConsumer(in,
-                             (byte b) -> {
-                               int i = index.get();
-                               assertEquals("Missmatch at position " + i,
-                                            Byte.valueOf(b),
-                                            expected.get(i));
-                               index.incrementAndGet();
-                             },
-                             ':');
+                                 (byte b) -> {
+                                   int i = index.get();
+                                   assertEquals("Missmatch at position " + i,
+                                                Byte.valueOf(b),
+                                                expected.get(i));
+                                   index.incrementAndGet();
+                                 },
+                                 ':');
   }
 
   @Test
   public void testHexString2ByteSinkEmptyString() throws ParseException
   {
     Utils.hexString2ByteConsumer("",
-                             (b) -> fail("Empty input not detected"),
-                             (char) 0);
+                                 (b) -> fail("Empty input not detected"),
+                                 (char) 0);
   }
 
   @Test(expectedExceptions = ParseException.class)
@@ -110,12 +110,12 @@ public class UtilsNGTest
     String in = "00f";
     AtomicInteger index = new AtomicInteger();
     Utils.hexString2ByteConsumer(in,
-                             (b) -> {
-                               if (index.incrementAndGet() > 1) {
-                                 fail("Illegal Input not detected");
-                               }
-                             },
-                             (char) 0);
+                                 (b) -> {
+                                   if (index.incrementAndGet() > 1) {
+                                     fail("Illegal Input not detected");
+                                   }
+                                 },
+                                 (char) 0);
   }
 
   @Test(expectedExceptions = ParseException.class)
@@ -124,12 +124,12 @@ public class UtilsNGTest
     String in = "0gf";
     AtomicInteger index = new AtomicInteger();
     Utils.hexString2ByteConsumer(in,
-                             (b) -> {
-                               if (index.incrementAndGet() > 1) {
-                                 fail("Illegal Input not detected");
-                               }
-                             },
-                             (char) 0);
+                                 (b) -> {
+                                   if (index.incrementAndGet() > 1) {
+                                     fail("Illegal Input not detected");
+                                   }
+                                 },
+                                 (char) 0);
   }
 
   @Test(expectedExceptions = ParseException.class)
@@ -137,8 +137,8 @@ public class UtilsNGTest
   {
     String in = "0gf";
     Utils.hexString2ByteConsumer(in,
-                             (b) -> fail("Illegal Input not detected"),
-                             (char) 'g');
+                                 (b) -> fail("Illegal Input not detected"),
+                                 (char) 'g');
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -146,8 +146,8 @@ public class UtilsNGTest
   public void testHexString2ByteSinkNullCharsequence() throws ParseException
   {
     Utils.hexString2ByteConsumer(null,
-                             (b) -> fail("Illegal Input not detected"),
-                             (char) 'g');
+                                 (b) -> fail("Illegal Input not detected"),
+                                 (char) 'g');
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -155,8 +155,8 @@ public class UtilsNGTest
   public void testHexString2ByteSinkNullSink() throws ParseException
   {
     Utils.hexString2ByteConsumer("ab",
-                             null,
-                             (char) 'g');
+                                 null,
+                                 (char) 'g');
   }
 
   @Test(expectedExceptions = ParseException.class)
@@ -164,12 +164,12 @@ public class UtilsNGTest
   {
     AtomicInteger index = new AtomicInteger();
     Utils.hexString2ByteConsumer("ab cD:EF",
-                             (b) -> {
-                               if (index.incrementAndGet() > 2) {
-                                 fail("Illegal Input not detected");
-                               }
-                             },
-                             (char) ' ');
+                                 (b) -> {
+                                   if (index.incrementAndGet() > 2) {
+                                     fail("Illegal Input not detected");
+                                   }
+                                 },
+                                 (char) ' ');
   }
 
   @Test
@@ -296,6 +296,29 @@ public class UtilsNGTest
     Utils.hexString2ByteBuffer("cafeba",
                                buffer,
                                (char) 0);
+  }
+
+  @Test
+  public void testByte_n()
+  {
+    int i = 0x65432100;
+    assertEquals((byte) 0,
+                 Utils.byte1(i));
+    assertEquals((byte) 0x21,
+                 Utils.byte2(i));
+    assertEquals((byte) 0x43,
+                 Utils.byte3(i));
+    assertEquals((byte) 0x65,
+                 Utils.byte4(i));
+    i = 0x00123456;
+    assertEquals((byte) 0x56,
+                 Utils.byte1(i));
+    assertEquals((byte) 0x34,
+                 Utils.byte2(i));
+    assertEquals((byte) 0x12,
+                 Utils.byte3(i));
+    assertEquals((byte) 0x00,
+                 Utils.byte4(i));
   }
 
 }

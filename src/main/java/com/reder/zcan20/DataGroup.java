@@ -15,10 +15,14 @@
  */
 package com.reder.zcan20;
 
+import com.reder.zcan20.util.Utils;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -36,6 +40,7 @@ public final class DataGroup implements Serializable
   public static final DataGroup MX9 = valueOf(0x5080);
 
   private final short magic;
+  private String toString;
 
   public static DataGroup valueOf(int magic)
   {
@@ -46,6 +51,7 @@ public final class DataGroup implements Serializable
   private DataGroup(short magic)
   {
     this.magic = magic;
+    toString = null;
   }
 
   public short getMagic()
@@ -71,6 +77,34 @@ public final class DataGroup implements Serializable
   private Object readResolve() throws ObjectStreamException
   {
     return valueOf(magic);
+  }
+
+  private String buildToString()
+  {
+    Class<?> clazz = getClass();
+    Field[] fields = clazz.getDeclaredFields();
+    for (Field f : fields) {
+      try {
+        if (Modifier.isStatic(f.getModifiers()) && f.get(null) == this) {
+          return f.getName();
+        }
+      } catch (IllegalArgumentException | IllegalAccessException ex) {
+        Exceptions.printStackTrace(ex);
+      }
+    }
+    return Utils.appendHexString(magic,
+                                 new StringBuilder("DataGroup 0x"),
+                                 4).toString();
+  }
+
+  @Override
+  public synchronized String toString()
+  {
+    if (toString == null) {
+      toString = buildToString();
+    }
+    return toString;
+
   }
 
 }

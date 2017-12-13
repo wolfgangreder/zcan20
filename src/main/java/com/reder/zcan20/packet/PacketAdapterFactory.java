@@ -23,13 +23,13 @@ import javax.validation.constraints.NotNull;
  *
  * @author Wolfgang Reder
  */
-public interface SpecialisationFactory
+public interface PacketAdapterFactory
 {
 
   public boolean isValid(CommandGroup group,
                          int command,
                          CommandMode mode);
 
-  public Object createSpecialisation(@NotNull Packet packet);
+  public PacketAdapter createAdapter(@NotNull Packet packet);
 
 }
