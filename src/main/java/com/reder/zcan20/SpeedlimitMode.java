@@ -15,33 +15,37 @@
  */
 package com.reder.zcan20;
 
-public enum SpeedlimitMode
+import com.reder.zcan20.util.MockEnum;
+import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+public final class SpeedlimitMode extends MockEnum implements Serializable
 {
-  NO_LIMIT(0),
-  NMRA(1),
-  ZIMO(2);
 
-  private final byte magic;
+  public static final long serialVersionUID = 1L;
 
-  private SpeedlimitMode(int magic)
+  private static final ConcurrentMap<Short, SpeedlimitMode> INSTANCES = new ConcurrentHashMap<>();
+
+  public static final SpeedlimitMode NO_LIMIT = valueOf(0);
+  public static final SpeedlimitMode NMRA = valueOf(1);
+  public static final SpeedlimitMode ZIMO = valueOf(2);
+
+  public static SpeedlimitMode valueOf(int magic)
   {
-    this.magic = (byte) magic;
+    return INSTANCES.computeIfAbsent((short) (magic & 0xffff),
+                                     SpeedlimitMode::new);
   }
 
-  public byte getMagic()
+  private SpeedlimitMode(short magic)
   {
-    return magic;
+    super(magic);
   }
 
-  public static SpeedlimitMode valueOfMagic(int magic)
+  @Override
+  protected String getDefaultToString()
   {
-    byte tmp = (byte) magic;
-    for (SpeedlimitMode m : values()) {
-      if (m.magic == tmp) {
-        return m;
-      }
-    }
-    return NO_LIMIT;
+    return "SPEED_LIMIT_0x" + Integer.toHexString(Short.toUnsignedInt(getMagic())).toUpperCase();
   }
 
 }

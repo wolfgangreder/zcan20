@@ -48,7 +48,7 @@ public final class ZCANFactory
   }
 
   /**
-   * Opens a connection to a device via serial Port.
+   * Opens a connection to a device via UDP.
    *
    * @param address IP address or fqn of the remote device.
    * @param remotePort Remote listening port.

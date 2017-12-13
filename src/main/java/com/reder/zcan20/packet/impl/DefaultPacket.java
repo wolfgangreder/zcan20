@@ -34,8 +34,6 @@ import org.openide.util.lookup.Lookups;
 public final class DefaultPacket implements Packet
 {
 
-  public static final int MAX_DLC = 12;
-
   private final CommandGroup group;
   private final CommandMode mode;
   private final byte command;
@@ -50,7 +48,7 @@ public final class DefaultPacket implements Packet
                 byte command,
                 short address,
                 ByteBuffer data,
-                Function<? super Packet, ? extends PacketAdapter> extensionFactory)
+                Function<? super Packet, ? extends PacketAdapter> adapterFactory)
   {
     this.group = group;
     this.mode = mode;
@@ -65,8 +63,8 @@ public final class DefaultPacket implements Packet
     } else {
       this.data = ByteBuffer.allocate(0).asReadOnlyBuffer();
     }
-    if (extensionFactory != null) {
-      lookup = Lookups.singleton(extensionFactory.apply(this));
+    if (adapterFactory != null) {
+      lookup = Lookups.singleton(adapterFactory.apply(this));
     } else {
       lookup = Lookup.EMPTY;
     }

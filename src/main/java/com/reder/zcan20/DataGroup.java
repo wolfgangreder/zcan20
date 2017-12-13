@@ -15,22 +15,20 @@
  */
 package com.reder.zcan20;
 
+import com.reder.zcan20.util.MockEnum;
 import com.reder.zcan20.util.Utils;
-import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.openide.util.Exceptions;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class DataGroup implements Serializable
+public final class DataGroup extends MockEnum implements Serializable
 {
 
+  public static final long serialVersionUID = 1L;
   private static final ConcurrentMap<Short, DataGroup> INSTANCES = new ConcurrentHashMap<>();
   public static final DataGroup LOCO = valueOf(0x0000);
   public static final DataGroup TRAINS = valueOf(0x2f00);
@@ -38,9 +36,6 @@ public final class DataGroup implements Serializable
   public static final DataGroup ACCESSORY_EXT = valueOf(0x3200);
   public static final DataGroup MX8 = valueOf(0x5040);
   public static final DataGroup MX9 = valueOf(0x5080);
-
-  private final short magic;
-  private String toString;
 
   public static DataGroup valueOf(int magic)
   {
@@ -50,61 +45,15 @@ public final class DataGroup implements Serializable
 
   private DataGroup(short magic)
   {
-    this.magic = magic;
-    toString = null;
-  }
-
-  public short getMagic()
-  {
-    return magic;
+    super(magic);
   }
 
   @Override
-  public int hashCode()
+  protected String getDefaultToString()
   {
-    int hash = 3;
-    hash = 31 * hash + this.magic;
-    return hash;
-  }
-
-  @Override
-  @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-  public boolean equals(Object obj)
-  {
-    return this == obj;
-  }
-
-  private Object readResolve() throws ObjectStreamException
-  {
-    return valueOf(magic);
-  }
-
-  private String buildToString()
-  {
-    Class<?> clazz = getClass();
-    Field[] fields = clazz.getDeclaredFields();
-    for (Field f : fields) {
-      try {
-        if (Modifier.isStatic(f.getModifiers()) && f.get(null) == this) {
-          return f.getName();
-        }
-      } catch (IllegalArgumentException | IllegalAccessException ex) {
-        Exceptions.printStackTrace(ex);
-      }
-    }
-    return Utils.appendHexString(magic,
+    return Utils.appendHexString(getMagic(),
                                  new StringBuilder("DataGroup 0x"),
-                                 4).toString();
-  }
-
-  @Override
-  public synchronized String toString()
-  {
-    if (toString == null) {
-      toString = buildToString();
-    }
-    return toString;
-
+                                 4).toString().toUpperCase();
   }
 
 }

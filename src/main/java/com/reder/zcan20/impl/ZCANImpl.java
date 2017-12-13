@@ -183,6 +183,12 @@ public final class ZCANImpl implements ZCAN
   }
 
   @Override
+  public PacketBuilder createPacketBuilder()
+  {
+    return ZCANFactory.createPacketBuilder(myNID);
+  }
+
+  @Override
   public short getNID()
   {
     return myNID;
@@ -242,7 +248,7 @@ public final class ZCANImpl implements ZCAN
                                              CommandGroup.NETWORK_PING,
                                              Ping.class,
                                              (p) -> p.getCommand() == CommandGroup.NETWORK_PING && p.getCommandMode()
-                                                                                                           == CommandMode.EVENT);
+                                                                                                   == CommandMode.EVENT);
           Ping ping = future.get(5,
                                  TimeUnit.SECONDS);
           _masterNID.set(ping.getMasterNID());

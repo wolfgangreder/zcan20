@@ -18,6 +18,7 @@ package com.reder.zcan20.packet.impl;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.DataGroup;
+import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.LocoActive;
 import com.reder.zcan20.ModuleInfoType;
 import com.reder.zcan20.PowerMode;
@@ -27,7 +28,6 @@ import com.reder.zcan20.SpeedFlags;
 import com.reder.zcan20.SpeedSteps;
 import com.reder.zcan20.SpeedlimitMode;
 import com.reder.zcan20.packet.Packet;
-import static com.reder.zcan20.packet.Packet.LOOKUPPATH;
 import com.reder.zcan20.packet.PacketAdapter;
 import com.reder.zcan20.packet.PacketAdapterFactory;
 import com.reder.zcan20.packet.PacketBuilder;
@@ -152,7 +152,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
 
   private Function<Packet, ? extends PacketAdapter> createAdapterFactory()
   {
-    for (PacketAdapterFactory ef : Lookups.forPath(LOOKUPPATH).lookupAll(PacketAdapterFactory.class)) {
+    for (PacketAdapterFactory ef : Lookups.forPath(Packet.LOOKUPPATH).lookupAll(PacketAdapterFactory.class)) {
       if (ef.isValid(commandGroup,
                      command,
                      commandMode)) {
@@ -212,6 +212,24 @@ public final class DefaultPacketBuilder implements PacketBuilder
     adapterFactory(null);
     ByteBuffer buffer = Utils.allocateLEBuffer(2);
     buffer.putShort(masterNID);
+    buffer.clear();
+    data(buffer);
+    return build();
+  }
+
+  @Override
+  public Packet buildInterfaceOptionPacket(short objectNID,
+                                           InterfaceOptionType type)
+  {
+    Objects.requireNonNull(type,
+                           "type is null");
+    commandGroup(CommandGroup.NETWORK);
+    command(CommandGroup.NETWORK_INTERFACE_OPTION);
+    commandMode(CommandMode.REQUEST);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    buffer.putShort(objectNID);
+    buffer.putShort(type.getMagic());
     buffer.clear();
     data(buffer);
     return build();
@@ -336,21 +354,86 @@ public final class DefaultPacketBuilder implements PacketBuilder
   public Packet buildDataPacket(short masterNID,
                                 short nid)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    commandGroup(CommandGroup.DATA);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.DATA_ITEMLIST_NID);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    buffer.putShort(masterNID);
+    buffer.putShort(nid);
+    buffer.rewind();
+    data(buffer);
+    return build();
   }
 
   @Override
-  public Packet buildConfigPacket(short nid,
-                                  PowerOutput output)
+  public Packet buildDataNameExt(short masterNID,
+                                 short objectNID,
+                                 int subID,
+                                 int val1,
+                                 int val2)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    commandGroup(CommandGroup.DATA);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.DATA_NAME_EXT);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(16);
+    buffer.putShort(masterNID);
+    buffer.putShort(objectNID);
+    buffer.putInt(subID);
+    buffer.putInt(val1);
+    buffer.putInt(val2);
+    buffer.rewind();
+    data(buffer);
+    return build();
+  }
+
+  @Override
+  public Packet buildModulePowerInfoPacket(short nid,
+                                           PowerOutput output)
+  {
+    Objects.requireNonNull(output,
+                           "output is null");
+    commandGroup(CommandGroup.CONFIG);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.CONFIG_POWER_INFO);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(3);
+    buffer.putShort(nid);
+    switch (output) {
+      case OUT_1:
+        buffer.put((byte) 0);
+        break;
+      case OUT_2:
+        buffer.put((byte) 1);
+        break;
+      case BOOSTER:
+        buffer.put((byte) 2);
+        break;
+      default:
+        throw new IllegalArgumentException("Illegal power output");
+    }
+    buffer.rewind();
+    data(buffer);
+    return build();
   }
 
   @Override
   public Packet buildModuleInfoPacket(short nid,
                                       ModuleInfoType type)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    Objects.requireNonNull(type,
+                           "type is null");
+    commandGroup(CommandGroup.CONFIG);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.CONFIG_MODULE_INFO);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    buffer.putShort(nid);
+    buffer.putShort(type.getMagic());
+    buffer.rewind();
+    data(buffer);
+    return build();
   }
 
 }

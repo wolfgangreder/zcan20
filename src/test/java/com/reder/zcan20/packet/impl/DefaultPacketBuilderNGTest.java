@@ -18,9 +18,17 @@ package com.reder.zcan20.packet.impl;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.DataGroup;
+import com.reder.zcan20.InterfaceOptionType;
+import com.reder.zcan20.ModuleInfoType;
+import com.reder.zcan20.PowerOutput;
 import com.reder.zcan20.packet.DataGroupCountRequestAdapter;
 import com.reder.zcan20.packet.DataGroupIndexRequestAdapter;
+import com.reder.zcan20.packet.DataGroupNIDRequestAdapter;
+import com.reder.zcan20.packet.DataNameExtRequestAdapter;
+import com.reder.zcan20.packet.InterfaceOptionRequestAdapter;
 import com.reder.zcan20.packet.LogoutPacketAdapter;
+import com.reder.zcan20.packet.ModuleInfoRequestAdapter;
+import com.reder.zcan20.packet.ModulePowerInfoRequestAdapter;
 import com.reder.zcan20.packet.Packet;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.Test;
@@ -40,10 +48,10 @@ public class DefaultPacketBuilderNGTest
     assertNotNull(packet);
     assertEquals(0xcafe,
                  packet.getSenderNID() & 0xffff);
-    assertEquals(CommandGroup.NETWORK,
-                 packet.getCommandGroup());
-    assertEquals(CommandMode.COMMAND,
-                 packet.getCommandMode());
+    assertSame(CommandGroup.NETWORK,
+               packet.getCommandGroup());
+    assertSame(CommandMode.COMMAND,
+               packet.getCommandMode());
     assertEquals(CommandGroup.NETWORK_PORT_OPEN,
                  packet.getCommand());
   }
@@ -56,10 +64,10 @@ public class DefaultPacketBuilderNGTest
     assertNotNull(packet);
     assertEquals(0xbabe,
                  packet.getSenderNID() & 0xffff);
-    assertEquals(CommandGroup.NETWORK,
-                 packet.getCommandGroup());
-    assertEquals(CommandMode.COMMAND,
-                 packet.getCommandMode());
+    assertSame(CommandGroup.NETWORK,
+               packet.getCommandGroup());
+    assertSame(CommandMode.COMMAND,
+               packet.getCommandMode());
     assertEquals(CommandGroup.NETWORK_PORT_CLOSE,
                  packet.getCommand());
     LogoutPacketAdapter adapter = packet.getAdapter(LogoutPacketAdapter.class);
@@ -79,10 +87,10 @@ public class DefaultPacketBuilderNGTest
     assertNotNull(packet);
     assertEquals(0xbabe,
                  packet.getSenderNID() & 0xffff);
-    assertEquals(CommandGroup.DATA,
-                 packet.getCommandGroup());
-    assertEquals(CommandMode.REQUEST,
-                 packet.getCommandMode());
+    assertSame(CommandGroup.DATA,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
     assertEquals(CommandGroup.DATA_GROUP_COUNT,
                  packet.getCommand());
     DataGroupCountRequestAdapter adapter = packet.getAdapter(DataGroupCountRequestAdapter.class);
@@ -107,10 +115,10 @@ public class DefaultPacketBuilderNGTest
     assertNotNull(packet);
     assertEquals(0xbabe,
                  packet.getSenderNID() & 0xffff);
-    assertEquals(CommandGroup.DATA,
-                 packet.getCommandGroup());
-    assertEquals(CommandMode.REQUEST,
-                 packet.getCommandMode());
+    assertSame(CommandGroup.DATA,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
     assertEquals(CommandGroup.DATA_ITEMLIST_INDEX,
                  packet.getCommand());
     DataGroupIndexRequestAdapter adapter = packet.getAdapter(DataGroupIndexRequestAdapter.class);
@@ -123,6 +131,341 @@ public class DefaultPacketBuilderNGTest
                adapter.getDataGroup());
     assertSame(packet,
                adapter.getPacket());
+  }
+
+  @Test
+  public void testBuildDataPacketNID()
+  {
+    final short nid = 0x1234;
+    final short masterNID = (short) 0xcafe;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder((short) 0xbabe);
+    Packet packet = builder.buildDataPacket(masterNID,
+                                            nid);
+    assertNotNull(packet);
+    assertEquals(0xbabe,
+                 packet.getSenderNID() & 0xffff);
+    assertSame(CommandGroup.DATA,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.DATA_ITEMLIST_NID,
+                 packet.getCommand());
+    DataGroupNIDRequestAdapter adapter = packet.getAdapter(DataGroupNIDRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(masterNID,
+                 adapter.getMasterNID());
+    assertEquals(nid,
+                 adapter.getObjectNID());
+  }
+
+  @Test
+  public void testBuildDataNameExt()
+  {
+    short myNID = (short) 0xbabe;
+    short masterNID = (short) 0xcafe;
+    short objectNID = (short) 0xaffe;
+    int subID = 0x12345678;
+    int val1 = 0x9abcdef0;
+    int val2 = 0xfedcba98;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    Packet packet = builder.buildDataNameExt(masterNID,
+                                             objectNID,
+                                             subID,
+                                             val1,
+                                             val2);
+    assertNotNull(packet);
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.DATA,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.DATA_NAME_EXT,
+                 packet.getCommand());
+    DataNameExtRequestAdapter adapter = packet.getAdapter(DataNameExtRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(masterNID,
+                 adapter.getMasterNID());
+    assertEquals(objectNID,
+                 adapter.getObjectNID());
+    assertEquals(subID,
+                 adapter.getSubID());
+    assertEquals(val1,
+                 adapter.getVal1());
+    assertEquals(val2,
+                 adapter.getVal2());
+  }
+
+  @Test
+  public void testBuildModulePowerInfo()
+  {
+    short myNID = (short) 0xbabe;
+    short masterNid = (short) 0xcafe;
+    PowerOutput out = PowerOutput.OUT_1;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    Packet packet = builder.buildModulePowerInfoPacket(masterNid,
+                                                       out);
+    assertNotNull(packet);
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.CONFIG,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.CONFIG_POWER_INFO,
+                 packet.getCommand());
+    ModulePowerInfoRequestAdapter adapter = packet.getAdapter(ModulePowerInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(masterNid,
+                 adapter.getTargetNID());
+    assertSame(out,
+               adapter.getOutput());
+
+    out = PowerOutput.OUT_2;
+    builder = new DefaultPacketBuilder(myNID);
+    packet = builder.buildModulePowerInfoPacket(masterNid,
+                                                out);
+    assertNotNull(packet);
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.CONFIG,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.CONFIG_POWER_INFO,
+                 packet.getCommand());
+    adapter = packet.getAdapter(ModulePowerInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(masterNid,
+                 adapter.getTargetNID());
+    assertSame(out,
+               adapter.getOutput());
+    out = PowerOutput.BOOSTER;
+    builder = new DefaultPacketBuilder(myNID);
+    packet = builder.buildModulePowerInfoPacket(masterNid,
+                                                out);
+    assertNotNull(packet);
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.CONFIG,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.CONFIG_POWER_INFO,
+                 packet.getCommand());
+    adapter = packet.getAdapter(ModulePowerInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(masterNid,
+                 adapter.getTargetNID());
+    assertSame(out,
+               adapter.getOutput());
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testBuildModulePowerInfoFail3()
+  {
+    short myNID = (short) 0xbabe;
+    short masterNid = (short) 0xcafe;
+    PowerOutput out = PowerOutput.OUT_3;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildModulePowerInfoPacket(masterNid,
+                                       out);
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testBuildModulePowerInfoFail4()
+  {
+    short myNID = (short) 0xbabe;
+    short masterNid = (short) 0xcafe;
+    PowerOutput out = PowerOutput.OUT_4;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildModulePowerInfoPacket(masterNid,
+                                       out);
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testBuildModulePowerInfoFail5()
+  {
+    short myNID = (short) 0xbabe;
+    short masterNid = (short) 0xcafe;
+    PowerOutput out = PowerOutput.OUT_5;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildModulePowerInfoPacket(masterNid,
+                                       out);
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testBuildModulePowerInfoFail6()
+  {
+    short myNID = (short) 0xbabe;
+    short masterNid = (short) 0xcafe;
+    PowerOutput out = PowerOutput.OUT_6;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildModulePowerInfoPacket(masterNid,
+                                       out);
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testBuildModulePowerInfoFail7()
+  {
+    short myNID = (short) 0xbabe;
+    short masterNid = (short) 0xcafe;
+    PowerOutput out = PowerOutput.OUT_7;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildModulePowerInfoPacket(masterNid,
+                                       out);
+  }
+
+  @Test
+  public void testBuildModuleInfoPacket()
+  {
+    short myNID = (short) 0xbabe;
+    short nid = (short) 0x1234;
+    ModuleInfoType info = ModuleInfoType.HW_VERSION;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    Packet packet = builder.buildModuleInfoPacket(nid,
+                                                  info);
+    assertNotNull(packet);
+    assertSame(CommandGroup.CONFIG,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.CONFIG_MODULE_INFO,
+                 packet.getCommand());
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    ModuleInfoRequestAdapter adapter = packet.getAdapter(ModuleInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(nid,
+                 adapter.getModuleNID());
+    assertSame(info,
+               adapter.getInfoType());
+
+    info = ModuleInfoType.SW_BUILD_DATE;
+    builder = new DefaultPacketBuilder(myNID);
+    packet = builder.buildModuleInfoPacket(nid,
+                                           info);
+    assertNotNull(packet);
+    assertSame(CommandGroup.CONFIG,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.CONFIG_MODULE_INFO,
+                 packet.getCommand());
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    adapter = packet.getAdapter(ModuleInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(nid,
+                 adapter.getModuleNID());
+    assertSame(info,
+               adapter.getInfoType());
+
+    info = ModuleInfoType.SW_BUILD_TIME;
+    builder = new DefaultPacketBuilder(myNID);
+    packet = builder.buildModuleInfoPacket(nid,
+                                           info);
+    assertNotNull(packet);
+    assertSame(CommandGroup.CONFIG,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.CONFIG_MODULE_INFO,
+                 packet.getCommand());
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    adapter = packet.getAdapter(ModuleInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(nid,
+                 adapter.getModuleNID());
+    assertSame(info,
+               adapter.getInfoType());
+
+    info = ModuleInfoType.SW_VERSION;
+    builder = new DefaultPacketBuilder(myNID);
+    packet = builder.buildModuleInfoPacket(nid,
+                                           info);
+    assertNotNull(packet);
+    assertSame(CommandGroup.CONFIG,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.CONFIG_MODULE_INFO,
+                 packet.getCommand());
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    adapter = packet.getAdapter(ModuleInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(nid,
+                 adapter.getModuleNID());
+    assertSame(info,
+               adapter.getInfoType());
+
+    info = ModuleInfoType.valueOf((short) 0xcafe);
+    builder = new DefaultPacketBuilder(myNID);
+    packet = builder.buildModuleInfoPacket(nid,
+                                           info);
+    assertNotNull(packet);
+    assertSame(CommandGroup.CONFIG,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.CONFIG_MODULE_INFO,
+                 packet.getCommand());
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    adapter = packet.getAdapter(ModuleInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(nid,
+                 adapter.getModuleNID());
+    assertSame(info,
+               adapter.getInfoType());
+  }
+
+  @Test
+  public void testBuildInterfaceOptionPacket()
+  {
+    short myNID = (short) 0xbabe;
+    short nid = (short) 0x1234;
+    InterfaceOptionType info = InterfaceOptionType.SW_PROVIDER;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    Packet packet = builder.buildInterfaceOptionPacket(nid,
+                                                       info);
+    assertNotNull(packet);
+    assertSame(CommandGroup.NETWORK,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.NETWORK_INTERFACE_OPTION,
+                 packet.getCommand());
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    InterfaceOptionRequestAdapter adapter = packet.getAdapter(InterfaceOptionRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(nid,
+                 adapter.getObjectNID());
+    assertSame(info,
+               adapter.getOptionType());
+
+    info = InterfaceOptionType.valueOf(0x3421);
+    builder = new DefaultPacketBuilder(myNID);
+    packet = builder.buildInterfaceOptionPacket(nid,
+                                                info);
+    assertNotNull(packet);
+    assertSame(CommandGroup.NETWORK,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.NETWORK_INTERFACE_OPTION,
+                 packet.getCommand());
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    adapter = packet.getAdapter(InterfaceOptionRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(nid,
+                 adapter.getObjectNID());
+    assertSame(info,
+               adapter.getOptionType());
   }
 
 }

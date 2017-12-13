@@ -18,6 +18,7 @@ package com.reder.zcan20.packet;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.DataGroup;
+import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.LocoActive;
 import com.reder.zcan20.ModuleInfoType;
 import com.reder.zcan20.PowerMode;
@@ -59,6 +60,9 @@ public interface PacketBuilder
   public Packet buildLoginPacket();
 
   public Packet buildLogoutPacket(short masterNID);
+
+  public Packet buildInterfaceOptionPacket(short objectNID,
+                                           @NotNull InterfaceOptionType type);
 
   public Packet buildPowerModePacket(short systemNID,
                                      @NotNull @NotEmpty Set<? extends PowerOutput> outputs,
@@ -107,8 +111,24 @@ public interface PacketBuilder
   public Packet buildDataPacket(short masterNID,
                                 short nid);
 
-  public Packet buildConfigPacket(short nid,
-                                  @NotNull PowerOutput output);
+  public Packet buildDataNameExt(short masterNID,
+                                 short objectNID,
+                                 int subID,
+                                 int val1,
+                                 int val2);
+
+  public default Packet buildLocoNameExt(short masterNID,
+                                         short objectNID)
+  {
+    return buildDataNameExt(masterNID,
+                            objectNID,
+                            0,
+                            0,
+                            0);
+  }
+
+  public Packet buildModulePowerInfoPacket(short nid,
+                                           @NotNull PowerOutput output);
 
   public Packet buildModuleInfoPacket(short nid,
                                       @NotNull ModuleInfoType type);

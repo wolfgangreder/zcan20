@@ -16,6 +16,9 @@
 package com.reder.zcan20.packet.impl;
 
 import com.reder.zcan20.DataGroup;
+import com.reder.zcan20.InterfaceOptionType;
+import com.reder.zcan20.ModuleInfoType;
+import com.reder.zcan20.PowerOutput;
 import com.reder.zcan20.ZCANFactory;
 import com.reder.zcan20.impl.UDPMarshaller;
 import com.reder.zcan20.packet.Packet;
@@ -117,8 +120,8 @@ public class UDPMarshallerTest
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
-    assertEquals(bytesWritten,
-                 expected.length);
+    assertEquals(expected.length,
+                 bytesWritten);
     assertEquals(expected,
                  buffer.array());
   }
@@ -150,8 +153,255 @@ public class UDPMarshallerTest
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
-    assertEquals(bytesWritten,
-                 expected.length);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalDataPacketNID()
+  {
+    final short objectNid = (short) 0x1234;
+    final byte[] expected = toByteArray(4,
+                                        0,
+                                        0,
+                                        0,
+                                        7,
+                                        8,
+                                        nid & 0xff,
+                                        (nid & 0xff00) >> 8,
+                                        masterNid & 0xff,
+                                        (masterNid & 0xff00) >> 8,
+                                        objectNid & 0xff,
+                                        (objectNid & 0xff00) >> 8);
+    Packet packet = ZCANFactory.createPacketBuilder(nid).buildDataPacket(masterNid,
+                                                                         objectNid);
+    assertNotNull(packet);
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalDataNameExt()
+  {
+    short objectNID = (short) 0xaffe;
+    int subID = 0x12345678;
+    int val1 = 0x9abcdef0;
+    int val2 = 0xfedcba98;
+    final byte[] expected = toByteArray(16,
+                                        0,
+                                        0,
+                                        0,
+                                        7,
+                                        33 << 2,
+                                        Utils.byte1(nid),
+                                        Utils.byte2(nid),
+                                        Utils.byte1(masterNid),
+                                        Utils.byte2(masterNid),
+                                        Utils.byte1(objectNID),
+                                        Utils.byte2(objectNID),
+                                        Utils.byte1(subID),
+                                        Utils.byte2(subID),
+                                        Utils.byte3(subID),
+                                        Utils.byte4(subID),
+                                        Utils.byte1(val1),
+                                        Utils.byte2(val1),
+                                        Utils.byte3(val1),
+                                        Utils.byte4(val1),
+                                        Utils.byte1(val2),
+                                        Utils.byte2(val2),
+                                        Utils.byte3(val2),
+                                        Utils.byte4(val2));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildDataNameExt(masterNid,
+                                             objectNID,
+                                             subID,
+                                             val1,
+                                             val2);
+    assertNotNull(packet);
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalModulePowerInfo()
+  {
+    PowerOutput out = PowerOutput.OUT_1;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    final byte[] expected = toByteArray(3,
+                                        0,
+                                        0,
+                                        0,
+                                        8,
+                                        0,
+                                        Utils.byte1(nid),
+                                        Utils.byte2(nid),
+                                        Utils.byte1(masterNid),
+                                        Utils.byte2(masterNid),
+                                        0);
+    Packet packet = builder.buildModulePowerInfoPacket(masterNid,
+                                                       out);
+    assertNotNull(packet);
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+    out = PowerOutput.OUT_2;
+    expected[expected.length - 1] = 1;
+    packet = builder.buildModulePowerInfoPacket(masterNid,
+                                                out);
+    assertNotNull(packet);
+    buffer = ByteBuffer.allocate(expected.length);
+    bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                               buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+    out = PowerOutput.BOOSTER;
+    expected[expected.length - 1] = 2;
+    packet = builder.buildModulePowerInfoPacket(masterNid,
+                                                out);
+    assertNotNull(packet);
+    buffer = ByteBuffer.allocate(expected.length);
+    bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                               buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalModuleInfo()
+  {
+    short objectNid = (short) 0x1234;
+    ModuleInfoType info = ModuleInfoType.HW_VERSION;
+    final byte[] expected = toByteArray(4,
+                                        0,
+                                        0,
+                                        0,
+                                        8,
+                                        32,
+                                        Utils.byte1(nid),
+                                        Utils.byte2(nid),
+                                        Utils.byte1(objectNid),
+                                        Utils.byte2(objectNid),
+                                        Utils.byte1(info.getMagic()),
+                                        Utils.byte2(info.getMagic()));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildModuleInfoPacket(objectNid,
+                                                  info);
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    assertNotNull(packet);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+
+    info = ModuleInfoType.SW_BUILD_DATE;
+    expected[expected.length - 2] = Utils.byte1(info.getMagic());
+    expected[expected.length - 1] = Utils.byte2(info.getMagic());
+    builder = new DefaultPacketBuilder(nid);
+    packet = builder.buildModuleInfoPacket(objectNid,
+                                           info);
+    buffer = ByteBuffer.allocate(expected.length);
+    assertNotNull(packet);
+    bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                               buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+
+    info = ModuleInfoType.SW_BUILD_TIME;
+    expected[expected.length - 2] = Utils.byte1(info.getMagic());
+    expected[expected.length - 1] = Utils.byte2(info.getMagic());
+    builder = new DefaultPacketBuilder(nid);
+    packet = builder.buildModuleInfoPacket(objectNid,
+                                           info);
+    buffer = ByteBuffer.allocate(expected.length);
+    assertNotNull(packet);
+    bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                               buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+
+    info = ModuleInfoType.SW_VERSION;
+    expected[expected.length - 2] = Utils.byte1(info.getMagic());
+    expected[expected.length - 1] = Utils.byte2(info.getMagic());
+    builder = new DefaultPacketBuilder(nid);
+    packet = builder.buildModuleInfoPacket(objectNid,
+                                           info);
+    buffer = ByteBuffer.allocate(expected.length);
+    assertNotNull(packet);
+    bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                               buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+
+    info = ModuleInfoType.valueOf(0xbabe);
+    expected[expected.length - 2] = Utils.byte1(info.getMagic());
+    expected[expected.length - 1] = Utils.byte2(info.getMagic());
+    builder = new DefaultPacketBuilder(nid);
+    packet = builder.buildModuleInfoPacket(objectNid,
+                                           info);
+    buffer = ByteBuffer.allocate(expected.length);
+    assertNotNull(packet);
+    bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                               buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalInterfaceOption()
+  {
+    short objectNid = (short) 0x1234;
+    InterfaceOptionType info = InterfaceOptionType.SW_PROVIDER;
+    final byte[] expected = toByteArray(4,
+                                        0,
+                                        0,
+                                        0,
+                                        10,
+                                        40,
+                                        Utils.byte1(nid),
+                                        Utils.byte2(nid),
+                                        Utils.byte1(objectNid),
+                                        Utils.byte2(objectNid),
+                                        Utils.byte1(info.getMagic()),
+                                        Utils.byte2(info.getMagic()));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildInterfaceOptionPacket(objectNid,
+                                                       info);
+    assertNotNull(packet);
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
     assertEquals(expected,
                  buffer.array());
   }

@@ -32,7 +32,8 @@ public enum PowerOutput
   OUT_5(16),
   OUT_6(32),
   OUT_7(64),
-  BOOSTER(128);
+  BOOSTER(128),
+  UNKNOWN(0);
   private final int magic;
 
   private PowerOutput(int magic)

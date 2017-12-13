@@ -15,13 +15,16 @@
  */
 package com.reder.zcan20;
 
+import com.reder.zcan20.util.MockEnum;
+import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public final class ProviderID
+public final class ProviderID extends MockEnum implements Serializable
 {
 
-  private static final ConcurrentMap<Integer, ProviderID> VALUES = new ConcurrentHashMap<>();
+  public static final long serialVersionUID = 1L;
+  private static final ConcurrentMap<Short, ProviderID> VALUES = new ConcurrentHashMap<>();
 
   public static final ProviderID ZIMO = valueOf(0);
   public static final ProviderID ESTWGJ = valueOf(0x10);
@@ -30,45 +33,22 @@ public final class ProviderID
   public static final ProviderID TRAINCONTROLLER = valueOf(0x30);
   public static final ProviderID TRAINPROGRAMMER = valueOf(0x31);
   public static final ProviderID RAILMANAGER = valueOf(0x40);
-  public static final ProviderID WOLFI = valueOf(0xff00);
 
   public static ProviderID valueOf(int magic)
   {
-    return VALUES.computeIfAbsent(magic,
+    return VALUES.computeIfAbsent((short) magic,
                                   ProviderID::new);
   }
 
-  private final int magic;
-
-  private ProviderID(int magic)
+  private ProviderID(short magic)
   {
-    this.magic = magic;
-  }
-
-  public int getMagic()
-  {
-    return magic;
+    super(magic);
   }
 
   @Override
-  public int hashCode()
+  protected String getDefaultToString()
   {
-    int hash = 5;
-    hash = 43 * hash + this.magic;
-    return hash;
-  }
-
-  @Override
-  @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-  public boolean equals(Object obj)
-  {
-    return this == obj;
-  }
-
-  @Override
-  public String toString()
-  {
-    return "ProviderID{" + "magic=0x" + Integer.toHexString(magic) + '}';
+    return "PROVIDER_0x" + Integer.toHexString(Short.toUnsignedInt(getMagic())).toUpperCase();
   }
 
 }

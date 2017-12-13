@@ -15,34 +15,40 @@
  */
 package com.reder.zcan20;
 
+import com.reder.zcan20.util.MockEnum;
+import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public enum ModuleInfoType
+public final class ModuleInfoType extends MockEnum implements Serializable
 {
-  UNKNOWN(0);
 
-  private final short magic;
+  public static final long serialVersionUID = 1L;
+  private static final ConcurrentMap<Short, ModuleInfoType> INSTANCES = new ConcurrentHashMap<>();
+  public static final ModuleInfoType HW_VERSION = valueOf(1);
+  public static final ModuleInfoType SW_VERSION = valueOf(2);
+  public static final ModuleInfoType SW_BUILD_DATE = valueOf(3);
+  public static final ModuleInfoType SW_BUILD_TIME = valueOf(4);
 
-  private ModuleInfoType(int magic)
+  public static ModuleInfoType valueOf(int type)
   {
-    this.magic = (short) magic;
+    return INSTANCES.computeIfAbsent((short) (type & 0xffff),
+                                     ModuleInfoType::new);
   }
 
-  public short getMagic()
+  private ModuleInfoType(short magic)
   {
-    return magic;
+    super(magic);
   }
 
-  public ModuleInfoType valueOfMagic(short magic)
+  @Override
+  protected String getDefaultToString()
   {
-    for (ModuleInfoType t : values()) {
-      if (t.magic == magic) {
-        return t;
-      }
-    }
-    return UNKNOWN;
+    return "MODULE_INFO_0x" + Integer.toHexString(Short.toUnsignedInt(getMagic())).toUpperCase();
   }
 
 }

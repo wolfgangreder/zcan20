@@ -180,7 +180,7 @@ public final class LocoModeImpl extends AbstractPacketAdapter implements LocoMod
   public SpeedlimitMode getSpeedLimitMode()
   {
     int m3 = buffer.get(4) & 0xff;
-    return SpeedlimitMode.valueOfMagic((m3 & 0xc) >> 4);
+    return SpeedlimitMode.valueOf((m3 & 0xc) >> 4);
   }
 
   @Override

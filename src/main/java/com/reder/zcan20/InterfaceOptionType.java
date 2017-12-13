@@ -15,23 +15,38 @@
  */
 package com.reder.zcan20;
 
+import com.reder.zcan20.util.MockEnum;
+import java.io.Serializable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public enum InterfaceOptionType
+public final class InterfaceOptionType extends MockEnum implements Serializable
 {
-  PROVIDER(0x0001);
-  private final int magic;
 
-  private InterfaceOptionType(int magic)
+  public static final long serialVersionUID = 1L;
+  private static final ConcurrentMap<Short, InterfaceOptionType> INSTANCES = new ConcurrentHashMap<>();
+
+  public static InterfaceOptionType SW_PROVIDER = valueOf(0x0001);
+
+  public static InterfaceOptionType valueOf(int magic)
   {
-    this.magic = magic;
+    return INSTANCES.computeIfAbsent((short) (magic & 0xffff),
+                                     InterfaceOptionType::new);
   }
 
-  public int getMagic()
+  private InterfaceOptionType(short magic)
   {
-    return magic;
+    super(magic);
+  }
+
+  @Override
+  protected String getDefaultToString()
+  {
+    return "INTERFACE_OPTION_TYPE_0x" + Integer.toHexString(Short.toUnsignedInt(getMagic())).toUpperCase();
   }
 
 }

@@ -13,30 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.reder.zcan20;
-
-import java.io.IOException;
-import javax.validation.constraints.NotNull;
+package com.reder.zcan20.packet;
 
 /**
- * Functions of the NetworkGroup (0x0a).
  *
  * @author Wolfgang Reder
  */
-public interface NetworkControl
+public interface DataNameExtRequestAdapter extends PacketAdapter
 {
 
-  public long getLastPingTimestamp();
+  public short getMasterNID();
 
-  public void setInterfaceOption(@NotNull InterfaceOptionType type,
-                                 @NotNull ProviderID provider) throws IOException;
+  public short getObjectNID();
 
-  public default void setInterfaceProviderID(@NotNull ProviderID provider) throws IOException
-  {
-    setInterfaceOption(InterfaceOptionType.SW_PROVIDER,
-                       provider);
-  }
+  public int getSubID();
 
-  public void getInterfaceOption(@NotNull InterfaceOptionType type) throws IOException;
+  public int getVal1();
+
+  public int getVal2();
 
 }
