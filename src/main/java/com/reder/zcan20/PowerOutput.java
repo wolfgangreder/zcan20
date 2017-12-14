@@ -34,14 +34,14 @@ public enum PowerOutput
   OUT_7(64),
   BOOSTER(128),
   UNKNOWN(0);
-  private final int magic;
+  private final byte magic;
 
   private PowerOutput(int magic)
   {
-    this.magic = magic;
+    this.magic = (byte) magic;
   }
 
-  public int getMagic()
+  public byte getMagic()
   {
     return magic;
   }
@@ -57,7 +57,7 @@ public enum PowerOutput
     throw new IllegalArgumentException("invalid magic 0x" + Integer.toHexString(magic));
   }
 
-  public static EnumSet<PowerOutput> toSet(int value)
+  public static EnumSet<PowerOutput> toSet(byte value)
   {
     int v = value & 0xff;
     EnumSet<PowerOutput> result = EnumSet.noneOf(PowerOutput.class);
@@ -69,10 +69,10 @@ public enum PowerOutput
     return result;
   }
 
-  public static int toValue(@NotNull Collection<? extends PowerOutput> flags)
+  public static byte toValue(@NotNull Collection<? extends PowerOutput> flags)
   {
     Objects.requireNonNull(flags);
-    int result = 0;
+    byte result = 0;
     for (PowerOutput o : flags) {
       result += o.getMagic();
     }

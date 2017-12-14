@@ -17,7 +17,7 @@ package com.reder.zcan20.packet.impl;
 
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
-import com.reder.zcan20.packet.LogoutPacketAdapter;
+import com.reder.zcan20.packet.NIDOnlyPacketAdapter;
 import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PacketAdapterFactory;
 import com.reder.zcan20.util.Utils;
@@ -27,7 +27,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class LogoutPacketAdapterImpl extends AbstractPacketAdapter implements LogoutPacketAdapter
+public final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implements NIDOnlyPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -39,18 +39,19 @@ public final class LogoutPacketAdapterImpl extends AbstractPacketAdapter impleme
                            int command,
                            CommandMode mode)
     {
-      return group == CommandGroup.NETWORK && command == CommandGroup.NETWORK_PORT_CLOSE && mode == CommandMode.COMMAND;
+      return (group == CommandGroup.NETWORK && command == CommandGroup.NETWORK_PORT_CLOSE && mode == CommandMode.COMMAND)
+                     || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_STATE && mode == CommandMode.REQUEST);
     }
 
     @Override
-    public LogoutPacketAdapter createAdapter(Packet packet)
+    public NIDOnlyPacketAdapter createAdapter(Packet packet)
     {
-      return new LogoutPacketAdapterImpl(packet);
+      return new NIDOnlyPacketAdapterImpl(packet);
     }
 
   }
 
-  public LogoutPacketAdapterImpl(Packet packet)
+  public NIDOnlyPacketAdapterImpl(Packet packet)
   {
     super(packet);
   }

@@ -21,15 +21,20 @@ import com.reder.zcan20.DataGroup;
 import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.ModuleInfoType;
 import com.reder.zcan20.PowerOutput;
+import com.reder.zcan20.ZCANFactory;
 import com.reder.zcan20.packet.DataGroupCountRequestAdapter;
 import com.reder.zcan20.packet.DataGroupIndexRequestAdapter;
 import com.reder.zcan20.packet.DataGroupNIDRequestAdapter;
 import com.reder.zcan20.packet.DataNameExtRequestAdapter;
 import com.reder.zcan20.packet.InterfaceOptionRequestAdapter;
-import com.reder.zcan20.packet.LogoutPacketAdapter;
 import com.reder.zcan20.packet.ModuleInfoRequestAdapter;
 import com.reder.zcan20.packet.ModulePowerInfoRequestAdapter;
+import com.reder.zcan20.packet.NIDOnlyPacketAdapter;
 import com.reder.zcan20.packet.Packet;
+import com.reder.zcan20.packet.PowerInfoRequestAdapter;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.Test;
 
@@ -70,7 +75,7 @@ public class DefaultPacketBuilderNGTest
                packet.getCommandMode());
     assertEquals(CommandGroup.NETWORK_PORT_CLOSE,
                  packet.getCommand());
-    LogoutPacketAdapter adapter = packet.getAdapter(LogoutPacketAdapter.class);
+    NIDOnlyPacketAdapter adapter = packet.getAdapter(NIDOnlyPacketAdapter.class);
     assertNotNull(adapter);
     assertEquals(0xcafe,
                  adapter.getMasterNID() & 0xffff);
@@ -466,6 +471,142 @@ public class DefaultPacketBuilderNGTest
                  adapter.getObjectNID());
     assertSame(info,
                adapter.getOptionType());
+  }
+
+  @Test
+  public void testBuildGetPowerModePacket()
+  {
+    short myNID = (short) 0xbabe;
+    short nid = (short) 0x1234;
+    Set<PowerOutput> outputs;
+
+    for (PowerOutput currentOut : PowerOutput.values()) {
+      if (currentOut == PowerOutput.UNKNOWN) {
+        continue;
+      }
+      outputs = Collections.singleton(currentOut);
+      DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+      Packet packet = builder.buildGetPowerModePacket(nid,
+                                                      outputs);
+      assertNotNull(packet);
+      assertSame(CommandGroup.SYSTEM,
+                 packet.getCommandGroup());
+      assertSame(CommandMode.REQUEST,
+                 packet.getCommandMode());
+      assertEquals(CommandGroup.SYSTEM_POWER,
+                   packet.getCommand());
+      assertEquals(myNID,
+                   packet.getSenderNID());
+      PowerInfoRequestAdapter adapter = packet.getAdapter(PowerInfoRequestAdapter.class);
+      assertNotNull(adapter);
+      assertEquals(nid,
+                   adapter.getMasterNID());
+      Set<PowerOutput> out = adapter.getOutputs();
+      assertEquals(outputs.size(),
+                   out.size());
+      for (PowerOutput o : outputs) {
+        assertTrue(out.contains(o));
+      }
+    }
+    outputs = EnumSet.allOf(PowerOutput.class);
+    outputs.remove(PowerOutput.UNKNOWN);
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    Packet packet = builder.buildGetPowerModePacket(nid,
+                                                    outputs);
+    assertNotNull(packet);
+    assertSame(CommandGroup.SYSTEM,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.SYSTEM_POWER,
+                 packet.getCommand());
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    PowerInfoRequestAdapter adapter = packet.getAdapter(PowerInfoRequestAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(nid,
+                 adapter.getMasterNID());
+    Set<PowerOutput> out = adapter.getOutputs();
+    assertEquals(outputs.size(),
+                 out.size());
+    for (PowerOutput o : outputs) {
+      assertTrue(out.contains(o));
+    }
+  }
+
+  @Test(expectedExceptions = {NullPointerException.class})
+  public void testGetBuildPowerModePacketFailNPE()
+  {
+    DefaultPacketBuilder builder = new DefaultPacketBuilder((short) 0);
+    builder.buildGetPowerModePacket((short) 0,
+                                    null);
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testGetBuildPowerModePacketFailEmptySet()
+  {
+    DefaultPacketBuilder builder = new DefaultPacketBuilder((short) 0);
+    builder.buildGetPowerModePacket((short) 0,
+                                    Collections.emptySet());
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testGetBuildPowerModePacketFailUnknown()
+  {
+    DefaultPacketBuilder builder = new DefaultPacketBuilder((short) 0);
+    EnumSet<PowerOutput> set = EnumSet.of(PowerOutput.BOOSTER,
+                                          PowerOutput.UNKNOWN);
+    builder.buildGetPowerModePacket((short) 0,
+                                    set);
+  }
+
+  @Test
+  public void testGetLocoStatePacket()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = ZCANFactory.LOCO_MAX;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    Packet packet = builder.buildLocoStatePacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.LOCO,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.LOCO_STATE,
+                 packet.getCommand());
+    NIDOnlyPacketAdapter adapter = packet.getAdapter(NIDOnlyPacketAdapter.class);
+    assertEquals(locoNid,
+                 adapter.getMasterNID());
+    assertSame(packet,
+               adapter.getPacket());
+    locoNid = 0;
+    builder = new DefaultPacketBuilder(myNID);
+    packet = builder.buildLocoStatePacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.LOCO,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.LOCO_STATE,
+                 packet.getCommand());
+    adapter = packet.getAdapter(NIDOnlyPacketAdapter.class);
+    assertEquals(locoNid,
+                 adapter.getMasterNID());
+    assertSame(packet,
+               adapter.getPacket());
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testGetLocoStatePacketFail1()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = ZCANFactory.LOCO_MAX + 1;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoStatePacket(locoNid);
   }
 
 }

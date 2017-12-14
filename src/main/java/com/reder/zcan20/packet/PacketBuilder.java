@@ -21,7 +21,6 @@ import com.reder.zcan20.DataGroup;
 import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.LocoActive;
 import com.reder.zcan20.ModuleInfoType;
-import com.reder.zcan20.PowerMode;
 import com.reder.zcan20.PowerOutput;
 import com.reder.zcan20.Protocol;
 import com.reder.zcan20.SpeedFlags;
@@ -64,9 +63,8 @@ public interface PacketBuilder
   public Packet buildInterfaceOptionPacket(short objectNID,
                                            @NotNull InterfaceOptionType type);
 
-  public Packet buildPowerModePacket(short systemNID,
-                                     @NotNull @NotEmpty Set<? extends PowerOutput> outputs,
-                                     @NotNull PowerMode mode);
+  public Packet buildGetPowerModePacket(short systemNID,
+                                        @NotNull @NotEmpty Set<? extends PowerOutput> outputs);
 
   public Packet buildLocoStatePacket(@Min(0) @Max(0x27ff) short locoID);
 

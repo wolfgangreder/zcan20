@@ -19,7 +19,7 @@ package com.reder.zcan20.packet;
  *
  * @author Wolfgang Reder
  */
-public interface LogoutPacketAdapter extends PacketAdapter
+public interface NIDOnlyPacketAdapter extends PacketAdapter
 {
 
   public short getMasterNID();

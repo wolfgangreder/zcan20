@@ -21,8 +21,7 @@ import java.nio.ByteBuffer;
 import org.openide.util.Lookup;
 
 /**
- * Represents a general Packet.
- * Datapecialisation can be obtained via {@link #getAdapter(java.lang.Class) }.
+ * Represents a general Packet. Datapecialisation can be obtained via {@link #getAdapter(java.lang.Class) }.
  *
  * @author reder
  */
@@ -60,12 +59,18 @@ public interface Packet extends PacketAdapter, Lookup.Provider
   public short getSenderNID();
 
   /**
-   * Packet payload.
-   * The returned ByteBuffer data cannot be modifed. ByteOrder is Little Endian. position is 0, limit is dlc.
+   * Packet payload. The returned ByteBuffer data cannot be modifed. ByteOrder is Little Endian. position is 0, limit is dlc.
    *
    * @return data (never {@code null})
    */
   public ByteBuffer getData();
+
+  /**
+   * Returns the required buffer size to hold the packet.
+   *
+   * @return required buffersize
+   */
+  public int getRequiredBufferSize();
 
   public default <T extends PacketAdapter> T getAdapter(Class<? extends T> clazz)
   {

@@ -21,12 +21,12 @@ import com.reder.zcan20.DataGroup;
 import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.LocoActive;
 import com.reder.zcan20.ModuleInfoType;
-import com.reder.zcan20.PowerMode;
 import com.reder.zcan20.PowerOutput;
 import com.reder.zcan20.Protocol;
 import com.reder.zcan20.SpeedFlags;
 import com.reder.zcan20.SpeedSteps;
 import com.reder.zcan20.SpeedlimitMode;
+import com.reder.zcan20.ZCANFactory;
 import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PacketAdapter;
 import com.reder.zcan20.packet.PacketAdapterFactory;
@@ -172,24 +172,22 @@ public final class DefaultPacketBuilder implements PacketBuilder
     if (data != null) {
       data.rewind();
     }
-    try {
-      return new DefaultPacket(checkCommandGroup(commandGroup,
-                                                 exFactory),
-                               checkCommandMode(commandMode,
-                                                exFactory),
-                               checkCommand(commandGroup,
-                                            command,
-                                            true,
-                                            exFactory),
-                               checkNID(senderNID,
-                                        exFactory),
-                               data,
-                               adapterFactory);
-    } finally {
-      if (data != null) {
-        data.clear();
-      }
+    Packet result = new DefaultPacket(checkCommandGroup(commandGroup,
+                                                        exFactory),
+                                      checkCommandMode(commandMode,
+                                                       exFactory),
+                                      checkCommand(commandGroup,
+                                                   command,
+                                                   true,
+                                                   exFactory),
+                                      checkNID(senderNID,
+                                               exFactory),
+                                      data,
+                                      adapterFactory);
+    if (data != null) {
+      data.clear();
     }
+    return result;
   }
 
   @Override
@@ -236,17 +234,45 @@ public final class DefaultPacketBuilder implements PacketBuilder
   }
 
   @Override
-  public Packet buildPowerModePacket(short systemNID,
-                                     Set<? extends PowerOutput> outputs,
-                                     PowerMode mode)
+  public Packet buildGetPowerModePacket(short systemNID,
+                                        Set<? extends PowerOutput> outputs)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    Objects.requireNonNull(outputs,
+                           "outputs is null");
+    if (outputs.isEmpty()) {
+      throw new IllegalArgumentException("outputs is empty");
+    }
+    if (outputs.contains(PowerOutput.UNKNOWN)) {
+      throw new IllegalArgumentException("ouputs contains unknown");
+    }
+    commandGroup(CommandGroup.SYSTEM);
+    command(CommandGroup.SYSTEM_POWER);
+    commandMode(CommandMode.REQUEST);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(3);
+    buffer.putShort(systemNID);
+    buffer.put(PowerOutput.toValue(outputs));
+    buffer.clear();
+    data(buffer);
+    return build();
   }
 
   @Override
   public Packet buildLocoStatePacket(short locoID)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.LOCO_STATE);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    buffer.putShort(locoID);
+    buffer.clear();
+    data(buffer);
+    return build();
   }
 
   @Override

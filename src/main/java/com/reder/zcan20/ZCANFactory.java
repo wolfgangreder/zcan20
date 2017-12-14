@@ -30,6 +30,22 @@ public final class ZCANFactory
   public static final String PROP_NID = "com.reder.zcan20.nid";
   public static final String DEFAULT_NID = "c2ff";
 
+  public static final short LOCO_MIN = 0;
+  public static final short LOCO_MAX = 0x27ff;
+  public static final short ACC_MIN = 0x3000;
+  public static final short ACC_MAX = 0x31ff;
+  public static final short MX1_MIN = 0x5000;
+  public static final short MX1_MAX = 0x503f;
+  public static final short MX8_MIN = 0x5040;
+  public static final short MX8_MAX = 0x507f;
+  public static final short MX9_MIN = 0x5080;
+  public static final short MX9_MAX = 0x50bf;
+  public static final short MFX_MIN = (short) 0x8000;
+  public static final short MFX_MAX = (short) 0xbfff;
+  public static final short CENTRAL_MIN = (short) 0xc000;
+  public static final short CENTRAL_MAX = (short) 0xc0ff;
+  public static final short SPECIAL_MIN = (short) 0xc200;
+  public static final short SPECIAL_MAX = (short) 0xc2ff;
   public static final short FUNC_RNG = 254;
   public static final short FUNC_MAN = 255;
 

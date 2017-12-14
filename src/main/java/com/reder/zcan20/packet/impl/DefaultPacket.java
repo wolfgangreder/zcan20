@@ -71,6 +71,12 @@ public final class DefaultPacket implements Packet
   }
 
   @Override
+  public int getRequiredBufferSize()
+  {
+    return 8 + data.capacity();
+  }
+
+  @Override
   public Lookup getLookup()
   {
     return lookup;
