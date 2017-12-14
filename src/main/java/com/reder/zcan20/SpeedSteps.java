@@ -17,17 +17,31 @@ package com.reder.zcan20;
 
 public enum SpeedSteps
 {
-  UNKNOWN(0),
-  STEP_14(1),
-  STEP_27(2),
-  STEP_28(3),
-  STEP_128(4),
-  STEP_1024(5);
+  UNKNOWN(0,
+          false),
+  STEP_14(1,
+          true),
+  STEP_27(2,
+          true),
+  STEP_28(3,
+          true),
+  STEP_128(4,
+           true),
+  STEP_1024(5,
+            true);
   private final int magic;
+  private final boolean validInSet;
 
-  private SpeedSteps(int magic)
+  private SpeedSteps(int magic,
+                     boolean validInSet)
   {
     this.magic = magic;
+    this.validInSet = validInSet;
+  }
+
+  public boolean isValidInSet()
+  {
+    return validInSet;
   }
 
   public byte getMagic()

@@ -27,7 +27,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter implements DataNameExtRequestAdapter
+final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter implements DataNameExtRequestAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -50,7 +50,7 @@ public final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter i
 
   }
 
-  public DataNameExtRequestAdapterImpl(Packet packet)
+  private DataNameExtRequestAdapterImpl(Packet packet)
   {
     super(packet);
   }

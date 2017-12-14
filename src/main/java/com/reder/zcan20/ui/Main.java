@@ -45,7 +45,7 @@ public class Main
     if (packet.getAdapter(CVInfoAdapter.class) != null) {
       CVInfoAdapter info = packet.getAdapter(CVInfoAdapter.class);
       printCV(info);
-      if (info.getDecoderAddress() == 246) {
+      if (info.getDecoderID() == 246) {
         done.countDown();
       }
     }
@@ -73,7 +73,7 @@ public class Main
   {
     if (info != null) {
       StringBuilder builder = new StringBuilder("Decoder ");
-      builder.append(info.getDecoderAddress());
+      builder.append(info.getDecoderID());
       builder.append(":CV #");
       builder.append(info.getNumber());
       builder.append("=");
@@ -95,7 +95,9 @@ public class Main
     try (ZCAN device = ZCANFactory.open("192.168.1.145",
                                         14520,
                                         14521,
-                                        null)) {
+                                        null,
+                                        5,
+                                        TimeUnit.SECONDS)) {
       device.addPacketListener(CommandGroup.TRACK_CONFIG_PUBLIC,
                                Main::onTrackConfigPacket);
 //      device.addPacketListener(CommandGroup.LOCO,

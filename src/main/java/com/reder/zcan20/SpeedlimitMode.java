@@ -17,8 +17,11 @@ package com.reder.zcan20;
 
 import com.reder.zcan20.util.MockEnum;
 import java.io.Serializable;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 public final class SpeedlimitMode extends MockEnum implements Serializable
 {
@@ -33,13 +36,20 @@ public final class SpeedlimitMode extends MockEnum implements Serializable
 
   public static SpeedlimitMode valueOf(int magic)
   {
-    return INSTANCES.computeIfAbsent((short) (magic & 0xffff),
+    return INSTANCES.computeIfAbsent((short) (magic & 0x03),
                                      SpeedlimitMode::new);
   }
 
   private SpeedlimitMode(short magic)
   {
     super(magic);
+  }
+
+  public static List<SpeedlimitMode> values()
+  {
+    return INSTANCES.values().stream().
+            sorted(Comparator.comparing(SpeedlimitMode::getMagic)).
+            collect(Collectors.toList());
   }
 
   @Override

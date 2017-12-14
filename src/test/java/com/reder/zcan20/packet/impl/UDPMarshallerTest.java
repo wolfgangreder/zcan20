@@ -19,6 +19,10 @@ import com.reder.zcan20.DataGroup;
 import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.ModuleInfoType;
 import com.reder.zcan20.PowerOutput;
+import com.reder.zcan20.Protocol;
+import com.reder.zcan20.SpeedFlags;
+import com.reder.zcan20.SpeedSteps;
+import com.reder.zcan20.SpeedlimitMode;
 import com.reder.zcan20.ZCANFactory;
 import com.reder.zcan20.impl.UDPMarshaller;
 import com.reder.zcan20.packet.Packet;
@@ -55,7 +59,7 @@ public class UDPMarshallerTest
     Packet packet = ZCANFactory.createPacketBuilder(nid).buildLoginPacket();
     assertNotNull(packet);
     assertEquals(8,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(8);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -80,7 +84,7 @@ public class UDPMarshallerTest
     Packet packet = ZCANFactory.createPacketBuilder(nid).buildLogoutPacket(masterNid);
     assertNotNull(packet);
     assertEquals(10,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = Utils.allocateLEBuffer(10);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -124,7 +128,7 @@ public class UDPMarshallerTest
                                                                                    grp);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -159,7 +163,7 @@ public class UDPMarshallerTest
                                                                          index);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -189,7 +193,7 @@ public class UDPMarshallerTest
                                                                          objectNid);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -238,7 +242,7 @@ public class UDPMarshallerTest
                                              val2);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -268,7 +272,7 @@ public class UDPMarshallerTest
                                                        out);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -325,7 +329,7 @@ public class UDPMarshallerTest
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
     assertEquals(expected.length,
@@ -342,7 +346,7 @@ public class UDPMarshallerTest
     buffer = ByteBuffer.allocate(expected.length);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                buffer);
     assertEquals(expected.length,
@@ -359,7 +363,7 @@ public class UDPMarshallerTest
     buffer = ByteBuffer.allocate(expected.length);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                buffer);
     assertEquals(expected.length,
@@ -376,7 +380,7 @@ public class UDPMarshallerTest
     buffer = ByteBuffer.allocate(expected.length);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                buffer);
     assertEquals(expected.length,
@@ -393,7 +397,7 @@ public class UDPMarshallerTest
     buffer = ByteBuffer.allocate(expected.length);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                buffer);
     assertEquals(expected.length,
@@ -424,7 +428,7 @@ public class UDPMarshallerTest
                                                        info);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -458,7 +462,7 @@ public class UDPMarshallerTest
 
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
@@ -486,7 +490,319 @@ public class UDPMarshallerTest
     Packet packet = builder.buildLocoStatePacket(locoNid);
     assertNotNull(packet);
     assertEquals(expected.length,
-                 packet.getRequiredBufferSize());
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalGetLocoMode()
+  {
+    short locoNid = ZCANFactory.LOCO_MAX - 1;
+    byte[] expected = toByteArray(2,
+                                  0,
+                                  0,
+                                  0,
+                                  2,
+                                  4,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildLocoModePacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalSetLocoMode()
+  {
+    short locoNid = ZCANFactory.LOCO_MAX;
+    SpeedSteps steps = SpeedSteps.STEP_128;
+    Protocol prot = Protocol.MFX;
+    SpeedlimitMode limit = SpeedlimitMode.ZIMO;
+    int numFunc = 4;
+    byte[] expected = toByteArray(5,
+                                  0,
+                                  0,
+                                  0,
+                                  2,
+                                  5,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid),
+                                  0x44,
+                                  4,
+                                  0x0b);
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildLocoModePacket(locoNid,
+                                                steps,
+                                                prot,
+                                                numFunc,
+                                                limit,
+                                                true,
+                                                true);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalGetLocoSpeed()
+  {
+    short locoNid = ZCANFactory.LOCO_MAX;
+    byte[] expected = toByteArray(2,
+                                  0,
+                                  0,
+                                  0,
+                                  2,
+                                  8,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildLocoSpeedPacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalSetLocoSpeed()
+  {
+    short locoNid = 0x123;
+    short speed = 0x100;
+    EnumSet<SpeedFlags> flags = EnumSet.of(SpeedFlags.REVERSE_FROM_SYSTEM,
+                                           SpeedFlags.FORWARD_TO_SYSTEM,
+                                           SpeedFlags.EMERGENCY_STOP);
+    int sf = speed + SpeedFlags.maskOfSet(flags);
+    byte div = 2;
+    byte[] expected = toByteArray(6,
+                                  0,
+                                  0,
+                                  0,
+                                  2,
+                                  9,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid),
+                                  Utils.byte1(sf),
+                                  Utils.byte2(sf),
+                                  div,
+                                  0);
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildLocoSpeedPacket(locoNid,
+                                                 speed,
+                                                 flags,
+                                                 div);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalGetLocoFuncInfo()
+  {
+    short locoNid = 0x123;
+    byte[] expected = toByteArray(2,
+                                  0,
+                                  0,
+                                  0,
+                                  2,
+                                  0xc,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildLocoFunctionInfoPacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalGetLocoFunc()
+  {
+    short locoNid = 0x123;
+    byte[] expected = toByteArray(2,
+                                  0,
+                                  0,
+                                  0,
+                                  2,
+                                  0x10,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildLocoFunctionPacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+
+  }
+
+  @Test
+  public void testMarshalSetLocoFunc()
+  {
+    short locoNid = 0x123;
+    short fxNr = 254;
+    short fxVal = (short) 0x89ab;
+    byte[] expected = toByteArray(6,
+                                  0,
+                                  0,
+                                  0,
+                                  2,
+                                  0x11,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid),
+                                  Utils.byte1(fxNr),
+                                  Utils.byte2(fxNr),
+                                  Utils.byte1(fxVal),
+                                  Utils.byte2(fxVal));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildLocoFunctionPacket(locoNid,
+                                                    fxNr,
+                                                    fxVal);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+
+  }
+
+  @Test
+  public void testMarshalGetCV()
+  {
+    short locoNid = 0x123;
+    short systemNid = (short) 0xbabe;
+    int cvNum = 232860;
+    byte[] expected = toByteArray(8,
+                                  0,
+                                  0,
+                                  0,
+                                  0x16,
+                                  0x20,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(systemNid),
+                                  Utils.byte2(systemNid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid),
+                                  Utils.byte1(cvNum),
+                                  Utils.byte2(cvNum),
+                                  Utils.byte3(cvNum),
+                                  Utils.byte4(cvNum));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildReadCVPacket(systemNid,
+                                              locoNid,
+                                              cvNum);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
+    ByteBuffer buffer = ByteBuffer.allocate(expected.length);
+    int bytesWritten = UDPMarshaller.marshalPacket(packet,
+                                                   buffer);
+    assertEquals(expected.length,
+                 bytesWritten);
+    assertEquals(expected,
+                 buffer.array());
+  }
+
+  @Test
+  public void testMarshalSetCV()
+  {
+    short locoNid = 0x123;
+    short systemNid = (short) 0xbabe;
+    int cvNum = 232860;
+    short value = (short) 0xcafe;
+    byte[] expected = toByteArray(10,
+                                  0,
+                                  0,
+                                  0,
+                                  0x16,
+                                  0x25,
+                                  Utils.byte1(nid),
+                                  Utils.byte2(nid),
+                                  Utils.byte1(systemNid),
+                                  Utils.byte2(systemNid),
+                                  Utils.byte1(locoNid),
+                                  Utils.byte2(locoNid),
+                                  Utils.byte1(cvNum),
+                                  Utils.byte2(cvNum),
+                                  Utils.byte3(cvNum),
+                                  Utils.byte4(cvNum),
+                                  Utils.byte1(value),
+                                  Utils.byte2(value));
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
+    Packet packet = builder.buildWriteCVPacket(systemNid,
+                                               locoNid,
+                                               cvNum,
+                                               value);
+    assertNotNull(packet);
+    assertEquals(expected.length,
+                 UDPMarshaller.getRequiredBufferSize(packet));
     ByteBuffer buffer = ByteBuffer.allocate(expected.length);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);

@@ -15,6 +15,7 @@
  */
 package com.reder.zcan20.packet;
 
+import com.reder.zcan20.CanId;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import java.nio.ByteBuffer;
@@ -29,6 +30,13 @@ public interface Packet extends PacketAdapter, Lookup.Provider
 {
 
   public static final String LOOKUPPATH = "com/reder/zcan20/adapter";
+
+  /**
+   * Returns the Id field of the can packet.
+   *
+   * @return
+   */
+  public CanId getCanId();
 
   /**
    * The CommandGroup of the Packet.
@@ -64,13 +72,6 @@ public interface Packet extends PacketAdapter, Lookup.Provider
    * @return data (never {@code null})
    */
   public ByteBuffer getData();
-
-  /**
-   * Returns the required buffer size to hold the packet.
-   *
-   * @return required buffersize
-   */
-  public int getRequiredBufferSize();
 
   public default <T extends PacketAdapter> T getAdapter(Class<? extends T> clazz)
   {

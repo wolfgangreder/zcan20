@@ -27,6 +27,7 @@ import com.reder.zcan20.SpeedFlags;
 import com.reder.zcan20.SpeedSteps;
 import com.reder.zcan20.SpeedlimitMode;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Set;
 import java.util.function.Function;
 import javax.validation.constraints.Max;
@@ -73,18 +74,24 @@ public interface PacketBuilder
   public Packet buildLocoModePacket(@Min(0) @Max(0x27ff) short locoID,
                                     @NotNull SpeedSteps steps,
                                     @NotNull Protocol protocol,
-                                    int numFunctions,
+                                    @Min(0) @Max(32) int numFunctions,
                                     @NotNull SpeedlimitMode limitMode,
                                     boolean pulseFx,
                                     boolean analogFx);
 
+  public Packet buildLocoSpeedPacket(@Min(0) @Max(0x27ff) short locoID);
+
   public Packet buildLocoSpeedPacket(@Min(0) @Max(0x27ff) short locoID,
                                      @Min(0) @Max(0x3ff) short speed,
-                                     @NotNull @NotEmpty Set<? extends SpeedFlags> speedFlags,
-                                     byte speedDivisor);
+                                     @NotNull Collection<? extends SpeedFlags> speedFlags,
+                                     @Min(1) short speedDivisor);
+
+  public Packet buildLocoFunctionInfoPacket(@Min(0) @Max(0x27ff) short locoID);
+
+  public Packet buildLocoFunctionPacket(@Min(0) @Max(0x27ff) short locoID);
 
   public Packet buildLocoFunctionPacket(@Min(0) @Max(0x27ff) short locoID,
-                                        short fxNumber,
+                                        @Min(0) @Max(255) short fxNumber,
                                         short fxValue);
 
   public Packet buildLocoActivePacket(@Min(0) @Max(0x27ff) short locoID);
@@ -92,10 +99,12 @@ public interface PacketBuilder
   public Packet buildLocoActivePacket(@Min(0) @Max(0x27ff) short locoID,
                                       @NotNull LocoActive mode);
 
-  public Packet buildReadCVPacket(short locoID,
+  public Packet buildReadCVPacket(short systemID,
+                                  short locoID,
                                   int cvNumber);
 
-  public Packet buildWriteCVPacket(short locoID,
+  public Packet buildWriteCVPacket(short systemID,
+                                   short locoID,
                                    int cvNumber,
                                    short value);
 

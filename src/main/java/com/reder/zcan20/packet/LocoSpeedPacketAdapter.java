@@ -15,19 +15,22 @@
  */
 package com.reder.zcan20.packet;
 
+import com.reder.zcan20.SpeedFlags;
+import java.util.Set;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public interface CVInfoAdapter extends PacketAdapter
+public interface LocoSpeedPacketAdapter extends PacketAdapter
 {
 
-  public short getSystemID();
+  public short getLocoID();
 
-  public short getDecoderID();
+  public short getSpeed();
 
-  public int getNumber();
+  public Set<SpeedFlags> getFlags();
 
-  public short getValue();
+  public short getDivisor();
 
 }

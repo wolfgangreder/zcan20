@@ -19,15 +19,13 @@ package com.reder.zcan20.packet;
  *
  * @author Wolfgang Reder
  */
-public interface CVInfoAdapter extends PacketAdapter
+public interface LocoFuncPacketAdapter extends PacketAdapter
 {
 
-  public short getSystemID();
+  public short getLocoID();
 
-  public short getDecoderID();
+  public short getFxNumber();
 
-  public int getNumber();
-
-  public short getValue();
+  public short getFxValue();
 
 }

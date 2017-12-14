@@ -15,12 +15,12 @@
  */
 package com.reder.zcan20.impl;
 
+import com.reder.zcan20.CanId;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.LinkState;
 import com.reder.zcan20.PacketListener;
-import com.reder.zcan20.PowerMode;
 import com.reder.zcan20.PowerOutput;
 import com.reder.zcan20.PowerState;
 import com.reder.zcan20.ProviderID;
@@ -30,11 +30,9 @@ import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PacketAdapter;
 import com.reder.zcan20.packet.PacketBuilder;
 import com.reder.zcan20.packet.Ping;
-import com.reder.zcan20.packet.PowerInfo;
+import com.reder.zcan20.util.CanIdMatcher;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -62,33 +60,57 @@ import org.openide.util.Lookup;
 public final class ZCANImpl implements ZCAN
 {
 
-  private final class ListenerFuture<T extends PacketAdapter> implements PacketListener
+  private final class FilterListener implements PacketListener
   {
 
-    private final CompletableFuture<? super T> future;
-    private final int command;
-    private final CommandGroup group;
-    private final Class<? extends T> extensionClass;
-    private final Predicate<? super Packet> packetMatcher;
+    private final PacketListener listener;
+    private final CanIdMatcher matcher;
 
-    public ListenerFuture(@NotNull CompletableFuture<? super T> future,
-                          CommandGroup group,
-                          int command,
-                          @NotNull Class<? extends T> extensionClass,
-                          Predicate<? super Packet> packetMatcher)
+    public FilterListener(PacketListener listener,
+                          CanIdMatcher matcher)
     {
-      this.future = Objects.requireNonNull(future);
-      this.extensionClass = Objects.requireNonNull(extensionClass);
-      this.packetMatcher = packetMatcher;
-      this.command = command;
-      this.group = Objects.requireNonNull(group);
+      this.listener = Objects.requireNonNull(listener,
+                                             "listener is null");
+      this.matcher = Objects.requireNonNull(matcher,
+                                            "matcher is null");
     }
 
     @Override
     public void onPacket(ZCAN connection,
                          Packet packet)
     {
-      if (packet.getCommand() == command && (packetMatcher == null || packetMatcher.test(packet))) {
+      if (matcher.matchesPacket(packet)) {
+        listener.onPacket(connection,
+                          packet);
+      }
+    }
+
+  }
+
+  private final class ListenerFuture<T extends PacketAdapter> implements PacketListener
+  {
+
+    private final CompletableFuture<? super T> future;
+    private final CanIdMatcher matcher;
+    private final Class<? extends T> extensionClass;
+    private final Predicate<? super Packet> packetMatcher;
+
+    public ListenerFuture(@NotNull CompletableFuture<? super T> future,
+                          CanIdMatcher matcher,
+                          @NotNull Class<? extends T> extensionClass,
+                          Predicate<? super Packet> packetMatcher)
+    {
+      this.future = Objects.requireNonNull(future);
+      this.extensionClass = Objects.requireNonNull(extensionClass);
+      this.packetMatcher = packetMatcher;
+      this.matcher = matcher;
+    }
+
+    @Override
+    public void onPacket(ZCAN connection,
+                         Packet packet)
+    {
+      if (packetMatcher == null || packetMatcher.test(packet)) {
         T result;
         if (extensionClass.isAssignableFrom(packet.getClass())) {
           result = extensionClass.cast(packet);
@@ -107,13 +129,13 @@ public final class ZCANImpl implements ZCAN
 
     void start()
     {
-      addPacketListener(group,
+      addPacketListener(matcher,
                         this);
     }
 
     void stop()
     {
-      removePacketListener(group,
+      removePacketListener(matcher,
                            this);
     }
 
@@ -153,7 +175,7 @@ public final class ZCANImpl implements ZCAN
   private final Object lock = new Object();
   private final Set<PacketListener> packetListener = new CopyOnWriteArraySet<>();
   private final ConcurrentMap<CommandGroup, Set<PacketListener>> filteredPacketListener = new ConcurrentHashMap<>();
-  private final AtomicInteger _masterNID = new AtomicInteger(-1);
+  private final AtomicInteger masterNID = new AtomicInteger(-1);
   private final AtomicInteger session = new AtomicInteger();
   private volatile long lastPacketTimestamp = -1;
   private final short myNID;
@@ -211,15 +233,13 @@ public final class ZCANImpl implements ZCAN
   }
 
   private <T extends PacketAdapter> Future<T> doSendPacket(@NotNull Packet p,
-                                                           CommandGroup group,
-                                                           int command,
+                                                           CanIdMatcher matcher,
                                                            @NotNull Class<? extends T> resultData,
                                                            Predicate<? super Packet> packetMatcher) throws IOException
   {
     CompletableFuture<T> future = new CompletableFuture<>();
     ListenerFuture<T> lf = new ListenerFuture<>(future,
-                                                group,
-                                                command,
+                                                matcher,
                                                 resultData,
                                                 packetMatcher);
     lf.start();
@@ -232,7 +252,8 @@ public final class ZCANImpl implements ZCAN
     return terminateResult != null;
   }
 
-  public void open() throws IOException
+  public void open(long timeout,
+                   TimeUnit unit) throws IOException
   {
     synchronized (lock) {
       if (!isOpen()) {
@@ -240,22 +261,21 @@ public final class ZCANImpl implements ZCAN
           abortFlag.set(false);
           port.start();
           terminateResult = packetThread.submit(this::packetLoop);
-          Future<Ping> future = doSendPacket(ZCANFactory.createPacketBuilder(myNID).
-                  commandGroup(CommandGroup.NETWORK).
-                  command(CommandGroup.NETWORK_PORT_OPEN).
-                  commandMode(CommandMode.COMMAND).build(),
-                                             CommandGroup.NETWORK,
-                                             CommandGroup.NETWORK_PING,
+          Future<Ping> future = doSendPacket(ZCANFactory.createPacketBuilder(myNID).buildLoginPacket(),
+                                             new CanIdMatcher(CanId.valueOf(CommandGroup.NETWORK,
+                                                                            CommandGroup.NETWORK_PING,
+                                                                            CommandMode.EVENT,
+                                                                            (short) 0),
+                                                              CanIdMatcher.MASK_NO_ADDRESS),
                                              Ping.class,
-                                             (p) -> p.getCommand() == CommandGroup.NETWORK_PING && p.getCommandMode()
-                                                                                                   == CommandMode.EVENT);
-          Ping ping = future.get(5,
-                                 TimeUnit.SECONDS);
-          _masterNID.set(ping.getMasterNID());
+                                             null);
+          Ping ping = future.get(timeout,
+                                 unit);
+          masterNID.set(ping.getMasterNID());
           session.set(ping.getSession());
           LOGGER.log(Level.INFO,
                      "Connected to 0x{0} Session 0x{1}",
-                     new Object[]{Integer.toHexString(_masterNID.get()),
+                     new Object[]{Integer.toHexString(masterNID.get()),
                                   Integer.toHexString(session.get())});
         } catch (InterruptedException ex) {
           Thread.currentThread().interrupt();
@@ -300,7 +320,7 @@ public final class ZCANImpl implements ZCAN
             LOGGER.log(Level.FINE,
                        "Ping received nid=0x{0}, type={1}, session=0x{2}",
                        new Object[]{Integer.toHexString(nid), id.toString(), Integer.toHexString(nsession)});
-            _masterNID.set(nid);
+            masterNID.set(nid);
             session.set(nsession);
             lastPacketTimestamp = System.currentTimeMillis();
           }
@@ -397,6 +417,26 @@ public final class ZCANImpl implements ZCAN
   }
 
   @Override
+  public void addPacketListener(CanIdMatcher matcher,
+                                PacketListener packetListener)
+  {
+    if (matcher != null && packetListener != null) {
+      addPacketListener(new FilterListener(packetListener,
+                                           matcher));
+    }
+  }
+
+  @Override
+  public void removePacketListener(CanIdMatcher matcher,
+                                   PacketListener packetListener)
+  {
+    if (matcher != null && packetListener != null) {
+      removePacketListener(new FilterListener(packetListener,
+                                              matcher));
+    }
+  }
+
+  @Override
   public long getLastPingTimestamp()
   {
     return lastPacketTimestamp;
@@ -421,111 +461,11 @@ public final class ZCANImpl implements ZCAN
                                 @NotNull TimeUnit unit) throws IOException
   {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    if (!isOpen()) {
-//      throw new IOException("Port closed");
-//    }
-//    DefaultPacket.Builder builder = new DefaultPacket.Builder();
-//    builder.commandGroup(CommandGroup.SYSTEM);
-//    builder.commandMode(CommandMode.REQUEST);
-//    builder.command(CommandGroup.SYSTEM_POWER);
-//    builder.senderNID(getNID());
-//    builder.data((byte) output.getMagic());
-//    try {
-//      Future<PowerStateInfo> future = doSendPacket(builder.build(),
-//                                                   CommandGroup.SYSTEM,
-//                                                   CommandGroup.SYSTEM_POWER,
-//                                                   PowerStateInfo.class,
-//                                                   (p) -> {
-//                                                     System.err.println("Matching " + p.toString());
-//                                                     PowerStateInfo info = p.getAdapter(PowerStateInfo.class);
-//                                                     if (info != null) {
-//                                                       return info.getOutput() == output;
-//                                                     }
-//                                                     return false;
-//                                                   });
-//      if (timeOut <= 0) {
-//        return future.get();
-//      } else {
-//        return future.get(timeOut,
-//                          unit);
-//      }
-//    } catch (InterruptedException ex) {
-//      Thread.currentThread().interrupt();
-//    } catch (ExecutionException ex) {
-//      if (ex.getCause() instanceof IOException) {
-//        throw (IOException) ex.getCause();
-//      } else {
-//        throw new IOException(ex);
-//      }
-//    }
-//    return null;
   }
 
   @Override
   public void setPowerStateInfo(PowerOutput output,
                                 PowerState state) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    if (!isOpen()) {
-//      throw new IOException("Port closed");
-//    }
-//    PacketBuilder builder = ZCANFactory.createPacketBuilder(myNID);
-//    builder.commandGroup(CommandGroup.SYSTEM);
-//    builder.commandMode(CommandMode.COMMAND);
-//    builder.command(CommandGroup.SYSTEM_POWER);
-//    builder.senderNID(getNID());
-//    builder.data((byte) output.getMagic(),
-//                 (byte) state.getMagic());
-  }
-
-//  @Override
-  public Future<PowerInfo> getOutputState(PowerOutput output) throws IOException, InterruptedException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    PacketBuilder builder = ZCANFactory.createPacketBuilder(myNID);
-//    builder.commandGroup(CommandGroup.CONFIG);
-//    builder.commandMode(CommandMode.REQUEST);
-//    builder.command(CommandGroup.CONFIG_POWER_INFO);
-//    builder.senderNID(getNID());
-//    byte b = 0;
-//    switch (output) {
-//      case BOOSTER:
-//        b = (byte) 2;
-//        break;
-//      case OUT_1:
-//        b = (byte) 0;
-//        break;
-//      case OUT_2:
-//        b = (byte) 1;
-//        break;
-//    }
-//    builder.data(b);
-//    return doSendPacket(builder.build(),
-//                        CommandGroup.CONFIG,
-//                        CommandGroup.CONFIG_POWER_INFO,
-//                        PowerInfo.class,
-//                        (p) -> p.getCommand() == CommandGroup.CONFIG_POWER_INFO && p.getCommandMode() == CommandMode.ACK);
-  }
-
-  //@Override
-  public List<Future<PowerInfo>> getOutputState(Collection<? extends PowerOutput> outputs) throws IOException,
-                                                                                                  InterruptedException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    if (!isOpen()) {
-//      throw new IOException("Port closed");
-//    }
-//    List<Future<PowerInfo>> result = new ArrayList<>(outputs.size());
-//    for (PowerOutput out : outputs) {
-//      if (out != null) {
-//        result.add(getOutputState(out));
-//      }
-//    }
-//    return result;
-  }
-
-  //@Override
-  public List<Future<PowerInfo>> setOutputState(Map<PowerOutput, PowerMode> modes) throws IOException
   {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
@@ -541,17 +481,6 @@ public final class ZCANImpl implements ZCAN
                      int cv) throws IOException
   {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    PacketBuilder builder = ZCANFactory.createPacketBuilder(myNID);
-//    builder.commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
-//    builder.command(CommandGroup.TSE_PROG_READ);
-//    builder.commandMode(CommandMode.REQUEST);
-////    builder.address((short) getNID());//_masterNID.get());
-//    ByteBuffer buffer = ByteBuffer.allocate(6);
-//    buffer.order(ByteOrder.LITTLE_ENDIAN);
-//    buffer.putShort((short) address);
-//    buffer.putInt(cv);
-//    builder.data(buffer.array());
-//    port.sendPacket(builder.build());
   }
 
   @Override
@@ -566,131 +495,12 @@ public final class ZCANImpl implements ZCAN
   public void getMode(int address) throws IOException
   {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    try {
-//      DefaultPacket.Builder builder = new DefaultPacket.Builder();
-//      builder.commandGroup(CommandGroup.LOCO);
-//      builder.command(CommandGroup.LOCO_ACTIVE);
-//      builder.commandMode(CommandMode.REQUEST);
-//      ByteBuffer buffer = ByteBuffer.allocate(2);
-//      buffer.order(ByteOrder.LITTLE_ENDIAN);
-//      buffer.putShort((short) address);
-//      builder.data(buffer.array());
-//      Future<Packet> f = doSendPacket(builder.build(),
-//                                      CommandGroup.LOCO,
-//                                      CommandGroup.LOCO_ACTIVE,
-//                                      Packet.class,
-//                                      (Packet p) -> {
-//                                        ByteBuffer b = p.getData();
-//                                        return b.remaining() >= 2 && b.getShort(2) == address;
-//                                      });
-//      boolean used = false;
-//      try {
-//        Packet usedPacket = f.get(500,
-//                                  TimeUnit.MILLISECONDS);
-//        used = usedPacket.getData().get(2) != 0;
-//      } catch (TimeoutException ex) {
-//      }
-//      builder = new DefaultPacket.Builder();
-//      builder.commandGroup(CommandGroup.LOCO);
-//      builder.command(CommandGroup.LOCO_MODE);
-//      builder.commandMode(CommandMode.REQUEST);
-//      builder.data(buffer.array());
-//      f = doSendPacket(builder.build(),
-//                       CommandGroup.LOCO,
-//                       CommandGroup.LOCO_MODE,
-//                       Packet.class,
-//                       (Packet p) -> {
-//                         ByteBuffer b = p.getData();
-//                         return b.remaining() >= 5 && b.getShort(2) == address;
-//                       });
-//      Packet modePacket = f.get(500,
-//                                TimeUnit.MILLISECONDS);
-//      return new LocoModeImpl(modePacket,
-//                              used);
-//    } catch (InterruptedException ex) {
-//      Thread.currentThread().interrupt();
-//      return null;
-//    } catch (ExecutionException ex) {
-//      if (ex.getCause() instanceof IOException) {
-//        throw (IOException) ex.getCause();
-//      } else {
-//        throw new IOException(ex);
-//      }
-//    } catch (TimeoutException ex) {
-//      return null;
-//    }
   }
 
   @Override
   public void takeOwnership(int address) throws IOException
   {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    try {
-//      synchronized (lock) {
-//        if (ownerPing != null) {
-//          ownerPing.cancel(true);
-//        }
-//        ownerPing = null;
-//      }
-//      DefaultPacket.Builder builder = new DefaultPacket.Builder();
-//      Future<Packet> f = doSendPacket(builder.buildTakeOwnership(getNID(),
-//                                                                 (short) address),
-//                                      CommandGroup.LOCO,
-//                                      CommandGroup.LOCO_ACTIVE,
-//                                      Packet.class,
-//                                      (Packet p) -> {
-//                                        ByteBuffer b = p.getData();
-//                                        return b.remaining() >= 2 && b.getShort(2) == address;
-//                                      });
-//      boolean used = false;
-//      try {
-//        Packet usedPacket = f.get(500,
-//                                  TimeUnit.MILLISECONDS);
-//        used = usedPacket.getData().get(2) != 0;
-//      } catch (TimeoutException ex) {
-//      }
-//      //if (!used) {
-//      ownerPing = listenerNotifer.scheduleWithFixedDelay(new PacketNotifier(new DefaultPacket.Builder().
-//              buildOwnerShipEvent(getNID(),
-//                                  (short) address)),
-//                                                         0,
-//                                                         500,
-//                                                         TimeUnit.MILLISECONDS);
-//      builder = new DefaultPacket.Builder();
-//      builder.commandGroup(CommandGroup.LOCO);
-//      builder.command(CommandGroup.LOCO_MODE);
-//      builder.commandMode(CommandMode.COMMAND);
-//      LocoModeImpl lm = new LocoModeImpl.Builder(builder).build(address,
-//                                                                used);
-//      port.sendPacket(lm.getPacket());
-//      return lm;
-////      f = doSendPacket(lm.getPacket(),
-////                       CommandGroup.LOCO,
-////                       CommandGroup.LOCO_MODE,
-////                       Packet.class,
-////                       (Packet p) -> {
-////                         ByteBuffer b = p.getData();
-////                         return b.remaining() >= 5 && b.getShort(2) == address;
-////                       });
-////      Packet modePacket = f.get(500,
-////                                TimeUnit.MILLISECONDS);
-////      return new LocoModeImpl(modePacket,
-////                              used);
-////      } else {
-////        throw new IOException("Cannot take ownership");
-////      }
-////    } catch (TimeoutException ex) {
-////      return null;
-//    } catch (ExecutionException ex) {
-//      if (ex.getCause() instanceof IOException) {
-//        throw (IOException) ex.getCause();
-//      } else {
-//        throw new IOException(ex);
-//      }
-//    } catch (InterruptedException ex) {
-//      Thread.currentThread().interrupt();
-//      return null;
-//    }
   }
 
 }

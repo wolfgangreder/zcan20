@@ -21,16 +21,29 @@ package com.reder.zcan20;
  */
 public enum Protocol
 {
-  UNKNOWN(0),
-  DCC(1),
-  MM2(2),
-  NOT_DEFINED(3),
-  MFX(4);
+  UNKNOWN(0,
+          false),
+  DCC(1,
+      true),
+  MM2(2,
+      true),
+  NOT_DEFINED(3,
+              false),
+  MFX(4,
+      true);
   private final byte magic;
+  private final boolean validInSet;
 
-  private Protocol(int magic)
+  private Protocol(int magic,
+                   boolean validInSet)
   {
     this.magic = (byte) magic;
+    this.validInSet = validInSet;
+  }
+
+  public boolean isValidInSet()
+  {
+    return validInSet;
   }
 
   public byte getMagic()

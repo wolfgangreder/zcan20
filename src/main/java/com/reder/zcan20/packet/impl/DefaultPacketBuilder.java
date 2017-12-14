@@ -33,9 +33,13 @@ import com.reder.zcan20.packet.PacketAdapterFactory;
 import com.reder.zcan20.packet.PacketBuilder;
 import com.reder.zcan20.util.Utils;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import org.openide.util.lookup.Lookups;
 
 /**
@@ -278,7 +282,19 @@ public final class DefaultPacketBuilder implements PacketBuilder
   @Override
   public Packet buildLocoModePacket(short locoID)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.LOCO_MODE);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    buffer.putShort(locoID);
+    buffer.clear();
+    data(buffer);
+    return build();
   }
 
   @Override
@@ -290,16 +306,128 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                     boolean pulseFx,
                                     boolean analogFx)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    Objects.requireNonNull(steps,
+                           "steps is null");
+    if (!steps.isValidInSet()) {
+      throw new IllegalArgumentException("steps is unknown");
+    }
+    Objects.requireNonNull(protocol,
+                           "protocol is null");
+    if (!protocol.isValidInSet()) {
+      throw new IllegalArgumentException("protocol is unknown or undefined");
+    }
+    if (numFunctions < 0 || numFunctions > 32) {
+      throw new IllegalArgumentException("numFunctions out of range");
+    }
+    Objects.requireNonNull(limitMode,
+                           "limitMode is null");
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.COMMAND);
+    command(CommandGroup.LOCO_MODE);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(5);
+    buffer.putShort(locoID);
+    int m1 = (steps.getMagic() & 0x0f) + ((protocol.getMagic() & 0x0f) << 4);
+    int m3 = (limitMode.getMagic() << 2) + (pulseFx ? 1 : 0) + (analogFx ? 2 : 0);
+    buffer.put((byte) m1);
+    buffer.put((byte) numFunctions);
+    buffer.put((byte) m3);
+    buffer.clear();
+    data(buffer);
+    return build();
   }
 
   @Override
-  public Packet buildLocoSpeedPacket(short locoID,
-                                     short speed,
-                                     Set<? extends SpeedFlags> speedFlags,
-                                     byte speedDivisor)
+  public Packet buildLocoSpeedPacket(short locoID)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.LOCO_SPEED);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    buffer.putShort(locoID);
+    buffer.clear();
+    data(buffer);
+    return build();
+  }
+
+  @Override
+  public Packet buildLocoSpeedPacket(@Min(0) @Max(0x27ff) short locoID,
+                                     @Min(0) @Max(0x3ff) short speed,
+                                     @NotNull Collection<? extends SpeedFlags> speedFlags,
+                                     @Min(1) short speedDivisor)
+  {
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    li = Short.toUnsignedInt(speed);
+    if (li > 0x3ff) {
+      throw new IllegalArgumentException("speed aout of range");
+    }
+    Objects.requireNonNull(speedFlags,
+                           "speedFlags is null");
+    short sf = (short) (speed & 0x3ff);
+    sf += SpeedFlags.maskOfSet(speedFlags);
+    if (speedDivisor < 1) {
+      throw new IllegalArgumentException("speedDivisor smaller than 1");
+    }
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.COMMAND);
+    command(CommandGroup.LOCO_SPEED);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(6);
+    buffer.putShort(locoID);
+    buffer.putShort(sf);
+    buffer.put(Utils.byte1(speedDivisor));
+    buffer.put((byte) 0);
+    buffer.clear();
+    data(buffer);
+    return build();
+  }
+
+  @Override
+  public Packet buildLocoFunctionInfoPacket(short locoID)
+  {
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.LOCO_FUNC_INFO);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    buffer.putShort(locoID);
+    buffer.clear();
+    data(buffer);
+    return build();
+  }
+
+  @Override
+  public Packet buildLocoFunctionPacket(short locoID)
+  {
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.LOCO_FUNC_SWITCH);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    buffer.putShort(locoID);
+    buffer.clear();
+    data(buffer);
+    return build();
   }
 
   @Override
@@ -307,7 +435,25 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                         short fxNumber,
                                         short fxValue)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    li = Short.toUnsignedInt(fxNumber);
+    if (li > 255) {
+      throw new IllegalArgumentException("fxNumber out ofRange");
+    }
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.COMMAND);
+    command(CommandGroup.LOCO_FUNC_SWITCH);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(6);
+    buffer.putShort(locoID);
+    buffer.putShort(fxNumber);
+    buffer.putShort(fxValue);
+    buffer.clear();
+    data(buffer);
+    return build();
   }
 
   @Override
@@ -324,18 +470,41 @@ public final class DefaultPacketBuilder implements PacketBuilder
   }
 
   @Override
-  public Packet buildReadCVPacket(short locoID,
+  public Packet buildReadCVPacket(short systemID,
+                                  short locoID,
                                   int cvNumber)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.TSE_PROG_READ);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(8);
+    buffer.putShort(systemID);
+    buffer.putShort(locoID);
+    buffer.putInt(cvNumber);
+    buffer.clear();
+    data(buffer);
+    return build();
   }
 
   @Override
-  public Packet buildWriteCVPacket(short locoID,
+  public Packet buildWriteCVPacket(short systemID,
+                                   short locoID,
                                    int cvNumber,
                                    short value)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
+    commandMode(CommandMode.COMMAND);
+    command(CommandGroup.TSE_PROG_WRITE);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(10);
+    buffer.putShort(systemID);
+    buffer.putShort(locoID);
+    buffer.putInt(cvNumber);
+    buffer.putShort(value);
+    buffer.clear();
+    data(buffer);
+    return build();
   }
 
   @Override

@@ -27,7 +27,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implements NIDOnlyPacketAdapter
+final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implements NIDOnlyPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -40,20 +40,48 @@ public final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implem
                            CommandMode mode)
     {
       return (group == CommandGroup.NETWORK && command == CommandGroup.NETWORK_PORT_CLOSE && mode == CommandMode.COMMAND)
-                     || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_STATE && mode == CommandMode.REQUEST);
+             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_STATE && mode == CommandMode.REQUEST)
+             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_MODE && mode == CommandMode.REQUEST)
+             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_INFO && mode == CommandMode.REQUEST)
+             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_SWITCH && mode == CommandMode.REQUEST)
+             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_SPEED && mode == CommandMode.REQUEST);
+    }
+
+    private String getPacketName(Packet packet)
+    {
+      CommandGroup group = packet.getCommandGroup();
+      if (group == CommandGroup.NETWORK) {
+        return "PORT_CLOSE";
+      } else if (group == CommandGroup.LOCO) {
+        switch (packet.getCommand()) {
+          case CommandGroup.LOCO_STATE:
+            return "LOCO_STATE";
+          case CommandGroup.LOCO_MODE:
+            return "LOCO_MODE";
+          case CommandGroup.LOCO_SPEED:
+            return "LOCO_SPEED";
+          case CommandGroup.LOCO_FUNC_INFO:
+            return "LOCO_FUNC";
+        }
+      }
+      return "NIDONYLPACKET";
     }
 
     @Override
     public NIDOnlyPacketAdapter createAdapter(Packet packet)
     {
-      return new NIDOnlyPacketAdapterImpl(packet);
+      return new NIDOnlyPacketAdapterImpl(packet,
+                                          getPacketName(packet));
     }
 
   }
+  private final String packetName;
 
-  public NIDOnlyPacketAdapterImpl(Packet packet)
+  private NIDOnlyPacketAdapterImpl(Packet packet,
+                                   String packetName)
   {
     super(packet);
+    this.packetName = packetName;
   }
 
   @Override
@@ -65,7 +93,8 @@ public final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implem
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("LOGOUT(0x");
+    StringBuilder builder = new StringBuilder(packetName);
+    builder.append("(0x");
     Utils.appendHexString(getMasterNID() & 0xffff,
                           builder,
                           4);

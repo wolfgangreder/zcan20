@@ -48,21 +48,25 @@ public final class CVTableModel implements TableModel
   {
 
     private final int number;
-    private final Integer valueOnDevice;
+    private final Short valueOnDevice;
     private final short decoderAddress;
-    private int value;
+    private final short systemID;
+    private short value;
 
     private Record(CVInfoAdapter info)
     {
-      this(info.getDecoderAddress(),
+      this(info.getSystemID(),
+           info.getDecoderID(),
            info.getNumber(),
            info.getValue());
     }
 
-    private Record(short decoderAddress,
+    private Record(short systemID,
+                   short decoderAddress,
                    int number,
-                   Integer valueOnDevice)
+                   Short valueOnDevice)
     {
+      this.systemID = systemID;
       this.number = number;
       this.valueOnDevice = valueOnDevice;
       if (valueOnDevice != null) {
@@ -72,7 +76,13 @@ public final class CVTableModel implements TableModel
     }
 
     @Override
-    public short getDecoderAddress()
+    public short getSystemID()
+    {
+      return systemID;
+    }
+
+    @Override
+    public short getDecoderID()
     {
       return decoderAddress;
     }
@@ -89,18 +99,18 @@ public final class CVTableModel implements TableModel
       return number;
     }
 
-    public Integer getValueOnDevice()
+    public Short getValueOnDevice()
     {
       return valueOnDevice;
     }
 
     @Override
-    public int getValue()
+    public short getValue()
     {
       return value;
     }
 
-    public void setValue(int value)
+    public void setValue(short value)
     {
       this.value = value;
     }
@@ -133,7 +143,7 @@ public final class CVTableModel implements TableModel
                         Packet packet)
   {
     CVInfoAdapter info = packet.getAdapter(CVInfoAdapter.class);
-    if (info != null && info.getDecoderAddress() == locoAddress) {
+    if (info != null && info.getDecoderID() == locoAddress) {
       SwingUtilities.invokeLater(() -> updateInfo(info));
     }
   }
@@ -212,7 +222,8 @@ public final class CVTableModel implements TableModel
 
   public CVInfoAdapter getRecord(int number)
   {
-    Record result = new Record(locoAddress,
+    Record result = new Record(device.getNID(),
+                               locoAddress,
                                number,
                                null);
     int index = Collections.binarySearch(data,
@@ -308,7 +319,7 @@ public final class CVTableModel implements TableModel
                        columnIndex)) {
       if (columnIndex == COL_VALUE && aValue instanceof Number) {
         Record rec = data.get(rowIndex);
-        int newValue = ((Number) aValue).intValue();
+        short newValue = ((Number) aValue).shortValue();
         if (rec.getValue() != newValue) {
           rec.setValue(newValue);
           fireCellChanged(rowIndex,

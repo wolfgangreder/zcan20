@@ -28,7 +28,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class InterfaceOptionRequestAdapterImpl extends AbstractPacketAdapter implements InterfaceOptionRequestAdapter
+final class InterfaceOptionRequestAdapterImpl extends AbstractPacketAdapter implements InterfaceOptionRequestAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -51,7 +51,7 @@ public final class InterfaceOptionRequestAdapterImpl extends AbstractPacketAdapt
 
   }
 
-  public InterfaceOptionRequestAdapterImpl(Packet packet)
+  private InterfaceOptionRequestAdapterImpl(Packet packet)
   {
     super(packet);
   }

@@ -28,7 +28,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerStateInfo
+final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerStateInfo
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -52,7 +52,7 @@ public final class PowerStateInfoImpl extends AbstractPacketAdapter implements P
   }
   private final int offset;
 
-  public PowerStateInfoImpl(Packet packet)
+  private PowerStateInfoImpl(Packet packet)
   {
     super(packet);
     if (buffer.capacity() < 4) {

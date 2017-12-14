@@ -28,7 +28,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class DataGroupIndexRequestAdapterImpl extends AbstractPacketAdapter implements DataGroupIndexRequestAdapter
+final class DataGroupIndexRequestAdapterImpl extends AbstractPacketAdapter implements DataGroupIndexRequestAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -51,7 +51,7 @@ public final class DataGroupIndexRequestAdapterImpl extends AbstractPacketAdapte
 
   }
 
-  public DataGroupIndexRequestAdapterImpl(Packet packet)
+  private DataGroupIndexRequestAdapterImpl(Packet packet)
   {
     super(packet);
   }

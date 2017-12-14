@@ -28,7 +28,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class DataGroupCountRequestAdapterImpl extends AbstractPacketAdapter implements DataGroupCountRequestAdapter
+final class DataGroupCountRequestAdapterImpl extends AbstractPacketAdapter implements DataGroupCountRequestAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -51,7 +51,7 @@ public final class DataGroupCountRequestAdapterImpl extends AbstractPacketAdapte
 
   }
 
-  public DataGroupCountRequestAdapterImpl(Packet packet)
+  private DataGroupCountRequestAdapterImpl(Packet packet)
   {
     super(packet);
   }

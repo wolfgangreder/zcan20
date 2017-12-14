@@ -31,11 +31,17 @@ import javax.validation.constraints.NotNull;
 public final class UDPMarshaller
 {
 
-  public static ByteBuffer adaptByteBuffer(@NotNull ByteBuffer bufferToFill)
+  public static final int PREFIX_LEN = 8;
+
+  /**
+   * Returns the required buffer size to hold the packet.
+   *
+   * @param packet Packet to check the size
+   * @return required buffersize
+   */
+  public static int getRequiredBufferSize(@NotNull Packet packet)
   {
-    ByteBuffer buffer = bufferToFill.slice();
-    buffer.order(ByteOrder.LITTLE_ENDIAN);
-    return buffer;
+    return PREFIX_LEN + packet.getData().remaining();
   }
 
   public static int marshalPacket(@NotNull Packet packet,
@@ -44,7 +50,7 @@ public final class UDPMarshaller
     ByteBuffer buffer = bufferToFill.duplicate();
     ByteBuffer data = packet.getData();
     int dlc = data.remaining();
-    buffer.limit(8 + dlc);
+    buffer.limit(PREFIX_LEN + dlc);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     buffer.putShort((short) dlc);
     buffer.putShort((short) 0);
@@ -60,12 +66,12 @@ public final class UDPMarshaller
   public static Packet unmarshalPacket(@NotNull ByteBuffer buffer) throws IOException
   {
     ByteBuffer packetBytes = buffer.duplicate();
-    if (packetBytes.limit() < 8) {
+    if (packetBytes.remaining() < PREFIX_LEN) {
       throw new IOException("Received ZCAN Packet too small");
     }
     packetBytes.order(ByteOrder.LITTLE_ENDIAN);
     final int dlc = packetBytes.getShort() & 0xffff;
-    if (packetBytes.limit() < (8 + dlc)) {
+    if (packetBytes.remaining() < (PREFIX_LEN + dlc)) {
       throw new IOException("Received ZCAN Packet too small");
     }
     packetBytes.getShort();// these 16bits are currently (4.10public) not used

@@ -21,12 +21,20 @@ import com.reder.zcan20.DataGroup;
 import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.ModuleInfoType;
 import com.reder.zcan20.PowerOutput;
+import com.reder.zcan20.Protocol;
+import com.reder.zcan20.SpeedFlags;
+import com.reder.zcan20.SpeedSteps;
+import com.reder.zcan20.SpeedlimitMode;
 import com.reder.zcan20.ZCANFactory;
+import com.reder.zcan20.packet.CVInfoAdapter;
 import com.reder.zcan20.packet.DataGroupCountRequestAdapter;
 import com.reder.zcan20.packet.DataGroupIndexRequestAdapter;
 import com.reder.zcan20.packet.DataGroupNIDRequestAdapter;
 import com.reder.zcan20.packet.DataNameExtRequestAdapter;
 import com.reder.zcan20.packet.InterfaceOptionRequestAdapter;
+import com.reder.zcan20.packet.LocoFuncPacketAdapter;
+import com.reder.zcan20.packet.LocoModePacketAdapter;
+import com.reder.zcan20.packet.LocoSpeedPacketAdapter;
 import com.reder.zcan20.packet.ModuleInfoRequestAdapter;
 import com.reder.zcan20.packet.ModulePowerInfoRequestAdapter;
 import com.reder.zcan20.packet.NIDOnlyPacketAdapter;
@@ -607,6 +615,478 @@ public class DefaultPacketBuilderNGTest
     short locoNid = ZCANFactory.LOCO_MAX + 1;
     DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
     builder.buildLocoStatePacket(locoNid);
+  }
+
+  @Test
+  public void testGetLocoModePacket()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = ZCANFactory.LOCO_MAX;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    Packet packet = builder.buildLocoModePacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.LOCO,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.LOCO_MODE,
+                 packet.getCommand());
+    NIDOnlyPacketAdapter adapter = packet.getAdapter(NIDOnlyPacketAdapter.class);
+    assertNotNull(adapter);
+    assertSame(packet,
+               adapter.getPacket());
+    assertEquals(locoNid,
+                 adapter.getMasterNID());
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testGetLocoModePacketFail1()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = ZCANFactory.LOCO_MAX + 1;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid);
+  }
+
+  @Test
+  public void testSetLocoModePacket()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = ZCANFactory.LOCO_MAX;
+    boolean pulseFx = false;
+    boolean analogFx = false;
+    for (SpeedSteps steps : SpeedSteps.values()) {
+      if (!steps.isValidInSet()) {
+        continue;
+      }
+      for (Protocol prot : Protocol.values()) {
+        pulseFx = !pulseFx;
+        if (!prot.isValidInSet()) {
+          continue;
+        }
+        for (SpeedlimitMode limitMode : SpeedlimitMode.values()) {
+          analogFx = !analogFx;
+          for (int numFunctions = 0; numFunctions < ZCANFactory.MAX_LOCO_FX; ++numFunctions) {
+            pulseFx = !pulseFx;
+            analogFx = !analogFx;
+            DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+            Packet packet = builder.buildLocoModePacket(locoNid,
+                                                        steps,
+                                                        prot,
+                                                        numFunctions,
+                                                        limitMode,
+                                                        pulseFx,
+                                                        analogFx);
+            assertNotNull(packet);
+            assertEquals(myNID,
+                         packet.getSenderNID());
+            assertSame(CommandGroup.LOCO,
+                       packet.getCommandGroup());
+            assertSame(CommandMode.COMMAND,
+                       packet.getCommandMode());
+            assertEquals(CommandGroup.LOCO_MODE,
+                         packet.getCommand());
+            LocoModePacketAdapter adapter = packet.getAdapter(LocoModePacketAdapter.class);
+            assertNotNull(adapter);
+            final String as = adapter.toString();
+            assertSame(as,
+                       packet,
+                       adapter.getPacket());
+            assertEquals(as,
+                         locoNid,
+                         adapter.getLocoID());
+            assertSame(as,
+                       steps,
+                       adapter.getSpeedsteps());
+            assertSame(as,
+                       prot,
+                       adapter.getProtocol());
+            assertSame(as,
+                       limitMode,
+                       adapter.getSpeedlimitMode());
+            assertEquals(as,
+                         numFunctions,
+                         adapter.getNumFunctions());
+            assertEquals(as,
+                         pulseFx,
+                         adapter.isPulseFx());
+            assertEquals(as,
+                         analogFx,
+                         adapter.isAnalogFx());
+          }
+        }
+      }
+    }
+
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testSetLocoModePacketFail1()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = ZCANFactory.LOCO_MAX + 1;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                SpeedSteps.STEP_128,
+                                Protocol.DCC,
+                                28,
+                                SpeedlimitMode.NO_LIMIT,
+                                false,
+                                false);
+
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testSetLocoModePacketFail2()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = 0;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                SpeedSteps.UNKNOWN,
+                                Protocol.DCC,
+                                28,
+                                SpeedlimitMode.NO_LIMIT,
+                                false,
+                                false);
+
+  }
+
+  @Test(expectedExceptions = {NullPointerException.class})
+  public void testSetLocoModePacketFail3()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = 0;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                null,
+                                Protocol.DCC,
+                                28,
+                                SpeedlimitMode.NO_LIMIT,
+                                false,
+                                false);
+
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testSetLocoModePacketFail4()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = 0;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                SpeedSteps.STEP_128,
+                                Protocol.NOT_DEFINED,
+                                28,
+                                SpeedlimitMode.NO_LIMIT,
+                                false,
+                                false);
+
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testSetLocoModePacketFail5()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = 0;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                SpeedSteps.STEP_128,
+                                Protocol.UNKNOWN,
+                                28,
+                                SpeedlimitMode.NO_LIMIT,
+                                false,
+                                false);
+
+  }
+
+  @Test(expectedExceptions = {NullPointerException.class})
+  public void testSetLocoModePacketFail6()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = 0;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                SpeedSteps.STEP_128,
+                                null,
+                                28,
+                                SpeedlimitMode.NO_LIMIT,
+                                false,
+                                false);
+
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testSetLocoModePacketFail7()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = 0;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                SpeedSteps.STEP_128,
+                                Protocol.DCC,
+                                33,
+                                SpeedlimitMode.NO_LIMIT,
+                                false,
+                                false);
+
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testSetLocoModePacketFail8()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = 0;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                SpeedSteps.STEP_128,
+                                Protocol.DCC,
+                                -1,
+                                SpeedlimitMode.NO_LIMIT,
+                                false,
+                                false);
+
+  }
+
+  @Test(expectedExceptions = {NullPointerException.class})
+  public void testSetLocoModePacketFail9()
+  {
+    short myNID = (short) 0xcafe;
+    short locoNid = 0;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoModePacket(locoNid,
+                                SpeedSteps.STEP_128,
+                                Protocol.DCC,
+                                32,
+                                null,
+                                false,
+                                false);
+
+  }
+
+  @Test
+  public void testGetLocoSpeedPacket()
+  {
+    short locoNid = 0x123;
+    short myNID = (short) 0xcafe;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    Packet packet = builder.buildLocoSpeedPacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(myNID,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.LOCO,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.LOCO_SPEED,
+                 packet.getCommand());
+    NIDOnlyPacketAdapter adapter = packet.getAdapter(NIDOnlyPacketAdapter.class);
+    assertNotNull(adapter);
+    assertSame(packet,
+               adapter.getPacket());
+    assertEquals(locoNid,
+                 adapter.getMasterNID());
+  }
+
+  @Test(expectedExceptions = {IllegalArgumentException.class})
+  public void testGetLocoSpeedPacketFail1()
+  {
+    short locoNid = ZCANFactory.LOCO_MAX + 1;
+    short myNID = (short) 0xcafe;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNID);
+    builder.buildLocoSpeedPacket(locoNid);
+  }
+
+  @Test
+  public void testSetLocoSpeedPacket()
+  {
+    short locoNid = 0x123;
+    short myNid = (short) 0xbabe;
+    short speed = 0x231;
+    EnumSet<SpeedFlags> flags = EnumSet.of(SpeedFlags.EMERGENCY_STOP,
+                                           SpeedFlags.FORWARD_FROM_SYSTEM,
+                                           SpeedFlags.REVERSE_TO_SYSTEM);
+    short div = 2;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNid);
+    Packet packet = builder.buildLocoSpeedPacket(locoNid,
+                                                 speed,
+                                                 flags,
+                                                 div);
+    assertNotNull(packet);
+    assertEquals(myNid,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.LOCO,
+               packet.getCommandGroup());
+    assertSame(CommandMode.COMMAND,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.LOCO_SPEED,
+                 packet.getCommand());
+    LocoSpeedPacketAdapter adapter = packet.getAdapter(LocoSpeedPacketAdapter.class);
+    assertNotNull(adapter);
+    assertEquals(packet,
+                 adapter.getPacket());
+    assertEquals(locoNid,
+                 adapter.getLocoID());
+    assertEquals(speed,
+                 adapter.getSpeed());
+    assertEquals(flags,
+                 adapter.getFlags());
+    assertEquals(div,
+                 adapter.getDivisor());
+  }
+
+  @Test
+  public void testGetLocoFuncInfoPacket()
+  {
+    short locoNid = 0x123;
+    short myNid = (short) 0xcafe;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNid);
+    Packet packet = builder.buildLocoFunctionInfoPacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(myNid,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.LOCO,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.LOCO_FUNC_INFO,
+                 packet.getCommand());
+    NIDOnlyPacketAdapter adapter = packet.getAdapter(NIDOnlyPacketAdapter.class);
+    assertNotNull(adapter);
+    assertSame(packet,
+               adapter.getPacket());
+    assertEquals(locoNid,
+                 adapter.getMasterNID());
+  }
+
+  @Test
+  public void testGetLocoFuncPacket()
+  {
+    short locoNid = 0x123;
+    short myNid = (short) 0xcafe;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNid);
+    Packet packet = builder.buildLocoFunctionPacket(locoNid);
+    assertNotNull(packet);
+    assertEquals(myNid,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.LOCO,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.LOCO_FUNC_SWITCH,
+                 packet.getCommand());
+    NIDOnlyPacketAdapter adapter = packet.getAdapter(NIDOnlyPacketAdapter.class);
+    assertNotNull(adapter);
+    assertSame(packet,
+               adapter.getPacket());
+    assertEquals(locoNid,
+                 adapter.getMasterNID());
+
+  }
+
+  @Test
+  public void testSetLocoFuncPacket()
+  {
+    short locoNid = 0x123;
+    short myNid = (short) 0xcafe;
+    short fxNum = 254;
+    short fxVal = (short) 0x1234;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNid);
+    Packet packet = builder.buildLocoFunctionPacket(locoNid,
+                                                    fxNum,
+                                                    fxVal);
+    assertNotNull(packet);
+    assertEquals(myNid,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.LOCO,
+               packet.getCommandGroup());
+    assertSame(CommandMode.COMMAND,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.LOCO_FUNC_SWITCH,
+                 packet.getCommand());
+    LocoFuncPacketAdapter adapter = packet.getAdapter(LocoFuncPacketAdapter.class);
+    assertNotNull(adapter);
+    assertSame(packet,
+               adapter.getPacket());
+    assertEquals(locoNid,
+                 adapter.getLocoID());
+    assertEquals(fxNum,
+                 adapter.getFxNumber());
+    assertEquals(fxVal,
+                 adapter.getFxValue());
+
+  }
+
+  @Test
+  public void testGetCVValue()
+  {
+    short locoNid = 0x123;
+    short myNid = (short) 0xcafe;
+    short systemNid = (short) 0xbabe;
+    int cvNum = 232860;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNid);
+    Packet packet = builder.buildReadCVPacket(systemNid,
+                                              locoNid,
+                                              cvNum);
+    assertNotNull(packet);
+    assertEquals(myNid,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.TRACK_CONFIG_PUBLIC,
+               packet.getCommandGroup());
+    assertSame(CommandMode.REQUEST,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.TSE_PROG_READ,
+                 packet.getCommand());
+    CVInfoAdapter adapter = packet.getAdapter(CVInfoAdapter.class);
+    assertNotNull(adapter);
+    assertSame(packet,
+               adapter.getPacket());
+    assertEquals(systemNid,
+                 adapter.getSystemID());
+    assertEquals(locoNid,
+                 adapter.getDecoderID());
+    assertEquals(cvNum,
+                 adapter.getNumber());
+    assertEquals(0,
+                 adapter.getValue());
+  }
+
+  @Test
+  public void testSetCVValue()
+  {
+    short locoNid = 0x123;
+    short myNid = (short) 0xcafe;
+    short systemNid = (short) 0xbabe;
+    int cvNum = 232860;
+    short value = (short) 0xaffe;
+    DefaultPacketBuilder builder = new DefaultPacketBuilder(myNid);
+    Packet packet = builder.buildWriteCVPacket(systemNid,
+                                               locoNid,
+                                               cvNum,
+                                               value);
+    assertNotNull(packet);
+    assertEquals(myNid,
+                 packet.getSenderNID());
+    assertSame(CommandGroup.TRACK_CONFIG_PUBLIC,
+               packet.getCommandGroup());
+    assertSame(CommandMode.COMMAND,
+               packet.getCommandMode());
+    assertEquals(CommandGroup.TSE_PROG_WRITE,
+                 packet.getCommand());
+    CVInfoAdapter adapter = packet.getAdapter(CVInfoAdapter.class);
+    assertNotNull(adapter);
+    assertSame(packet,
+               adapter.getPacket());
+    assertEquals(systemNid,
+                 adapter.getSystemID());
+    assertEquals(locoNid,
+                 adapter.getDecoderID());
+    assertEquals(cvNum,
+                 adapter.getNumber());
+    assertEquals(value,
+                 adapter.getValue());
   }
 
 }

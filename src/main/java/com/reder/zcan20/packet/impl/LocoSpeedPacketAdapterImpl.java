@@ -17,10 +17,10 @@ package com.reder.zcan20.packet.impl;
 
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
-import com.reder.zcan20.PowerOutput;
+import com.reder.zcan20.SpeedFlags;
+import com.reder.zcan20.packet.LocoSpeedPacketAdapter;
 import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PacketAdapterFactory;
-import com.reder.zcan20.packet.PowerInfoRequestAdapter;
 import com.reder.zcan20.util.Utils;
 import java.util.Set;
 import org.openide.util.lookup.ServiceProvider;
@@ -29,7 +29,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-final class PowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements PowerInfoRequestAdapter
+final class LocoSpeedPacketAdapterImpl extends AbstractPacketAdapter implements LocoSpeedPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -41,49 +41,64 @@ final class PowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements
                            int command,
                            CommandMode mode)
     {
-      return group == CommandGroup.SYSTEM && command == CommandGroup.SYSTEM_POWER && mode == CommandMode.REQUEST;
+      if (group == CommandGroup.LOCO && command == CommandGroup.LOCO_SPEED) {
+        return mode == CommandMode.COMMAND || mode == CommandMode.ACK;
+      }
+      return false;
     }
 
     @Override
-    public PowerInfoRequestAdapter createAdapter(Packet packet)
+    public LocoSpeedPacketAdapter createAdapter(Packet packet)
     {
-      return new PowerInfoRequestAdapterImpl(packet);
+      return new LocoSpeedPacketAdapterImpl(packet);
     }
 
   }
 
-  private PowerInfoRequestAdapterImpl(Packet packet)
+  private LocoSpeedPacketAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public short getMasterNID()
+  public short getLocoID()
   {
     return buffer.getShort(0);
   }
 
   @Override
-  public Set<PowerOutput> getOutputs()
+  public short getSpeed()
   {
-    return PowerOutput.toSet(buffer.get(2));
+    return (short) (buffer.getShort(2) & 0x3ff);
+  }
+
+  @Override
+  public Set<SpeedFlags> getFlags()
+  {
+    return SpeedFlags.setOfMask(buffer.getShort(2));
+  }
+
+  @Override
+  public short getDivisor()
+  {
+    return (short) (buffer.get(4) & 0xff);
   }
 
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("PowerInfoRequest(0x");
-    Utils.appendHexString(getMasterNID() & 0xffff,
+    StringBuilder builder = new StringBuilder("LOCO_SPEED(0x");
+    Utils.appendHexString(getLocoID(),
                           builder,
                           4);
     builder.append(", ");
-    Set<PowerOutput> outputs = getOutputs();
-    for (PowerOutput o : outputs) {
-      builder.append(o);
-      builder.append(' ');
-    }
-    if (!outputs.isEmpty()) {
-      builder.setLength(builder.length() - 1);
+    builder.append(getSpeed());
+    builder.append(", ");
+    builder.append(getDivisor());
+    builder.append(", ");
+    for (SpeedFlags f : getFlags()) {
+      builder.append(f);
+      builder.append(" ");
     }
     return builder.append(')').toString();
   }

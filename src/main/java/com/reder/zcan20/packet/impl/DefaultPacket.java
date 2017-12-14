@@ -15,6 +15,7 @@
  */
 package com.reder.zcan20.packet.impl;
 
+import com.reder.zcan20.CanId;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.packet.Packet;
@@ -22,6 +23,7 @@ import com.reder.zcan20.packet.PacketAdapter;
 import com.reder.zcan20.util.Utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Objects;
 import java.util.function.Function;
 import javax.validation.constraints.NotNull;
 import org.openide.util.Lookup;
@@ -40,6 +42,7 @@ public final class DefaultPacket implements Packet
   private final short address;
   private final ByteBuffer data;
   private final Lookup lookup;
+  private final CanId canId;
   private String string;
 
   @SuppressWarnings("LeakingThisInConstructor")
@@ -68,12 +71,16 @@ public final class DefaultPacket implements Packet
     } else {
       lookup = Lookup.EMPTY;
     }
+    canId = CanId.valueOf(group,
+                          command,
+                          mode,
+                          address);
   }
 
   @Override
-  public int getRequiredBufferSize()
+  public CanId getCanId()
   {
-    return 8 + data.capacity();
+    return canId;
   }
 
   @Override
@@ -116,6 +123,42 @@ public final class DefaultPacket implements Packet
   public ByteBuffer getData()
   {
     return data.duplicate().order(ByteOrder.LITTLE_ENDIAN);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return getCanId().intValue();
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final DefaultPacket other = (DefaultPacket) obj;
+    if (this.command != other.command) {
+      return false;
+    }
+    if (this.address != other.address) {
+      return false;
+    }
+    if (!Objects.equals(this.group,
+                        other.group)) {
+      return false;
+    }
+    if (this.mode != other.mode) {
+      return false;
+    }
+    return Objects.equals(this.data,
+                          other.data);
   }
 
   @Override

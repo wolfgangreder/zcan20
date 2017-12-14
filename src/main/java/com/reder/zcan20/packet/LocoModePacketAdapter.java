@@ -15,19 +15,29 @@
  */
 package com.reder.zcan20.packet;
 
+import com.reder.zcan20.Protocol;
+import com.reder.zcan20.SpeedSteps;
+import com.reder.zcan20.SpeedlimitMode;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public interface CVInfoAdapter extends PacketAdapter
+public interface LocoModePacketAdapter extends PacketAdapter
 {
 
-  public short getSystemID();
+  public short getLocoID();
 
-  public short getDecoderID();
+  public SpeedSteps getSpeedsteps();
 
-  public int getNumber();
+  public Protocol getProtocol();
 
-  public short getValue();
+  public int getNumFunctions();
+
+  public SpeedlimitMode getSpeedlimitMode();
+
+  public boolean isPulseFx();
+
+  public boolean isAnalogFx();
 
 }

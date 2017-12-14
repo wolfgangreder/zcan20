@@ -19,14 +19,14 @@ import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.packet.CVInfoAdapter;
 import com.reder.zcan20.packet.Packet;
-import org.openide.util.lookup.ServiceProvider;
 import com.reder.zcan20.packet.PacketAdapterFactory;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class CVInfoImpl extends AbstractPacketAdapter implements CVInfoAdapter
+final class CVInfoPacketAdpaterImpl extends AbstractPacketAdapter implements CVInfoAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -38,38 +38,48 @@ public final class CVInfoImpl extends AbstractPacketAdapter implements CVInfoAda
                            int command,
                            CommandMode mode)
     {
-      return group == CommandGroup.TRACK_CONFIG_PUBLIC && (mode == CommandMode.ACK || mode == CommandMode.EVENT);
+      return group == CommandGroup.TRACK_CONFIG_PUBLIC && mode != CommandMode.EVENT;
     }
 
     @Override
     public CVInfoAdapter createAdapter(Packet packet)
     {
-      return new CVInfoImpl(packet);
+      return new CVInfoPacketAdpaterImpl(packet);
     }
 
   }
 
-  public CVInfoImpl(Packet packet)
+  private CVInfoPacketAdpaterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
+  public short getSystemID()
+  {
+    return buffer.getShort(0);
+  }
+
+  @Override
+  public short getDecoderID()
+  {
+    return buffer.getShort(2);
+  }
+
+  @Override
   public int getNumber()
   {
-    return buffer.getInt(6) & 0xffff_ffff;
+    return buffer.getInt(4);
   }
 
   @Override
-  public int getValue()
+  public short getValue()
   {
-    return buffer.getShort(10) & 0xffff;
-  }
-
-  @Override
-  public short getDecoderAddress()
-  {
-    return buffer.getShort(4);
+    if (buffer.capacity() > 8) {
+      return buffer.getShort(8);
+    } else {
+      return 0;
+    }
   }
 
 }

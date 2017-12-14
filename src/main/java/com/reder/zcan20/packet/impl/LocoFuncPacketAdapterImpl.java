@@ -17,19 +17,17 @@ package com.reder.zcan20.packet.impl;
 
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
-import com.reder.zcan20.PowerOutput;
+import com.reder.zcan20.packet.LocoFuncPacketAdapter;
 import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PacketAdapterFactory;
-import com.reder.zcan20.packet.PowerInfoRequestAdapter;
 import com.reder.zcan20.util.Utils;
-import java.util.Set;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-final class PowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements PowerInfoRequestAdapter
+final class LocoFuncPacketAdapterImpl extends AbstractPacketAdapter implements LocoFuncPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -41,50 +39,54 @@ final class PowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements
                            int command,
                            CommandMode mode)
     {
-      return group == CommandGroup.SYSTEM && command == CommandGroup.SYSTEM_POWER && mode == CommandMode.REQUEST;
+      if (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_SWITCH) {
+        return mode == CommandMode.COMMAND || mode == CommandMode.ACK;
+      }
+      return false;
     }
 
     @Override
-    public PowerInfoRequestAdapter createAdapter(Packet packet)
+    public LocoFuncPacketAdapter createAdapter(Packet packet)
     {
-      return new PowerInfoRequestAdapterImpl(packet);
+      return new LocoFuncPacketAdapterImpl(packet);
     }
 
   }
 
-  private PowerInfoRequestAdapterImpl(Packet packet)
+  private LocoFuncPacketAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public short getMasterNID()
+  public short getLocoID()
   {
     return buffer.getShort(0);
   }
 
   @Override
-  public Set<PowerOutput> getOutputs()
+  public short getFxNumber()
   {
-    return PowerOutput.toSet(buffer.get(2));
+    return buffer.getShort(2);
+  }
+
+  @Override
+  public short getFxValue()
+  {
+    return buffer.getShort(4);
   }
 
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("PowerInfoRequest(0x");
-    Utils.appendHexString(getMasterNID() & 0xffff,
+    StringBuilder builder = new StringBuilder("LOCO_FUNC(0x");
+    Utils.appendHexString(getLocoID(),
                           builder,
                           4);
     builder.append(", ");
-    Set<PowerOutput> outputs = getOutputs();
-    for (PowerOutput o : outputs) {
-      builder.append(o);
-      builder.append(' ');
-    }
-    if (!outputs.isEmpty()) {
-      builder.setLength(builder.length() - 1);
-    }
+    builder.append(getFxNumber());
+    builder.append(", ");
+    builder.append(getFxValue());
     return builder.append(')').toString();
   }
 

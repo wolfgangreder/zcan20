@@ -27,7 +27,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class PingImpl extends AbstractPacketAdapter implements Ping
+final class PingImpl extends AbstractPacketAdapter implements Ping
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -50,7 +50,7 @@ public final class PingImpl extends AbstractPacketAdapter implements Ping
 
   }
 
-  public PingImpl(@NotNull Packet packet)
+  private PingImpl(@NotNull Packet packet)
   {
     super(packet);
     if (packet.getCommandGroup() != CommandGroup.NETWORK) {

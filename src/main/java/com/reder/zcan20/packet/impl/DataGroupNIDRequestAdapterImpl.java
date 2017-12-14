@@ -27,7 +27,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class DataGroupNIDRequestAdapterImpl extends AbstractPacketAdapter implements DataGroupNIDRequestAdapter
+final class DataGroupNIDRequestAdapterImpl extends AbstractPacketAdapter implements DataGroupNIDRequestAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -50,7 +50,7 @@ public final class DataGroupNIDRequestAdapterImpl extends AbstractPacketAdapter 
 
   }
 
-  public DataGroupNIDRequestAdapterImpl(Packet packet)
+  private DataGroupNIDRequestAdapterImpl(Packet packet)
   {
     super(packet);
   }

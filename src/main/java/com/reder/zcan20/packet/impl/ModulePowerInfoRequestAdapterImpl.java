@@ -28,7 +28,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-public final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements ModulePowerInfoRequestAdapter
+final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements ModulePowerInfoRequestAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -51,7 +51,7 @@ public final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapt
 
   }
 
-  public ModulePowerInfoRequestAdapterImpl(Packet packet)
+  private ModulePowerInfoRequestAdapterImpl(Packet packet)
   {
     super(packet);
   }

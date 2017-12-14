@@ -15,6 +15,7 @@
  */package com.reder.zcan20;
 
 import com.reder.zcan20.packet.PacketBuilder;
+import com.reder.zcan20.util.CanIdMatcher;
 import java.io.IOException;
 import java.util.function.BiConsumer;
 import org.openide.util.Lookup;
@@ -43,9 +44,10 @@ public interface ZCAN extends AutoCloseable, NetworkControl, SystemControl, Trac
   public void removePacketListener(CommandGroup group,
                                    PacketListener packetListener);
 
-  public default <T> T getExtension(Class<? extends T> clazz)
-  {
-    return null;
-  }
+  public void addPacketListener(CanIdMatcher matcher,
+                                PacketListener packetListener);
+
+  public void removePacketListener(CanIdMatcher matcher,
+                                   PacketListener packetListener);
 
 }

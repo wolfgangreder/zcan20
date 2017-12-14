@@ -20,19 +20,20 @@ import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.PowerOutput;
 import com.reder.zcan20.PowerState;
 import com.reder.zcan20.packet.Packet;
+import com.reder.zcan20.packet.PacketAdapterFactory;
 import com.reder.zcan20.packet.PowerInfo;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
-import com.reder.zcan20.packet.PacketAdapterFactory;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
+final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
 {
 
-  //@ServiceProvider(service=PacketAdapterFactory.class)
+  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
   public static final class Factory implements PacketAdapterFactory
   {
 
@@ -53,7 +54,7 @@ public final class PowerInfoImpl extends AbstractPacketAdapter implements PowerI
 
   }
 
-  public PowerInfoImpl(@NotNull Packet packet)
+  private PowerInfoImpl(@NotNull Packet packet)
   {
     super(packet);
     if (packet.getCommandGroup() != CommandGroup.CONFIG) {

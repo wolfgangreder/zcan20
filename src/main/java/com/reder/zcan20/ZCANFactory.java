@@ -22,6 +22,7 @@ import com.reder.zcan20.packet.PacketBuilder;
 import com.reder.zcan20.packet.impl.DefaultPacketBuilder;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.validation.constraints.NotNull;
 
 public final class ZCANFactory
@@ -29,7 +30,7 @@ public final class ZCANFactory
 
   public static final String PROP_NID = "com.reder.zcan20.nid";
   public static final String DEFAULT_NID = "c2ff";
-
+  public static final int MAX_LOCO_FX = 32;
   public static final short LOCO_MIN = 0;
   public static final short LOCO_MAX = 0x27ff;
   public static final short ACC_MIN = 0x3000;
@@ -70,20 +71,25 @@ public final class ZCANFactory
    * @param remotePort Remote listening port.
    * @param localPort Local listening port.
    * @param properties Map of connection properties. Can be {@code null}.
+   * @param timeOut timeOut to wait for ping
+   * @param unit timeunit for waiting
    * @return Interface to the device.
    * @throws IOException if the connection cannot be established.
    */
   public static ZCAN open(@NotNull final String address,
                           int remotePort,
                           int localPort,
-                          Map<String, String> properties) throws IOException
+                          Map<String, String> properties,
+                          long timeOut,
+                          TimeUnit unit) throws IOException
   {
     ZPort port = new UDPPort(address,
                              remotePort,
                              localPort);
     ZCANImpl result = new ZCANImpl(port,
                                    properties);
-    result.open();
+    result.open(timeOut,
+                unit);
     return result;
   }
 
