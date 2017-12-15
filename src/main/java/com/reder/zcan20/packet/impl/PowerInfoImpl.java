@@ -74,7 +74,7 @@ final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
   @Override
   public PowerOutput getOutput()
   {
-    switch (buffer.get(2)) {
+    switch (buffer.get(0)) {
       case 1:
         return PowerOutput.OUT_1;
       case 2:
@@ -82,7 +82,7 @@ final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
       case 4:
         return PowerOutput.BOOSTER;
     }
-    return PowerOutput.valueOfMagic(buffer.get(2) & 0xff);
+    return PowerOutput.valueOfMagic(buffer.get(0) & 0xff);
   }
 
   @Override
@@ -94,15 +94,32 @@ final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
   @Override
   public float getVoltage()
   {
-    float tmp = buffer.getShort(6);
+    float tmp = buffer.getShort(4);
     return tmp / 1000;
   }
 
   @Override
   public float getCurrent()
   {
-    float tmp = buffer.getShort(4);
+    float tmp = buffer.getShort(6);
     return tmp / 1000;
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder builder = new StringBuilder("POWER_INFO(");
+    builder.append(getOutput());
+    builder.append(", ");
+    for (PowerState s : getState()) {
+      builder.append(s);
+      builder.append(", ");
+    }
+    builder.append(getVoltage());
+    builder.append(" V, ");
+    builder.append(getCurrent());
+    return builder.append(" A)").toString();
+
   }
 
 }

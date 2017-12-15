@@ -22,6 +22,7 @@ import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.LocoActive;
 import com.reder.zcan20.ModuleInfoType;
 import com.reder.zcan20.PowerOutput;
+import com.reder.zcan20.PowerState;
 import com.reder.zcan20.Protocol;
 import com.reder.zcan20.SpeedFlags;
 import com.reder.zcan20.SpeedSteps;
@@ -136,6 +137,10 @@ public interface PacketBuilder
 
   public Packet buildModulePowerInfoPacket(short nid,
                                            @NotNull PowerOutput output);
+
+  public Packet builderModulePowerInfoPacket(short nid,
+                                             @NotNull PowerOutput output,
+                                             @NotNull PowerState state);
 
   public Packet buildModuleInfoPacket(short nid,
                                       @NotNull ModuleInfoType type);

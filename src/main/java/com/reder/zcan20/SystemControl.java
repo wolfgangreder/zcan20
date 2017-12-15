@@ -15,15 +15,12 @@
  */package com.reder.zcan20;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import javax.validation.constraints.NotNull;
 
 public interface SystemControl
 {
 
-  public void getPowerStateInfo(@NotNull PowerOutput output,
-                                long timeOut,
-                                @NotNull TimeUnit unit) throws IOException;
+  public void getPowerStateInfo(@NotNull PowerOutput output) throws IOException;
 
   public void setPowerStateInfo(@NotNull PowerOutput output,
                                 @NotNull PowerState state) throws IOException;

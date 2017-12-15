@@ -22,6 +22,7 @@ import com.reder.zcan20.InterfaceOptionType;
 import com.reder.zcan20.LocoActive;
 import com.reder.zcan20.ModuleInfoType;
 import com.reder.zcan20.PowerOutput;
+import com.reder.zcan20.PowerState;
 import com.reder.zcan20.Protocol;
 import com.reder.zcan20.SpeedFlags;
 import com.reder.zcan20.SpeedSteps;
@@ -611,6 +612,24 @@ public final class DefaultPacketBuilder implements PacketBuilder
     buffer.rewind();
     data(buffer);
     return build();
+  }
+
+  @Override
+  public Packet builderModulePowerInfoPacket(short nid,
+                                             PowerOutput output,
+                                             PowerState state)
+  {
+    Objects.requireNonNull(output,
+                           "output is null");
+    if (!output.isValidInSet()) {
+      throw new IllegalArgumentException("output is not set/command valid");
+    }
+    Objects.requireNonNull(state);
+    commandGroup(CommandGroup.CONFIG);
+    commandMode(CommandMode.COMMAND);
+    command(CommandGroup.CONFIG_MODULE_POWER_INFO);
+    adapterFactory(null);
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override

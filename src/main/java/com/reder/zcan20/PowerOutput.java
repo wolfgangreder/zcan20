@@ -25,20 +25,37 @@ import javax.validation.constraints.NotNull;
  */
 public enum PowerOutput
 {
-  OUT_1(1),
-  OUT_2(2),
-  OUT_3(4),
-  OUT_4(8),
-  OUT_5(16),
-  OUT_6(32),
-  OUT_7(64),
-  BOOSTER(128),
-  UNKNOWN(0);
+  OUT_1(1,
+        true),
+  OUT_2(2,
+        true),
+  OUT_3(4,
+        true),
+  OUT_4(8,
+        true),
+  OUT_5(16,
+        true),
+  OUT_6(32,
+        true),
+  OUT_7(64,
+        true),
+  BOOSTER(128,
+          true),
+  UNKNOWN(0,
+          false);
   private final byte magic;
+  private final boolean validInSet;
 
-  private PowerOutput(int magic)
+  private PowerOutput(int magic,
+                      boolean validInSet)
   {
     this.magic = (byte) magic;
+    this.validInSet = validInSet;
+  }
+
+  public boolean isValidInSet()
+  {
+    return validInSet;
   }
 
   public byte getMagic()

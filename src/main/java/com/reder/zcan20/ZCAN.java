@@ -21,7 +21,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import org.openide.util.Lookup;
 
-public interface ZCAN extends AutoCloseable, NetworkControl, SystemControl, TrackConfig, LocoManagement, Lookup.Provider
+public interface ZCAN extends AutoCloseable, NetworkControl, SystemControl, TrackConfig, LocoManagement, ObjectData,
+                              Lookup.Provider
 {
 
   @Override

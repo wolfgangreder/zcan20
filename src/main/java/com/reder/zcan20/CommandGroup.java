@@ -100,11 +100,13 @@ public final class CommandGroup implements Serializable
                                                   DATA_NAME_EXT,
                                                   DATA_LOCO_GUI_EXT);
   public static final byte CONFIG_POWER_INFO = 0x00;
+  public static final byte CONFIG_UNKNOWN_5 = 0x05;
   public static final byte CONFIG_MODULE_INFO = 0x08;
   public static final byte CONFIG_MODULE_POWER_INFO = 0x20;
   public static final CommandGroup CONFIG = valueOf((byte) 0x08,
                                                     "CONFIG",
                                                     CONFIG_POWER_INFO,
+                                                    CONFIG_UNKNOWN_5,
                                                     CONFIG_MODULE_INFO,
                                                     CONFIG_MODULE_POWER_INFO);
   public static final CommandGroup PUBLIC = valueOf((byte) 0x09,
