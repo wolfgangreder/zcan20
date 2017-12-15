@@ -1035,7 +1035,7 @@ public class DefaultPacketBuilderNGTest
                  packet.getSenderNID());
     assertSame(CommandGroup.TRACK_CONFIG_PUBLIC,
                packet.getCommandGroup());
-    assertSame(CommandMode.REQUEST,
+    assertSame(CommandMode.COMMAND,
                packet.getCommandMode());
     assertEquals(CommandGroup.TSE_PROG_READ,
                  packet.getCommand());

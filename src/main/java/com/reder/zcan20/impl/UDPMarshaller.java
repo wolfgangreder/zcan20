@@ -71,7 +71,7 @@ public final class UDPMarshaller
     }
     packetBytes.order(ByteOrder.LITTLE_ENDIAN);
     final int dlc = packetBytes.getShort() & 0xffff;
-    if (packetBytes.remaining() < (PREFIX_LEN + dlc)) {
+    if (packetBytes.remaining() < (PREFIX_LEN + dlc - 2)) {
       throw new IOException("Received ZCAN Packet too small");
     }
     packetBytes.getShort();// these 16bits are currently (4.10public) not used

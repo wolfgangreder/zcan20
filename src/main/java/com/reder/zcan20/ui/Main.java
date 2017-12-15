@@ -15,11 +15,12 @@
  */
 package com.reder.zcan20.ui;
 
-import com.reder.zcan20.CommandGroup;
+import com.reder.zcan20.CVReadState;
 import com.reder.zcan20.ZCAN;
 import com.reder.zcan20.ZCANFactory;
 import com.reder.zcan20.packet.CVInfoAdapter;
 import com.reder.zcan20.packet.Packet;
+import com.reder.zcan20.packet.PacketAdapter;
 import com.reder.zcan20.util.Utils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,10 +43,14 @@ public class Main
                                           Packet packet)
   {
     System.out.println(packet);
+    PacketAdapter adapter = packet.getAdapter(PacketAdapter.class);
+    if (adapter != null) {
+      System.out.println(adapter);
+    }
     if (packet.getAdapter(CVInfoAdapter.class) != null) {
       CVInfoAdapter info = packet.getAdapter(CVInfoAdapter.class);
       printCV(info);
-      if (info.getDecoderID() == 246) {
+      if (info.getDecoderID() == 1118) {
         done.countDown();
       }
     }
@@ -98,20 +103,24 @@ public class Main
                                         null,
                                         5,
                                         TimeUnit.SECONDS)) {
-      device.addPacketListener(CommandGroup.TRACK_CONFIG_PUBLIC,
-                               Main::onTrackConfigPacket);
-//      device.addPacketListener(CommandGroup.LOCO,
-//                               Main::onTrackConfigPacket);
-//      device.addPacketListener(Main::onTrackConfigPacket);
-//      LocoMode mode = device.takeOwnership(246);
-//      LocoMode mode = device.getMode(246);
-//      System.out.println(mode);
-      device.readCV(246,
-                    29);
-////      printPowerStateInfo(device);
-////      int b = System.in.read();
-      done.await(20,
-                 TimeUnit.SECONDS);
+      device.addPacketListener(Main::onTrackConfigPacket);
+      for (int cv = 1; cv < 512; ++cv) {
+//        for (int i = 0; i < 3; ++i) {
+        CVInfoAdapter adapter = device.readCV((short) 1118,
+                                              cv,
+                                              1000);
+        if (adapter != null && adapter.getReadState() == CVReadState.READ) {
+          System.out.println("Adapter=" + adapter.toString());
+          return;
+        } else if (adapter != null) {
+          System.out.println(adapter.getReadState());
+        } else {
+          System.out.println("NO-READ");
+        }
+      }
+//      done.await(5,
+//                 TimeUnit.SECONDS);
+//      }
     }
   }
 

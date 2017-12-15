@@ -60,6 +60,25 @@ public final class Utils
     return (byte) ((i & 0xff000000) >> 24);
   }
 
+  public static short short1(int i)
+  {
+    return (short) ((i & 0xffff));
+  }
+
+  public static short short2(int i)
+  {
+    return (short) ((i & 0xffff0000) >> 16);
+  }
+
+  public static byte[] toByteArray(int... in)
+  {
+    byte[] result = new byte[in.length];
+    for (int i = 0; i < in.length; i++) {
+      result[i] = (byte) in[i];
+    }
+    return result;
+  }
+
   /**
    * Allocates a ByteBuffer with byteorder {@code ByteOrder.LITTLE_ENDIAN}.
    *

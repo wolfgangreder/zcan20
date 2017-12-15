@@ -15,6 +15,7 @@
  */
 package com.reder.zcan20.ui;
 
+import com.reder.zcan20.CVReadState;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.PacketListener;
 import com.reder.zcan20.ZCAN;
@@ -73,6 +74,12 @@ public final class CVTableModel implements TableModel
         value = valueOnDevice;
       }
       this.decoderAddress = decoderAddress;
+    }
+
+    @Override
+    public CVReadState getReadState()
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

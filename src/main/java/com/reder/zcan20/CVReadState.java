@@ -23,5 +23,6 @@ public enum CVReadState
 {
   ACK,
   READ,
-  NO_ACK;
+  NO_ACK,
+  BUSY;
 }

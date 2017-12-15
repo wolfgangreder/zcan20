@@ -127,10 +127,12 @@ public final class CommandGroup implements Serializable
   public static final CommandGroup FILE_TRANSFER = valueOf((byte) 0x0f,
                                                            "FILE TRANSFER",
                                                            MAGIC_COMMAND_DISABLE);
+  public static final byte TSE_PROG_BUSY = 0x02; // not documented !
   public static final byte TSE_PROG_READ = 0x08;
   public static final byte TSE_PROG_WRITE = 0x09;
   public static final CommandGroup TRACK_CONFIG_PUBLIC = valueOf((byte) 0x16,
                                                                  "TRACK CONFIG PUBLIC",
+                                                                 TSE_PROG_BUSY,
                                                                  TSE_PROG_READ,
                                                                  TSE_PROG_WRITE);
 

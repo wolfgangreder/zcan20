@@ -45,9 +45,9 @@ public final class UDPPort implements ZPort
   public static final int SO_TRAFFIC = 0x14; // IPTOS_RELIABILITY (0x04),IPTOS_LOWDELAY (0x10)
   private final String name;
   private final SocketAddress outAddress;
-  private DatagramSocket out;
-  private final SocketAddress inAddress;
-  private DatagramSocket in;
+  private DatagramSocket socket;
+  private final int localPort;
+  private final InetAddress local2Bound;
   private final int mtu;
   private final BufferPool bufferPool;
 
@@ -57,16 +57,16 @@ public final class UDPPort implements ZPort
   {
     this.name = "MX10@" + address + ":" + remotePort;
     InetAddress inetAddress = InetAddress.getByName(address);
-    InetAddress local2Bound = getMatchingAddress(inetAddress);
-    if (local2Bound == null) {
-      local2Bound = InetAddress.getLocalHost();
+    InetAddress l2b = getMatchingAddress(inetAddress);
+    if (l2b == null) {
+      l2b = InetAddress.getLocalHost();
     }
+    local2Bound = l2b;
     NetworkInterface intf = NetworkInterface.getByInetAddress(local2Bound);
     mtu = intf.getMTU();
     outAddress = new InetSocketAddress(inetAddress,
                                        remotePort);
-    inAddress = new InetSocketAddress(local2Bound,
-                                      localPort);
+    this.localPort = localPort;
     bufferPool = new BufferPool(mtu,
                                 Runtime.getRuntime().availableProcessors());
   }
@@ -87,7 +87,7 @@ public final class UDPPort implements ZPort
   private boolean isOpen()
   {
     synchronized (this) {
-      return out != null && in != null;
+      return socket != null;
     }
   }
 
@@ -102,14 +102,11 @@ public final class UDPPort implements ZPort
   {
     synchronized (this) {
       if (!isOpen()) {
-        out = null;
-        in = null;
-        out = new DatagramSocket();
-        in = new DatagramSocket(inAddress);
-        in.setSoTimeout(SO_TIMEOUT);
-        in.setTrafficClass(SO_TRAFFIC);
-        out.setSoTimeout(SO_TIMEOUT);
-        out.setTrafficClass(SO_TRAFFIC);
+        socket = null;
+        socket = new DatagramSocket(localPort,
+                                    local2Bound);
+        socket.setSoTimeout(SO_TIMEOUT);
+        socket.setTrafficClass(SO_TRAFFIC);
       }
     }
   }
@@ -118,10 +115,8 @@ public final class UDPPort implements ZPort
   public void close() throws IOException
   {
     synchronized (this) {
-      out.close();
-      in.close();
-      out = null;
-      in = null;
+      socket.close();
+      socket = null;
     }
   }
 
@@ -135,13 +130,13 @@ public final class UDPPort implements ZPort
       ByteBuffer buffer = item.getBuffer();
       int numBytes = UDPMarshaller.marshalPacket(packet,
                                                  buffer);
-      DatagramSocket socket;
+      DatagramSocket s;
       synchronized (this) {
-        socket = out;
+        s = socket;
       }
-      socket.send(new DatagramPacket(buffer.array(),
-                                     numBytes,
-                                     outAddress));
+      s.send(new DatagramPacket(buffer.array(),
+                                numBytes,
+                                outAddress));
     }
   }
 
@@ -152,16 +147,18 @@ public final class UDPPort implements ZPort
       ByteBuffer buffer = item.getBuffer();
       DatagramPacket packet = new DatagramPacket(buffer.array(),
                                                  buffer.capacity());
-      DatagramSocket socket;
+      DatagramSocket s;
       synchronized (this) {
-        socket = in;
+        s = socket;
       }
       try {
-        socket.receive(packet);
+        s.receive(packet);
       } catch (SocketTimeoutException ex) {
         return null;
       }
       ByteBuffer packetBytes = ByteBuffer.wrap(packet.getData());
+      packetBytes.limit(packet.getLength() + packet.getOffset());
+      packetBytes.position(packet.getOffset());
       Packet result = UDPMarshaller.unmarshalPacket(packetBytes);
       LOGGER.log(Level.FINEST,
                  "Reading {0}",

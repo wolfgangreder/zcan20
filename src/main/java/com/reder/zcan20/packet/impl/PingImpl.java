@@ -20,6 +20,7 @@ import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PacketAdapterFactory;
 import com.reder.zcan20.packet.Ping;
+import com.reder.zcan20.util.Utils;
 import javax.validation.constraints.NotNull;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -83,6 +84,24 @@ final class PingImpl extends AbstractPacketAdapter implements Ping
   public short getSession()
   {
     return buffer.getShort(6);
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder builder = new StringBuilder("PING(0x");
+    Utils.appendHexString(getMasterNID(),
+                          builder,
+                          8);
+    builder.append(", 0x");
+    Utils.appendHexString(getType(),
+                          builder,
+                          4);
+    builder.append(", 0x");
+    Utils.appendHexString(getSession(),
+                          builder,
+                          4);
+    return builder.append(')').toString();
   }
 
 }

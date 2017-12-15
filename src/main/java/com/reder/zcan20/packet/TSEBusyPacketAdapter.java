@@ -12,23 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */package com.reder.zcan20;
+ */
+package com.reder.zcan20.packet;
 
-import com.reder.zcan20.packet.CVInfoAdapter;
-import java.io.IOException;
-
-public interface TrackConfig
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public interface TSEBusyPacketAdapter
 {
-
-  public void readCV(short address,
-                     int cv) throws IOException;
-
-  public CVInfoAdapter readCV(short address,
-                              int cv,
-                              long timeout) throws IOException;
-
-  public void writeCV(short address,
-                      int cv,
-                      short value) throws IOException;
 
 }

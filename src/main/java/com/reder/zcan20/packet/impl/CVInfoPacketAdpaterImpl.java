@@ -15,11 +15,13 @@
  */
 package com.reder.zcan20.packet.impl;
 
+import com.reder.zcan20.CVReadState;
 import com.reder.zcan20.CommandGroup;
 import com.reder.zcan20.CommandMode;
 import com.reder.zcan20.packet.CVInfoAdapter;
 import com.reder.zcan20.packet.Packet;
 import com.reder.zcan20.packet.PacketAdapterFactory;
+import com.reder.zcan20.util.Utils;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -48,10 +50,22 @@ final class CVInfoPacketAdpaterImpl extends AbstractPacketAdapter implements CVI
     }
 
   }
+  private final CVReadState state;
 
   private CVInfoPacketAdpaterImpl(Packet packet)
   {
     super(packet);
+    if (packet.getCommand() == CommandGroup.TSE_PROG_BUSY) {
+      state = CVReadState.BUSY;
+    } else {
+      state = CVReadState.READ;
+    }
+  }
+
+  @Override
+  public CVReadState getReadState()
+  {
+    return state;
   }
 
   @Override
@@ -80,6 +94,24 @@ final class CVInfoPacketAdpaterImpl extends AbstractPacketAdapter implements CVI
     } else {
       return 0;
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder builder = new StringBuilder("CVInfo(");
+    builder.append(getReadState());
+    builder.append(", 0x");
+    Utils.appendHexString(getSystemID() & 0xffff,
+                          builder,
+                          4);
+    builder.append(", ");
+    builder.append(getDecoderID());
+    builder.append(", #");
+    builder.append(getNumber());
+    builder.append(", ");
+    builder.append(getValue());
+    return builder.append(')').toString();
   }
 
 }

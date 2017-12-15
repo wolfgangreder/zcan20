@@ -15,6 +15,8 @@
  */
 package com.reder.zcan20.packet;
 
+import com.reder.zcan20.CVReadState;
+
 /**
  *
  * @author Wolfgang Reder
@@ -29,5 +31,7 @@ public interface CVInfoAdapter extends PacketAdapter
   public int getNumber();
 
   public short getValue();
+
+  public CVReadState getReadState();
 
 }

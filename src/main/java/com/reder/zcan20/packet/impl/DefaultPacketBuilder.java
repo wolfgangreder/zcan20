@@ -182,7 +182,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                                        exFactory),
                                       checkCommand(commandGroup,
                                                    command,
-                                                   true,
+                                                   false,
                                                    exFactory),
                                       checkNID(senderNID,
                                                exFactory),
@@ -475,7 +475,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                   int cvNumber)
   {
     commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
-    commandMode(CommandMode.REQUEST);
+    commandMode(CommandMode.COMMAND);
     command(CommandGroup.TSE_PROG_READ);
     adapterFactory(null);
     ByteBuffer buffer = Utils.allocateLEBuffer(8);

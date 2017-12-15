@@ -18,16 +18,22 @@ package com.reder.zcan20.util;
 import com.reder.zcan20.CanId;
 import com.reder.zcan20.packet.Packet;
 import java.util.Objects;
+import java.util.function.Predicate;
 import javax.validation.constraints.NotNull;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class CanIdMatcher
+public final class CanIdMatcher implements Predicate<Packet>
 {
 
-  public static final int MASK_NO_ADDRESS = 0x1FFF0000;
+  public static final int MASK_NO_ADDRESS = 0x1fff0000;
+  public static final int MASK_ALL = 0x1fffffff;
+  public static final int MASK_ADDRESS = 0x1000ffff;
+  public static final int MASK_COMMANDGROUP = 0x1f000000;
+  public static final int MASK_MODE = 0x10300000;
+  public static final int MASK_COMMAND = 0x1fc00000;
   private final CanId canId;
   private final int mask;
 
@@ -36,7 +42,7 @@ public final class CanIdMatcher
   {
     this.canId = Objects.requireNonNull(canId,
                                         "canId is null");
-    this.mask = mask + (1 << 28);
+    this.mask = mask | (1 << 28);
   }
 
   public CanId getCanId()
@@ -49,6 +55,12 @@ public final class CanIdMatcher
     return mask;
   }
 
+  @Override
+  public boolean test(Packet t)
+  {
+    return matchesPacket(t);
+  }
+
   public boolean matchesPacket(@NotNull Packet packet)
   {
     return matchesId(packet.getCanId());
@@ -56,7 +68,7 @@ public final class CanIdMatcher
 
   public boolean matchesId(@NotNull CanId ci)
   {
-    return (ci.intValue() & mask) == canId.intValue();
+    return (ci.intValue() & mask) == (canId.intValue() & mask);
   }
 
   @Override
