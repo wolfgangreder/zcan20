@@ -50,11 +50,16 @@
       <artifactId>org-openide-util-lookup</artifactId>
       <version>RELEASE82</version>
     </dependency>
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>1.3.2</version>
+    </dependency>
   </dependencies>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
   </properties>
   <build>
     <plugins>
@@ -93,7 +98,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>com.reder.zcan20.ui.Main</mainClass>
+              <mainClass>at.or.reder.zcan20.ui.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -116,6 +121,23 @@
               <!--links>
                 <link></link>
               </links-->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/deploy</outputDirectory>
             </configuration>
           </execution>
         </executions>
