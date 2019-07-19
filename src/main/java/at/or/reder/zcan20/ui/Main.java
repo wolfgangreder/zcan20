@@ -15,35 +15,36 @@
  */
 package at.or.reder.zcan20.ui;
 
+import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.ZCAN;
 import at.or.reder.zcan20.ZCANFactory;
 import at.or.reder.zcan20.packet.Packet;
+import at.or.reder.zcan20.util.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
+import javax.swing.SwingUtilities;
 import javax.validation.constraints.NotNull;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public class Main implements AutoCloseable
-{
+public class Main implements AutoCloseable {
 
   private final String[] args;
 
   private ZCAN device;
 
-  private Main(String[] args)
-  {
+  private Main(String[] args) {
     this.args = Arrays.copyOf(args,
                               args.length);
   }
 
-  private void open() throws IOException
-  {
+  private void open() throws IOException {
     device = ZCANFactory.open("192.168.1.145",
                               14520,
                               14521,
@@ -53,23 +54,35 @@ public class Main implements AutoCloseable
 
   }
 
-  private void checkOpen() throws IOException
-  {
+  private void checkOpen() throws IOException {
     if (device == null) {
       open();
     }
   }
 
-  public void run() throws IOException
-  {
+  public void run() throws IOException {
     checkOpen();
     device.addPacketListener(this::toConsolePacketListener);
-
+    Runtime.getRuntime().
+            addShutdownHook(new Thread() {
+              @Override
+              public void run() {
+                try {
+                  close();
+                } catch (IOException ex) {
+                  Utils.LOGGER.log(Level.SEVERE,
+                                   null,
+                                   ex);
+                }
+              }
+            });
+    SwingUtilities.invokeLater(() -> {
+      new MiniControl(device).setVisible(true);
+    });
   }
 
   @Override
-  public void close() throws IOException
-  {
+  public void close() throws IOException {
     if (device != null) {
       device.close();
     }
@@ -77,18 +90,28 @@ public class Main implements AutoCloseable
   }
 
   private void toConsolePacketListener(@NotNull ZCAN connection,
-                                       @NotNull Packet packet)
-  {
-
+                                       @NotNull Packet packet) {
+    if (packet.getCommandGroup() == CommandGroup.CONFIG) {
+      if (packet.getCommand() != 0x0) {
+        System.out.println(Utils.packetToString(packet));
+      }
+    }
   }
 
-  public static void main(String[] args) throws IOException
-  {
-    try (InputStream is = Main.class.getResourceAsStream("loggerconfig.properties")) {
-      LogManager.getLogManager().readConfiguration(is);
+  public static void main(String[] args) throws IOException {
+    try (InputStream is = Main.class.getResourceAsStream(
+            "loggerconfig.properties")) {
+      if (is != null) {
+        LogManager.getLogManager().
+                readConfiguration(is);
+      }
     }
     try (Main main = new Main(args)) {
       main.run();
+      int ch;
+      while ((ch = System.in.read()) != 10) {
+        System.out.println(ch);
+      }
     }
   }
 

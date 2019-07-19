@@ -29,11 +29,12 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.validation.constraints.NotNull;
 
-public final class ZCANFactory
-{
+public final class ZCANFactory {
 
-  public static final String PROP_NID = "com.reder.zcan20.nid";
+  public static final String PROP_NID = "at.or.reder.zcan20.nid";
   public static final String DEFAULT_NID = "c2ff";
+  public static final String PROP_PING_JITTER_LEVEL = "at.or.reder.zcan20.jitter.level";
+  public static final int DEFAULT_PING_JITTER_LEVEL = 10;
   public static final int MAX_LOCO_FX = 32;
   public static final short LOCO_MIN = 0;
   public static final short LOCO_MAX = 0x27ff;
@@ -53,20 +54,21 @@ public final class ZCANFactory
   public static final short SPECIAL_MAX = (short) 0xc2ff;
   public static final short FUNC_RNG = 254;
   public static final short FUNC_MAN = 255;
-  public static final Set<Integer> READONLY_CV = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(8,
-                                                                                                         7,
-                                                                                                         65,
-                                                                                                         250,
-                                                                                                         251,
-                                                                                                         252,
-                                                                                                         253,
-                                                                                                         260,
-                                                                                                         261,
-                                                                                                         262,
-                                                                                                         263,
-                                                                                                         1,
-                                                                                                         17,
-                                                                                                         18)));
+  public static final Set<Integer> READONLY_CV = Collections.unmodifiableSet(
+          new HashSet<>(Arrays.asList(8,
+                                      7,
+                                      65,
+                                      250,
+                                      251,
+                                      252,
+                                      253,
+                                      260,
+                                      261,
+                                      262,
+                                      263,
+                                      1,
+                                      17,
+                                      18)));
 
   /**
    * Opens a connection to a device via serial Port.
@@ -77,8 +79,7 @@ public final class ZCANFactory
    * @throws IOException if the connection cannot be established.
    */
   public static ZCAN open(@NotNull final String commPort,
-                          Map<String, String> properties) throws IOException
-  {
+                          Map<String, String> properties) throws IOException {
     throw new UnsupportedOperationException("not implemented yet");
   }
 
@@ -99,8 +100,7 @@ public final class ZCANFactory
                           int localPort,
                           Map<String, String> properties,
                           long timeOut,
-                          TimeUnit unit) throws IOException
-  {
+                          TimeUnit unit) throws IOException {
     ZPort port = new UDPPort(address,
                              remotePort,
                              localPort);
@@ -117,14 +117,12 @@ public final class ZCANFactory
    * @param myNID Own network id
    * @return a new PacketBuilder
    */
-  public static PacketBuilder createPacketBuilder(short myNID)
-  {
+  public static PacketBuilder createPacketBuilder(short myNID) {
     return new DefaultPacketBuilder(myNID);
   }
 
   public static short toLongAddress(short cv17,
-                                    short cv18)
-  {
+                                    short cv18) {
     if (cv17 < 192 || cv17 > 231) {
       throw new IllegalArgumentException("cv17 out of range");
     }
@@ -133,24 +131,21 @@ public final class ZCANFactory
     return (short) tmp;
   }
 
-  public static short toCV17(short longAddress)
-  {
+  public static short toCV17(short longAddress) {
     if (!isLongAddress(longAddress)) {
       throw new IllegalArgumentException("argument is not a long address");
     }
     return (short) ((longAddress >> 8) & 0x3f);
   }
 
-  public static short toCV18(short longAddress)
-  {
+  public static short toCV18(short longAddress) {
     if (!isLongAddress(longAddress)) {
       throw new IllegalArgumentException("argument is not a long address");
     }
     return (short) (longAddress & 0xff);
   }
 
-  public static boolean isLongAddress(short address)
-  {
+  public static boolean isLongAddress(short address) {
     return address > 127;
   }
 

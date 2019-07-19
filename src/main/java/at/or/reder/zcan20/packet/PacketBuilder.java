@@ -41,8 +41,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Wolfgang Reder
  */
-public interface PacketBuilder
-{
+public interface PacketBuilder {
 
   public PacketBuilder commandGroup(@NotNull CommandGroup commandGroup);
 
@@ -54,11 +53,19 @@ public interface PacketBuilder
 
   public PacketBuilder data(ByteBuffer data);
 
-  public PacketBuilder adapterFactory(Function<? super Packet, ? extends PacketAdapter> adpaterFactory);
+  public PacketBuilder adapterFactory(
+          Function<? super Packet, ? extends PacketAdapter> adpaterFactory);
 
   public Packet build();
 
   public Packet buildLoginPacket();
+
+  public default Packet buildPingPacket(short senderNID) {
+    return commandMode(CommandMode.REQUEST).
+            senderNID(senderNID).
+            command(CommandGroup.NETWORK_PING).
+            build();
+  }
 
   public Packet buildLogoutPacket(short masterNID);
 
@@ -126,8 +133,7 @@ public interface PacketBuilder
                                  int val2);
 
   public default Packet buildLocoNameExt(short masterNID,
-                                         short objectNID)
-  {
+                                         short objectNID) {
     return buildDataNameExt(masterNID,
                             objectNID,
                             0,

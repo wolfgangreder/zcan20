@@ -20,8 +20,7 @@ import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public final class ProviderID extends MockEnum implements Serializable
-{
+public final class ProviderID extends MockEnum implements Serializable {
 
   public static final long serialVersionUID = 1L;
   private static final ConcurrentMap<Short, ProviderID> VALUES = new ConcurrentHashMap<>();
@@ -33,22 +32,22 @@ public final class ProviderID extends MockEnum implements Serializable
   public static final ProviderID TRAINCONTROLLER = valueOf(0x30);
   public static final ProviderID TRAINPROGRAMMER = valueOf(0x31);
   public static final ProviderID RAILMANAGER = valueOf(0x40);
+  public static final ProviderID WINDIGIPAT = valueOf(0x50);
+  public static final ProviderID ITRAIN = valueOf(0x70);
 
-  public static ProviderID valueOf(int magic)
-  {
+  public static ProviderID valueOf(int magic) {
     return VALUES.computeIfAbsent((short) magic,
                                   ProviderID::new);
   }
 
-  private ProviderID(short magic)
-  {
+  private ProviderID(short magic) {
     super(magic);
   }
 
   @Override
-  protected String getDefaultToString()
-  {
-    return "PROVIDER_0x" + Integer.toHexString(Short.toUnsignedInt(getMagic())).toUpperCase();
+  protected String getDefaultToString() {
+    return "PROVIDER_0x" + Integer.toHexString(Short.toUnsignedInt(getMagic())).
+           toUpperCase();
   }
 
 }

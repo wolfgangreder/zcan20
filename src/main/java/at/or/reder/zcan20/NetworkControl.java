@@ -23,16 +23,32 @@ import javax.validation.constraints.NotNull;
  *
  * @author Wolfgang Reder
  */
-public interface NetworkControl
-{
+public interface NetworkControl {
+
+  /**
+   * Send ping request automically.
+   *
+   * @return {@code true} if autoping is enabled
+   */
+  public boolean isAutopingEnabled();
+
+  public void setAutopingEnabled(boolean e);
+
+  /**
+   * Autoping intervall in seconds.
+   *
+   * @return autoping intervall
+   */
+  public int getAutopingIntervall();
+
+  public void setAutopingIntervall(int autoPingIntervall);
 
   public long getLastPingTimestamp();
 
   public void setInterfaceOption(@NotNull InterfaceOptionType type,
                                  @NotNull ProviderID provider) throws IOException;
 
-  public default void setInterfaceProviderID(@NotNull ProviderID provider) throws IOException
-  {
+  public default void setInterfaceProviderID(@NotNull ProviderID provider) throws IOException {
     setInterfaceOption(InterfaceOptionType.SW_PROVIDER,
                        provider);
   }

@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
  *
  * @author Wolfgang Reder
  */
-public final class CommandGroup implements Serializable
-{
+public final class CommandGroup implements Serializable {
 
   private static final ConcurrentMap<Byte, CommandGroup> INSTANCES = new ConcurrentHashMap<>();
   private static final byte MAGIC_COMMAND_DISABLE = (byte) 0xff;
@@ -100,7 +99,7 @@ public final class CommandGroup implements Serializable
                                                   DATA_NAME_EXT,
                                                   DATA_LOCO_GUI_EXT);
   public static final byte CONFIG_POWER_INFO = 0x00;
-  public static final byte CONFIG_UNKNOWN_5 = 0x05;
+  public static final byte CONFIG_UNKNOWN_5 = 0x05;  // Irgendwas mit dem Fahrzeugstatus (Decoderadressen werden gesendet)
   public static final byte CONFIG_MODULE_INFO = 0x08;
   public static final byte CONFIG_MODULE_POWER_INFO = 0x20;
   public static final CommandGroup CONFIG = valueOf((byte) 0x08,
@@ -142,19 +141,18 @@ public final class CommandGroup implements Serializable
 
   private static CommandGroup valueOf(byte magic,
                                       String name,
-                                      Byte... allowedCommands)
-  {
+                                      Byte... allowedCommands) {
     return INSTANCES.computeIfAbsent((byte) (magic & 0xff),
                                      (m) -> new CommandGroup(m,
-                                                             name,
-                                                             Arrays.asList(allowedCommands)));
+                                                               name,
+                                                               Arrays.asList(
+                                                                       allowedCommands)));
   }
 
-  public static CommandGroup valueOf(byte magic)
-  {
+  public static CommandGroup valueOf(byte magic) {
     return INSTANCES.computeIfAbsent((byte) (magic & 0xff),
                                      (m) -> new CommandGroup(m,
-                                                             "UNKNOWN"));
+                                                               "UNKNOWN"));
   }
 
   private final byte magic;
@@ -162,8 +160,7 @@ public final class CommandGroup implements Serializable
   private final Set<Byte> allowedCommands;
 
   private CommandGroup(byte magic,
-                       String name)
-  {
+                       String name) {
     this(magic,
          name,
          null);
@@ -171,15 +168,15 @@ public final class CommandGroup implements Serializable
 
   private CommandGroup(byte magic,
                        String name,
-                       Collection<Byte> allowedCommands)
-  {
+                       Collection<Byte> allowedCommands) {
     this.magic = magic;
     this.name = Objects.requireNonNull(name,
                                        "name is null");
     if (allowedCommands == null) {
       this.allowedCommands = null;
     } else if (!allowedCommands.contains(MAGIC_COMMAND_DISABLE)) {
-      this.allowedCommands = Collections.unmodifiableSet(allowedCommands.stream().
+      this.allowedCommands = Collections.unmodifiableSet(allowedCommands.
+              stream().
               filter((i) -> i != null).
               collect(Collectors.toSet()));
     } else {
@@ -187,29 +184,24 @@ public final class CommandGroup implements Serializable
     }
   }
 
-  public boolean isCommandAllowed(byte cmd)
-  {
+  public boolean isCommandAllowed(byte cmd) {
     return allowedCommands == null || allowedCommands.contains(cmd);
   }
 
-  public Set<Byte> getAllowedCommands()
-  {
+  public Set<Byte> getAllowedCommands() {
     return allowedCommands;
   }
 
-  public byte getMagic()
-  {
+  public byte getMagic() {
     return (byte) magic;
   }
 
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
   @Override
-  public int hashCode()
-  {
+  public int hashCode() {
     int hash = 5;
     hash = 73 * hash + this.magic;
     return hash;
@@ -217,19 +209,16 @@ public final class CommandGroup implements Serializable
 
   @Override
   @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-  public boolean equals(Object obj)
-  {
+  public boolean equals(Object obj) {
     return this == obj;
   }
 
-  private Object readResolve() throws ObjectStreamException
-  {
+  private Object readResolve() throws ObjectStreamException {
     return valueOf(magic);
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return "CommandGroup " + getName() + " 0x" + Utils.appendHexString(magic,
                                                                        new StringBuilder(),
                                                                        2);
