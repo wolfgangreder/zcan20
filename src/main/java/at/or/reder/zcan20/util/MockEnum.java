@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2017-2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public abstract class MockEnum implements Serializable
                                       int.class);
       int mod = method.getModifiers();
       if (Modifier.isStatic(mod)) {
-        boolean wasAccessible = method.canAccess(null);
+        boolean wasAccessible = method.isAccessible();
         try {
           method.setAccessible(true);
           return method.invoke(null,

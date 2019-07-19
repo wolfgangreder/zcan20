@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2017-2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,15 +61,18 @@ import javax.validation.constraints.NotNull;
 import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 
-public final class ZCANImpl implements ZCAN {
+public final class ZCANImpl implements ZCAN
+{
 
-  private final class FilterListener implements PacketListener {
+  private final class FilterListener implements PacketListener
+  {
 
     private final PacketListener listener;
     private final Predicate<? super Packet> matcher;
 
     public FilterListener(PacketListener listener,
-                          Predicate<? super Packet> matcher) {
+                          Predicate<? super Packet> matcher)
+    {
       this.listener = Objects.requireNonNull(listener,
                                              "listener is null");
       this.matcher = Objects.requireNonNull(matcher,
@@ -78,7 +81,8 @@ public final class ZCANImpl implements ZCAN {
 
     @Override
     public void onPacket(ZCAN connection,
-                         Packet packet) {
+                         Packet packet)
+    {
       if (matcher.test(packet)) {
         listener.onPacket(connection,
                           packet);
@@ -86,7 +90,8 @@ public final class ZCANImpl implements ZCAN {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
       int hash = 7;
       hash = 67 * hash + Objects.hashCode(this.listener);
       hash = 67 * hash + Objects.hashCode(this.matcher);
@@ -94,7 +99,8 @@ public final class ZCANImpl implements ZCAN {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
       if (this == obj) {
         return true;
       }
@@ -115,7 +121,8 @@ public final class ZCANImpl implements ZCAN {
 
   }
 
-  private final class FutureListener<T extends PacketAdapter> implements PacketListener {
+  private final class FutureListener<T extends PacketAdapter> implements PacketListener
+  {
 
     private final CompletableFuture<? super T> future;
     private final Predicate<? super Packet> matcher;
@@ -123,7 +130,8 @@ public final class ZCANImpl implements ZCAN {
 
     public FutureListener(@NotNull CompletableFuture<? super T> future,
                           Predicate<? super Packet> matcher,
-                          @NotNull Class<? extends T> extensionClass) {
+                          @NotNull Class<? extends T> extensionClass)
+    {
       this.future = Objects.requireNonNull(future);
       this.extensionClass = Objects.requireNonNull(extensionClass);
       this.matcher = matcher;
@@ -131,7 +139,8 @@ public final class ZCANImpl implements ZCAN {
 
     @Override
     public void onPacket(ZCAN connection,
-                         Packet packet) {
+                         Packet packet)
+    {
       if (matcher.test(packet)) {
         T result;
         if (extensionClass.isAssignableFrom(packet.getClass())) {
@@ -149,26 +158,31 @@ public final class ZCANImpl implements ZCAN {
       }
     }
 
-    void start() {
+    void start()
+    {
       addPacketListener(this);
     }
 
-    void stop() {
+    void stop()
+    {
       removePacketListener(this);
     }
 
   }
 
-  private final class PacketNotifier implements Runnable {
+  private final class PacketNotifier implements Runnable
+  {
 
     private final Packet packet;
 
-    public PacketNotifier(Packet packet) {
+    public PacketNotifier(Packet packet)
+    {
       this.packet = packet;
     }
 
     @Override
-    public void run() {
+    public void run()
+    {
       try {
         port.sendPacket(packet);
       } catch (IOException ex) {
@@ -190,8 +204,7 @@ public final class ZCANImpl implements ZCAN {
   private final Object lock = new Object();
   private final Set<PacketListener> packetListener = new CopyOnWriteArraySet<>();
   private final ConcurrentMap<CommandGroup, Set<PacketListener>> filteredPacketListener = new ConcurrentHashMap<>();
-  private final AtomicReference<Short> masterNID = new AtomicReference<>(
-          (short) -1);
+  private final AtomicReference<Short> masterNID = new AtomicReference<>((short) -1);
   private final AtomicInteger session = new AtomicInteger();
   private volatile long lastPacketTimestamp = -1;
   private final short myNID;
@@ -200,13 +213,13 @@ public final class ZCANImpl implements ZCAN {
   private int ownerPingJitter = 10;
 
   public ZCANImpl(@NotNull ZPort port,
-                  Map<String, String> properties) {
+                  Map<String, String> properties)
+  {
     this.port = Objects.requireNonNull(port,
                                        "port is null");
     this.packetThread = Executors.newFixedThreadPool(1,
                                                      this::createPacketThread);
-    this.listenerNotifer = Executors.newSingleThreadScheduledExecutor(
-            this::createListenerThread);
+    this.listenerNotifer = Executors.newSingleThreadScheduledExecutor(this::createListenerThread);
     String strNid = ZCANFactory.DEFAULT_NID;
     if (properties != null) {
       strNid = properties.getOrDefault(ZCANFactory.PROP_NID,
@@ -217,16 +230,19 @@ public final class ZCANImpl implements ZCAN {
   }
 
   @Override
-  public PacketBuilder createPacketBuilder() {
+  public PacketBuilder createPacketBuilder()
+  {
     return ZCANFactory.createPacketBuilder(myNID);
   }
 
   @Override
-  public short getNID() {
+  public short getNID()
+  {
     return myNID;
   }
 
-  private Thread createPacketThread(Runnable r) {
+  private Thread createPacketThread(Runnable r)
+  {
     Thread result = new Thread(r,
                                port.getName() + "-" + threadCounter.
                                incrementAndGet());
@@ -234,17 +250,19 @@ public final class ZCANImpl implements ZCAN {
     return result;
   }
 
-  private Thread createListenerThread(Runnable r) {
+  private Thread createListenerThread(Runnable r)
+  {
     Thread result = new Thread(r,
-                               port.getName() + "-listener-" +
-                               listenerThreadCounter.incrementAndGet());
+                               port.getName() + "-listener-"
+                               + listenerThreadCounter.incrementAndGet());
     result.setDaemon(true);
     return result;
   }
 
   private <T extends PacketAdapter> Future<T> doSendPacket(@NotNull Packet p,
                                                            CanIdMatcher matcher,
-                                                           @NotNull Class<? extends T> resultData) throws IOException {
+                                                           @NotNull Class<? extends T> resultData) throws IOException
+  {
     CompletableFuture<T> future = new CompletableFuture<>();
     FutureListener<T> lf = new FutureListener<>(future,
                                                 matcher,
@@ -257,7 +275,8 @@ public final class ZCANImpl implements ZCAN {
   private <T extends PacketAdapter> T sendReceive(Packet packet,
                                                   Predicate<? super Packet> matcher,
                                                   Class<? extends T> adapterClass,
-                                                  long timeout) throws IOException {
+                                                  long timeout) throws IOException
+  {
     CompletableFuture<T> future = new CompletableFuture<>();
     FutureListener<T> lf = new FutureListener<>(future,
                                                 matcher,
@@ -282,11 +301,13 @@ public final class ZCANImpl implements ZCAN {
     }
   }
 
-  private boolean isOpen() {
+  private boolean isOpen()
+  {
     return terminateResult != null;
   }
 
-  public boolean sendPing() {
+  public boolean sendPing()
+  {
     try {
       doSendPacket(createPacketBuilder().
               buildPingPacket(myNID),
@@ -305,23 +326,31 @@ public final class ZCANImpl implements ZCAN {
   }
 
   @Override
-  public boolean isAutopingEnabled() {
+  public boolean isAutopingEnabled()
+  {
+    throw new UnsupportedOperationException();
   }
 
   @Override
-  public void setAutopingEnabled(boolean e) {
+  public void setAutopingEnabled(boolean e)
+  {
+    throw new UnsupportedOperationException();
   }
 
   @Override
-  public int getAutopingIntervall() {
+  public int getAutopingIntervall()
+  {
+    throw new UnsupportedOperationException();
   }
 
   @Override
-  public void setAutopingIntervall(int autoPingIntervall) {
+  public void setAutopingIntervall(int autoPingIntervall)
+  {
   }
 
   public void open(long timeout,
-                   TimeUnit unit) throws IOException {
+                   TimeUnit unit) throws IOException
+  {
     synchronized (lock) {
       if (!isOpen()) {
         try {
@@ -360,7 +389,8 @@ public final class ZCANImpl implements ZCAN {
     }
   }
 
-  private void notfyPacketListener(Packet packet) {
+  private void notfyPacketListener(Packet packet)
+  {
     for (PacketListener l : packetListener) {
       l.onPacket(this,
                  packet);
@@ -375,7 +405,8 @@ public final class ZCANImpl implements ZCAN {
     }
   }
 
-  private void packetLoop() {
+  private void packetLoop()
+  {
     LOGGER.log(Level.INFO,
                "Starting packetloop");
     while (!abortFlag.get()) {
@@ -411,7 +442,8 @@ public final class ZCANImpl implements ZCAN {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() throws IOException
+  {
     synchronized (lock) {
       if (isOpen()) {
         if (ownerPing != null) {
@@ -440,22 +472,26 @@ public final class ZCANImpl implements ZCAN {
   }
 
   @Override
-  public void addLinkStateListener(BiConsumer<ZCAN, LinkState> listener) {
+  public void addLinkStateListener(BiConsumer<ZCAN, LinkState> listener)
+  {
   }
 
   @Override
-  public void removeLinkStateListener(BiConsumer<ZCAN, LinkState> listener) {
+  public void removeLinkStateListener(BiConsumer<ZCAN, LinkState> listener)
+  {
   }
 
   @Override
-  public void addPacketListener(PacketListener packetListener) {
+  public void addPacketListener(PacketListener packetListener)
+  {
     if (packetListener != null) {
       this.packetListener.add(packetListener);
     }
   }
 
   @Override
-  public void removePacketListener(PacketListener packetListener) {
+  public void removePacketListener(PacketListener packetListener)
+  {
     if (packetListener != null) {
       this.packetListener.remove(packetListener);
     }
@@ -463,7 +499,8 @@ public final class ZCANImpl implements ZCAN {
 
   @Override
   public void addPacketListener(CommandGroup group,
-                                PacketListener packetListener) {
+                                PacketListener packetListener)
+  {
     if (packetListener != null && group != null) {
       Set<PacketListener> filtered = filteredPacketListener.computeIfAbsent(
               group,
@@ -474,7 +511,8 @@ public final class ZCANImpl implements ZCAN {
 
   @Override
   public void removePacketListener(CommandGroup group,
-                                   PacketListener packetListener) {
+                                   PacketListener packetListener)
+  {
     if (group != null && packetListener != null) {
       Set<PacketListener> filtered = filteredPacketListener.get(group);
       if (filtered != null) {
@@ -485,7 +523,8 @@ public final class ZCANImpl implements ZCAN {
 
   @Override
   public void addPacketListener(Predicate<? super Packet> matcher,
-                                PacketListener packetListener) {
+                                PacketListener packetListener)
+  {
     if (matcher != null && packetListener != null) {
       addPacketListener(new FilterListener(packetListener,
                                            matcher));
@@ -494,7 +533,8 @@ public final class ZCANImpl implements ZCAN {
 
   @Override
   public void removePacketListener(Predicate<? super Packet> matcher,
-                                   PacketListener packetListener) {
+                                   PacketListener packetListener)
+  {
     if (matcher != null && packetListener != null) {
       removePacketListener(new FilterListener(packetListener,
                                               matcher));
@@ -502,23 +542,27 @@ public final class ZCANImpl implements ZCAN {
   }
 
   @Override
-  public long getLastPingTimestamp() {
+  public long getLastPingTimestamp()
+  {
     return lastPacketTimestamp;
   }
 
   @Override
   public void setInterfaceOption(InterfaceOptionType type,
-                                 ProviderID provider) throws IOException {
+                                 ProviderID provider) throws IOException
+  {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
-  public void getInterfaceOption(InterfaceOptionType type) throws IOException {
+  public void getInterfaceOption(InterfaceOptionType type) throws IOException
+  {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
-  public void getPowerStateInfo(@NotNull final PowerOutput output) throws IOException {
+  public void getPowerStateInfo(@NotNull final PowerOutput output) throws IOException
+  {
     Objects.requireNonNull(output,
                            "output is null");
     if (!output.isValidInSet()) {
@@ -533,7 +577,8 @@ public final class ZCANImpl implements ZCAN {
 
   @Override
   public void setPowerStateInfo(PowerOutput output,
-                                PowerState state) throws IOException {
+                                PowerState state) throws IOException
+  {
     Objects.requireNonNull(output,
                            "output is null");
     if (!output.isValidInSet()) {
@@ -549,13 +594,15 @@ public final class ZCANImpl implements ZCAN {
   }
 
   @Override
-  public void loadDump() throws IOException {
+  public void loadDump() throws IOException
+  {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
   public void readCV(short address,
-                     int cv) throws IOException {
+                     int cv) throws IOException
+  {
     PacketBuilder builder = createPacketBuilder();
     Packet packet = builder.buildReadCVPacket(masterNID.get(),
                                               address,
@@ -567,7 +614,8 @@ public final class ZCANImpl implements ZCAN {
   public CVInfoAdapter readCV(short address,
                               int cv,
                               long timeout,
-                              Predicate<? super Packet> packetMatcher) throws IOException {
+                              Predicate<? super Packet> packetMatcher) throws IOException
+  {
     Packet packet = createPacketBuilder().
             buildReadCVPacket(masterNID.get(),
                               address,
@@ -578,8 +626,8 @@ public final class ZCANImpl implements ZCAN {
                                CommandGroup.TSE_PROG_READ,
                                CommandMode.ACK,
                                masterNID.get()),
-                                        CanIdMatcher.MASK_NO_ADDRESS &
-                                        (~CanIdMatcher.MASK_COMMAND)).and(
+                                        CanIdMatcher.MASK_NO_ADDRESS
+                                        & (~CanIdMatcher.MASK_COMMAND)).and(
                                packetMatcher),
                        CVInfoAdapter.class,
                        timeout);
@@ -588,7 +636,8 @@ public final class ZCANImpl implements ZCAN {
   @Override
   public void writeCV(short address,
                       int cv,
-                      short value) throws IOException {
+                      short value) throws IOException
+  {
     Packet packet = createPacketBuilder().
             buildWriteCVPacket(masterNID.get(),
                                address,
@@ -601,7 +650,8 @@ public final class ZCANImpl implements ZCAN {
   public CVInfoAdapter writeCV(short address,
                                int cv,
                                short value,
-                               long timeout) throws IOException {
+                               long timeout) throws IOException
+  {
     Packet packet = createPacketBuilder().
             buildWriteCVPacket(masterNID.get(),
                                address,
@@ -613,24 +663,27 @@ public final class ZCANImpl implements ZCAN {
                                CommandGroup.TSE_PROG_WRITE,
                                CommandMode.ACK,
                                masterNID.get()),
-                                        CanIdMatcher.MASK_NO_ADDRESS &
-                                        (~CanIdMatcher.MASK_COMMAND)),
+                                        CanIdMatcher.MASK_NO_ADDRESS
+                                        & (~CanIdMatcher.MASK_COMMAND)),
                        CVInfoAdapter.class,
                        timeout);
   }
 
   @Override
-  public void getMode(int address) throws IOException {
+  public void getMode(int address) throws IOException
+  {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
-  public void takeOwnership(int address) throws IOException {
+  public void takeOwnership(int address) throws IOException
+  {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
-  public void getObjectCount(DataGroup group) throws IOException {
+  public void getObjectCount(DataGroup group) throws IOException
+  {
     Objects.requireNonNull(group,
                            "group is null");
     PacketBuilder builder = createPacketBuilder();
@@ -641,7 +694,8 @@ public final class ZCANImpl implements ZCAN {
 
   @Override
   public DataGroupCountPacketAdapter getObjectCount(DataGroup group,
-                                                    long timeout) throws IOException {
+                                                    long timeout) throws IOException
+  {
     Objects.requireNonNull(group,
                            "group is null");
     PacketBuilder builder = createPacketBuilder();
@@ -661,7 +715,8 @@ public final class ZCANImpl implements ZCAN {
 
   @Override
   public void getObjectInfoByIndex(DataGroup group,
-                                   short index) throws IOException {
+                                   short index) throws IOException
+  {
     Objects.requireNonNull(group,
                            "group is null");
     PacketBuilder builder = createPacketBuilder();
@@ -672,7 +727,8 @@ public final class ZCANImpl implements ZCAN {
   }
 
   @Override
-  public void getObjectInfoByNid(short nid) throws IOException {
+  public void getObjectInfoByNid(short nid) throws IOException
+  {
     PacketBuilder builder = createPacketBuilder();
     Packet packet = builder.buildDataPacket(masterNID.get(),
                                             nid);
