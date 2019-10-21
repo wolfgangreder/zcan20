@@ -57,7 +57,7 @@ public final class UDPPort implements ZPort
                  int remotePort,
                  int localPort) throws IOException
   {
-    this.name = "MX10@" + address + ":" + remotePort;
+    this.name = "UDPPeer to MX10@" + address + ":" + remotePort;
     InetAddress inetAddress = InetAddress.getByName(address);
     InetAddress l2b = getMatchingAddress(inetAddress);
     if (l2b == null) {
@@ -65,7 +65,7 @@ public final class UDPPort implements ZPort
     }
     local2Bound = l2b;
     NetworkInterface intf = NetworkInterface.getByInetAddress(local2Bound);
-    mtu = intf.getMTU();
+    mtu = intf != null ? intf.getMTU() : 1500; //assume ethernet
     outAddress = new InetSocketAddress(inetAddress,
                                        remotePort);
     this.localPort = localPort;
@@ -170,6 +170,12 @@ public final class UDPPort implements ZPort
                       result.toString());
       return result;
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return name;
   }
 
 }
