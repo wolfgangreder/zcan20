@@ -32,8 +32,8 @@ public enum PowerState
   DECODER_UPDATE(4),
   SOUND_LOAD(5),
   // bits 4..7
-  UNDERVOLTAGE(0x10),
-  OVERCURRENT(0x20),
+  OVERCURRENT(0x10),
+  UNDERVOLTAGE(0x20),
   SUPPLYVOLTAGE(0x40),
   // bit 10
   ZACK(0x400),

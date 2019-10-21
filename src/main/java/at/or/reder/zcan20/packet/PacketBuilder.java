@@ -21,7 +21,8 @@ import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.LocoActive;
 import at.or.reder.zcan20.ModuleInfoType;
-import at.or.reder.zcan20.PowerOutput;
+import at.or.reder.zcan20.PowerMode;
+import at.or.reder.zcan20.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedFlags;
@@ -41,7 +42,8 @@ import javax.validation.constraints.NotNull;
  *
  * @author Wolfgang Reder
  */
-public interface PacketBuilder {
+public interface PacketBuilder
+{
 
   public PacketBuilder commandGroup(@NotNull CommandGroup commandGroup);
 
@@ -60,10 +62,12 @@ public interface PacketBuilder {
 
   public Packet buildLoginPacket();
 
-  public default Packet buildPingPacket(short senderNID) {
+  public default Packet buildPingPacket(short senderNID)
+  {
     return commandMode(CommandMode.REQUEST).
             senderNID(senderNID).
             command(CommandGroup.NETWORK_PING).
+            commandGroup(CommandGroup.NETWORK).
             build();
   }
 
@@ -73,7 +77,7 @@ public interface PacketBuilder {
                                            @NotNull InterfaceOptionType type);
 
   public Packet buildGetPowerModePacket(short systemNID,
-                                        @NotNull @NotEmpty Set<? extends PowerOutput> outputs);
+                                        @NotNull @NotEmpty Set<? extends PowerPort> outputs);
 
   public Packet buildLocoStatePacket(@Min(0) @Max(0x27ff) short locoID);
 
@@ -133,7 +137,8 @@ public interface PacketBuilder {
                                  int val2);
 
   public default Packet buildLocoNameExt(short masterNID,
-                                         short objectNID) {
+                                         short objectNID)
+  {
     return buildDataNameExt(masterNID,
                             objectNID,
                             0,
@@ -141,11 +146,15 @@ public interface PacketBuilder {
                             0);
   }
 
-  public Packet buildModulePowerInfoPacket(short nid,
-                                           @NotNull PowerOutput output);
+  public Packet buildSystemPowerInfoPacket(short nid,
+                                           @NotNull Collection<PowerPort> output);
+
+  public Packet buildSystemPowerInfoPacket(short nid,
+                                           @NotNull Collection<PowerPort> output,
+                                           PowerMode mode);
 
   public Packet builderModulePowerInfoPacket(short nid,
-                                             @NotNull PowerOutput output,
+                                             @NotNull PowerPort output,
                                              @NotNull PowerState state);
 
   public Packet buildModuleInfoPacket(short nid,

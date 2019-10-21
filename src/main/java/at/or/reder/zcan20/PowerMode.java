@@ -15,23 +15,54 @@
  */
 package at.or.reder.zcan20;
 
+import org.openide.util.NbBundle.Messages;
+
 /**
  *
  * @author Wolfgang Reder
  */
+@Messages({"PowerMode_PENDING=Unbekannt",
+           "PowerMode_ON=Aktiv",
+           "PowerMode_SSP0=SSP FS0",
+           "PowerMode_SSPE=SSP Em",
+           "PowerMode_OFF=Aus",
+           "PowerMode_SERVICE=Service",
+           "PowerMode_OVERCURRENT=Strom!",
+           "PowerMode_OVERVOLTAGE=Spannung!",
+           "PowerMode_SUPPLYVOLTAGE=Versorgung!"})
 public enum PowerMode
 {
-  PENDING(0),
-  ON(1),
-  SSP0(2),
-  SSPE(3),
-  OFF(4),
-  SERVICE(5);
+  PENDING(0,
+          Bundle.PowerMode_PENDING()),
+  ON(1,
+     Bundle.PowerMode_ON()),
+  SSP0(2,
+       Bundle.PowerMode_SSP0()),
+  SSPE(3,
+       Bundle.PowerMode_SSPE()),
+  OFF(4,
+      Bundle.PowerMode_OFF()),
+  SERVICE(5,
+          Bundle.PowerMode_SERVICE()),
+  OVERCURRENT(0xa,
+              Bundle.PowerMode_OVERCURRENT()),
+  UNDERVOLTAGE(0x20,
+               Bundle.PowerMode_OVERVOLTAGE()),
+  SUPPLYVOLTAGE(0x40,
+                Bundle.PowerMode_SUPPLYVOLTAGE()),;
   private final int magic;
+  private final String label;
 
-  private PowerMode(int magic)
+  private PowerMode(int magic,
+                    String label)
   {
     this.magic = magic;
+    this.label = label;
+  }
+
+  public String getLabel()
+  {
+    return label;
   }
 
   public int getMagic()

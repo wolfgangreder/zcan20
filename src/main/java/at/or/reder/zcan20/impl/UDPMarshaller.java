@@ -78,7 +78,7 @@ public final class UDPMarshaller
     final CommandGroup group = CommandGroup.valueOf(packetBytes.get());
     final byte mcmd = packetBytes.get();
     final CommandMode mode = CommandMode.valueOfMagic(mcmd);
-    final byte command = (byte) (mcmd >> 2);
+    final byte command = (byte) ((mcmd >> 2) & 0x3f);
     final short senderNID = packetBytes.getShort();
     return ZCANFactory.createPacketBuilder(senderNID).
             senderNID(senderNID).

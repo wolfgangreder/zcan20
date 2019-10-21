@@ -17,11 +17,12 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
-import at.or.reder.zcan20.PowerOutput;
+import at.or.reder.zcan20.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PowerInfo;
+import java.util.Collections;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.openide.util.lookup.ServiceProvider;
@@ -72,53 +73,70 @@ final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
   }
 
   @Override
-  public PowerOutput getOutput()
-  {
-    switch (buffer.get(0)) {
-      case 1:
-        return PowerOutput.OUT_1;
-      case 2:
-        return PowerOutput.OUT_2;
-      case 4:
-        return PowerOutput.BOOSTER;
-    }
-    return PowerOutput.valueOfMagic(buffer.get(0) & 0xff);
-  }
-
-  @Override
   public Set<PowerState> getState()
   {
-    return PowerState.toSet(buffer.getShort(2) & 0xffff);
+    // TODO informationen von ZIMO anfordern
+    return Collections.emptySet();
   }
 
   @Override
-  public float getVoltage()
+  public float getOutputVoltage(PowerPort out)
   {
-    float tmp = buffer.getShort(4);
-    return tmp / 1000;
+    short f = 0;
+    switch (out) {
+      case OUT_1:
+        f = buffer.getShort(4);
+        break;
+      case OUT_2:
+        f = buffer.getShort(10);
+        break;
+      default:
+        return Float.NaN;
+    }
+    return f / 1000f;
   }
 
   @Override
-  public float getCurrent()
+  public float getOutputCurrent(PowerPort out)
   {
-    float tmp = buffer.getShort(6);
-    return tmp / 1000;
+    float f;
+    switch (out) {
+      case OUT_1:
+        f = buffer.getShort(6);
+        break;
+      case OUT_2:
+        f = buffer.getShort(12);
+        break;
+      default:
+        return Float.NaN;
+    }
+    return f / 1000;
+  }
+
+  @Override
+  public float getInputVoltage()
+  {
+    return buffer.getShort(18) / 1000f;
+  }
+
+  @Override
+  public float getInputCurrent()
+  {
+    return buffer.getShort(20) / 100f;
   }
 
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("POWER_INFO(");
-    builder.append(getOutput());
-    builder.append(", ");
-    for (PowerState s : getState()) {
-      builder.append(s);
-      builder.append(", ");
-    }
-    builder.append(getVoltage());
+    StringBuilder builder = new StringBuilder("POWER_INFO(Track1:");
+    builder.append(getOutputVoltage(PowerPort.OUT_1));
     builder.append(" V, ");
-    builder.append(getCurrent());
-    return builder.append(" A)").toString();
+    builder.append(getOutputCurrent(PowerPort.OUT_1));
+    builder.append(" A, Track2:");
+    builder.append(getOutputVoltage(PowerPort.OUT_2));
+    builder.append(" V, ");
+    builder.append(getOutputCurrent(PowerPort.OUT_2));
+    return builder.append("A)").toString();
 
   }
 

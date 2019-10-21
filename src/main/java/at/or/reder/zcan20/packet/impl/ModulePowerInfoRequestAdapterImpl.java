@@ -17,7 +17,7 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
-import at.or.reder.zcan20.PowerOutput;
+import at.or.reder.zcan20.PowerPort;
 import at.or.reder.zcan20.packet.ModulePowerInfoRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
@@ -63,17 +63,17 @@ final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter impl
   }
 
   @Override
-  public PowerOutput getOutput()
+  public PowerPort getOutput()
   {
     switch (buffer.get(2)) {
       case 0:
-        return PowerOutput.OUT_1;
+        return PowerPort.OUT_1;
       case 1:
-        return PowerOutput.OUT_2;
+        return PowerPort.OUT_2;
       case 2:
-        return PowerOutput.BOOSTER;
+        return PowerPort.BOOSTER;
       default:
-        return PowerOutput.UNKNOWN;
+        return PowerPort.UNKNOWN;
     }
   }
 

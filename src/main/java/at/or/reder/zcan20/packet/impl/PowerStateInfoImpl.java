@@ -18,10 +18,11 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PowerMode;
-import at.or.reder.zcan20.PowerOutput;
+import at.or.reder.zcan20.PowerPort;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PowerStateInfo;
+import at.or.reder.zcan20.util.Utils;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -72,15 +73,29 @@ final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerSta
   }
 
   @Override
-  public PowerOutput getOutput()
+  public PowerPort getOutput()
   {
-    return PowerOutput.valueOfMagic(buffer.get(offset + 2) & 0xff);
+    return PowerPort.valueOfMagic(buffer.get(offset + 2) & 0xff);
   }
 
   @Override
   public PowerMode getMode()
   {
     return PowerMode.valueOfMagic(buffer.get(offset + 3) & 0xff);
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder builder = new StringBuilder("SYSTEM_POWER(SystemNID: 0x");
+    Utils.appendHexString(getSystemNID(),
+                          builder,
+                          4);
+    builder.append(", Port: ");
+    builder.append(getOutput());
+    builder.append(", Mode: ");
+    builder.append(getMode());
+    return builder.append(')').toString();
   }
 
 }

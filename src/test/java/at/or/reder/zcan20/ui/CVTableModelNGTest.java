@@ -5,7 +5,6 @@
  */
 package at.or.reder.zcan20.ui;
 
-import at.or.reder.zcan20.ui.CVTableModel;
 import java.util.Locale;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;

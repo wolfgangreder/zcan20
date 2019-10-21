@@ -67,7 +67,7 @@ public abstract class MockEnum implements Serializable
                                       int.class);
       int mod = method.getModifiers();
       if (Modifier.isStatic(mod)) {
-        boolean wasAccessible = method.isAccessible();
+        boolean wasAccessible = method.canAccess(null);
         try {
           method.setAccessible(true);
           return method.invoke(null,

@@ -21,7 +21,8 @@ import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.LocoActive;
 import at.or.reder.zcan20.ModuleInfoType;
-import at.or.reder.zcan20.PowerOutput;
+import at.or.reder.zcan20.PowerMode;
+import at.or.reder.zcan20.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedFlags;
@@ -240,14 +241,14 @@ public final class DefaultPacketBuilder implements PacketBuilder
 
   @Override
   public Packet buildGetPowerModePacket(short systemNID,
-                                        Set<? extends PowerOutput> outputs)
+                                        Set<? extends PowerPort> outputs)
   {
     Objects.requireNonNull(outputs,
                            "outputs is null");
     if (outputs.isEmpty()) {
       throw new IllegalArgumentException("outputs is empty");
     }
-    if (outputs.contains(PowerOutput.UNKNOWN)) {
+    if (outputs.contains(PowerPort.UNKNOWN)) {
       throw new IllegalArgumentException("ouputs contains unknown");
     }
     commandGroup(CommandGroup.SYSTEM);
@@ -256,7 +257,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     adapterFactory(null);
     ByteBuffer buffer = Utils.allocateLEBuffer(3);
     buffer.putShort(systemNID);
-    buffer.put(PowerOutput.toValue(outputs));
+    buffer.put(PowerPort.toValue(outputs));
     buffer.clear();
     data(buffer);
     return build();
@@ -585,30 +586,40 @@ public final class DefaultPacketBuilder implements PacketBuilder
   }
 
   @Override
-  public Packet buildModulePowerInfoPacket(short nid,
-                                           PowerOutput output)
+  public Packet buildSystemPowerInfoPacket(short nid,
+                                           Collection<PowerPort> output)
   {
     Objects.requireNonNull(output,
                            "output is null");
-    commandGroup(CommandGroup.CONFIG);
+    commandGroup(CommandGroup.SYSTEM);
     commandMode(CommandMode.REQUEST);
-    command(CommandGroup.CONFIG_POWER_INFO);
+    command(CommandGroup.SYSTEM_POWER);
     adapterFactory(null);
     ByteBuffer buffer = Utils.allocateLEBuffer(3);
     buffer.putShort(nid);
-    switch (output) {
-      case OUT_1:
-        buffer.put((byte) 0);
-        break;
-      case OUT_2:
-        buffer.put((byte) 1);
-        break;
-      case BOOSTER:
-        buffer.put((byte) 2);
-        break;
-      default:
-        throw new IllegalArgumentException("Illegal power output");
-    }
+    byte mask = PowerPort.toValue(output);
+    buffer.put(mask);
+    buffer.rewind();
+    data(buffer);
+    return build();
+  }
+
+  @Override
+  public Packet buildSystemPowerInfoPacket(short nid,
+                                           Collection<PowerPort> output,
+                                           PowerMode mode)
+  {
+    Objects.requireNonNull(output,
+                           "output is null");
+    commandGroup(CommandGroup.SYSTEM);
+    commandMode(CommandMode.COMMAND);
+    command(CommandGroup.SYSTEM_POWER);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    buffer.putShort(nid);
+    byte mask = PowerPort.toValue(output);
+    buffer.put(mask);
+    buffer.put((byte) (mode.getMagic() & 0xff));
     buffer.rewind();
     data(buffer);
     return build();
@@ -616,7 +627,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
 
   @Override
   public Packet builderModulePowerInfoPacket(short nid,
-                                             PowerOutput output,
+                                             PowerPort output,
                                              PowerState state)
   {
     Objects.requireNonNull(output,

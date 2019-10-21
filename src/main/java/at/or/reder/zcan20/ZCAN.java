@@ -17,13 +17,14 @@
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketBuilder;
 import java.io.IOException;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import org.openide.util.Lookup;
 
 public interface ZCAN extends AutoCloseable, NetworkControl, SystemControl, TrackConfig, LocoManagement, ObjectData,
                               Lookup.Provider
 {
+
+  public LinkState getLinkState();
 
   @Override
   public void close() throws IOException;
@@ -32,9 +33,9 @@ public interface ZCAN extends AutoCloseable, NetworkControl, SystemControl, Trac
 
   public short getNID();
 
-  public void addLinkStateListener(BiConsumer<ZCAN, LinkState> listener);
+  public void addLinkStateListener(LinkStateListener listener);
 
-  public void removeLinkStateListener(BiConsumer<ZCAN, LinkState> listener);
+  public void removeLinkStateListener(LinkStateListener listener);
 
   public void addPacketListener(PacketListener packetListener);
 

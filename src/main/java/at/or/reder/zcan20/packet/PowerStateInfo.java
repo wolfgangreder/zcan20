@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.packet;
 
 import at.or.reder.zcan20.PowerMode;
-import at.or.reder.zcan20.PowerOutput;
+import at.or.reder.zcan20.PowerPort;
 
 /**
  *
@@ -27,7 +27,7 @@ public interface PowerStateInfo extends PacketAdapter
 
   public int getSystemNID();
 
-  public PowerOutput getOutput();
+  public PowerPort getOutput();
 
   public PowerMode getMode();
 

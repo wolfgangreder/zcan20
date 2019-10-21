@@ -15,8 +15,10 @@
  */
 package at.or.reder.zcan20;
 
+import java.util.EventListener;
+
 @FunctionalInterface
-public interface LinkStateListener
+public interface LinkStateListener extends EventListener
 {
 
   public void onLinkStateChanged(ZCAN intf,

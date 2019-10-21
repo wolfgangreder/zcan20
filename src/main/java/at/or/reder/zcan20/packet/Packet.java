@@ -29,7 +29,7 @@ import org.openide.util.Lookup;
 public interface Packet extends PacketAdapter, Lookup.Provider
 {
 
-  public static final String LOOKUPPATH = "com/reder/zcan20/adapter";
+  public static final String LOOKUPPATH = "at/or/reder/zcan20/adapter";
 
   /**
    * Returns the Id field of the can packet.

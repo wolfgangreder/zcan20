@@ -21,6 +21,9 @@ import at.or.reder.zcan20.packet.DataNameExtRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -39,7 +42,8 @@ final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter implemen
                            int command,
                            CommandMode mode)
     {
-      return group == CommandGroup.DATA && mode == CommandMode.REQUEST && command == CommandGroup.DATA_NAME_EXT;
+      return group == CommandGroup.DATA && (mode == CommandMode.REQUEST || mode == CommandMode.ACK) && command
+                                                                                                               == CommandGroup.DATA_NAME_EXT;
     }
 
     @Override
@@ -58,31 +62,51 @@ final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter implemen
   @Override
   public short getMasterNID()
   {
-    return buffer.getShort(0);
+    return getPacket().getSenderNID();
   }
 
   @Override
   public short getObjectNID()
   {
-    return buffer.getShort(2);
+    return buffer.getShort(0);
   }
 
   @Override
-  public int getSubID()
+  public short getSubID()
   {
-    return buffer.getInt(4);
+    return buffer.getShort(2);
   }
 
   @Override
   public int getVal1()
   {
-    return buffer.getInt(8);
+    return buffer.getInt(4);
   }
 
   @Override
   public int getVal2()
   {
-    return buffer.getInt(12);
+    return buffer.getInt(8);
+  }
+
+  @Override
+  public String getText()
+  {
+    ByteBuffer tmp = ByteBuffer.allocate(buffer.remaining());
+    buffer.mark();
+    try {
+      byte b;
+      buffer.position(12);
+      while (buffer.hasRemaining() && (b = buffer.get()) != 0) {
+        tmp.put(b);
+      }
+    } finally {
+      buffer.reset();
+    }
+    tmp.limit(tmp.position());
+    tmp.rewind();
+    CharBuffer charBuffer = Charset.forName("CP850").decode(tmp);
+    return charBuffer.toString();
   }
 
   @Override
@@ -97,9 +121,9 @@ final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter implemen
                           builder,
                           4);
     builder.append(", 0x");
-    Utils.appendHexString(getSubID(),
+    Utils.appendHexString(getSubID() & 0xffff,
                           builder,
-                          8);
+                          4);
     builder.append(", 0x");
     Utils.appendHexString(getVal1(),
                           builder,
@@ -108,7 +132,9 @@ final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter implemen
     Utils.appendHexString(getVal2(),
                           builder,
                           8);
-    return builder.append(')').toString();
+    builder.append(", \"");
+    builder.append(getText());
+    return builder.append("\")").toString();
   }
 
 }

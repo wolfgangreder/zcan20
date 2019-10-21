@@ -26,10 +26,12 @@ public interface DataNameExtRequestAdapter extends PacketAdapter
 
   public short getObjectNID();
 
-  public int getSubID();
+  public short getSubID();
 
   public int getVal1();
 
   public int getVal2();
+
+  public String getText();
 
 }

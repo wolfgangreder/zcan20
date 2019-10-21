@@ -23,7 +23,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Wolfgang Reder
  */
-public enum PowerOutput
+public enum PowerPort
 {
   OUT_1(1,
         true),
@@ -46,8 +46,8 @@ public enum PowerOutput
   private final byte magic;
   private final boolean validInSet;
 
-  private PowerOutput(int magic,
-                      boolean validInSet)
+  private PowerPort(int magic,
+                    boolean validInSet)
   {
     this.magic = (byte) magic;
     this.validInSet = validInSet;
@@ -63,10 +63,10 @@ public enum PowerOutput
     return magic;
   }
 
-  public static PowerOutput valueOfMagic(int magic)
+  public static PowerPort valueOfMagic(int magic)
   {
     int v = magic & 0xff;
-    for (PowerOutput o : values()) {
+    for (PowerPort o : values()) {
       if (v == o.getMagic()) {
         return o;
       }
@@ -74,11 +74,11 @@ public enum PowerOutput
     throw new IllegalArgumentException("invalid magic 0x" + Integer.toHexString(magic));
   }
 
-  public static EnumSet<PowerOutput> toSet(byte value)
+  public static EnumSet<PowerPort> toSet(byte value)
   {
     int v = value & 0xff;
-    EnumSet<PowerOutput> result = EnumSet.noneOf(PowerOutput.class);
-    for (PowerOutput o : values()) {
+    EnumSet<PowerPort> result = EnumSet.noneOf(PowerPort.class);
+    for (PowerPort o : values()) {
       if ((v & o.getMagic()) != 0) {
         result.add(o);
       }
@@ -86,11 +86,11 @@ public enum PowerOutput
     return result;
   }
 
-  public static byte toValue(@NotNull Collection<? extends PowerOutput> flags)
+  public static byte toValue(@NotNull Collection<? extends PowerPort> flags)
   {
     Objects.requireNonNull(flags);
     byte result = 0;
-    for (PowerOutput o : flags) {
+    for (PowerPort o : flags) {
       result += o.getMagic();
     }
     return result;

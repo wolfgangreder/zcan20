@@ -23,7 +23,10 @@ import javax.validation.constraints.NotNull;
  *
  * @author Wolfgang Reder
  */
-public interface NetworkControl {
+public interface NetworkControl
+{
+
+  public boolean sendPing();
 
   /**
    * Send ping request automically.
@@ -48,7 +51,8 @@ public interface NetworkControl {
   public void setInterfaceOption(@NotNull InterfaceOptionType type,
                                  @NotNull ProviderID provider) throws IOException;
 
-  public default void setInterfaceProviderID(@NotNull ProviderID provider) throws IOException {
+  public default void setInterfaceProviderID(@NotNull ProviderID provider) throws IOException
+  {
     setInterfaceOption(InterfaceOptionType.SW_PROVIDER,
                        provider);
   }

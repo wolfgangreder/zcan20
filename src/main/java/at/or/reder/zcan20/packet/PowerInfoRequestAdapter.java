@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet;
 
-import at.or.reder.zcan20.PowerOutput;
+import at.or.reder.zcan20.PowerPort;
 import java.util.Set;
 
 /**
@@ -27,6 +27,6 @@ public interface PowerInfoRequestAdapter extends PacketAdapter
 
   public short getMasterNID();
 
-  public Set<PowerOutput> getOutputs();
+  public Set<PowerPort> getOutputs();
 
 }

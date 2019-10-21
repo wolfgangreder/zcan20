@@ -37,10 +37,12 @@ import java.util.logging.Logger;
  *
  * @author Wolfgang Reder
  */
+@SuppressWarnings("ClassWithMultipleLoggers")
 public final class UDPPort implements ZPort
 {
 
-  public static final Logger LOGGER = Logger.getLogger("com.reder.zcan.zport");
+  public static final Logger READ_LOGGER = Logger.getLogger("at.or.reder.zcan.zport.read");
+  public static final Logger WRITE_LOGGER = Logger.getLogger("at.or.reder.zcan.zport.write");
   public static final int SO_TIMEOUT = 5000;
   public static final int SO_TRAFFIC = 0x14; // IPTOS_RELIABILITY (0x04),IPTOS_LOWDELAY (0x10)
   private final String name;
@@ -123,9 +125,9 @@ public final class UDPPort implements ZPort
   @Override
   public void sendPacket(Packet packet) throws IOException
   {
-    LOGGER.log(Level.FINEST,
-               "Sending {0}",
-               packet.toString());
+    WRITE_LOGGER.log(Level.FINEST,
+                     "Sending {0}",
+                     packet.toString());
     try (BufferPool.BufferItem item = bufferPool.getBuffer()) {
       ByteBuffer buffer = item.getBuffer();
       int numBytes = UDPMarshaller.marshalPacket(packet,
@@ -154,15 +156,18 @@ public final class UDPPort implements ZPort
       try {
         s.receive(packet);
       } catch (SocketTimeoutException ex) {
+        READ_LOGGER.log(Level.FINE,
+                        "Packet Timeout",
+                        ex);
         return null;
       }
       ByteBuffer packetBytes = ByteBuffer.wrap(packet.getData());
       packetBytes.limit(packet.getLength() + packet.getOffset());
       packetBytes.position(packet.getOffset());
       Packet result = UDPMarshaller.unmarshalPacket(packetBytes);
-      LOGGER.log(Level.FINEST,
-                 "Reading {0}",
-                 result.toString());
+      READ_LOGGER.log(Level.FINEST,
+                      "Reading {0}",
+                      result.toString());
       return result;
     }
   }
