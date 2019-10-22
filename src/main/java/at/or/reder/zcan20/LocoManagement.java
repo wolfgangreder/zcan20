@@ -15,17 +15,11 @@
  */
 package at.or.reder.zcan20;
 
-import java.io.IOException;
-
 /**
  *
  * @author Wolfgang Reder
  */
 public interface LocoManagement
 {
-
-  public void getMode(int address) throws IOException;
-
-  public void takeOwnership(int address) throws IOException;
 
 }

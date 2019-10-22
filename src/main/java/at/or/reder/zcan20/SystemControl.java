@@ -16,35 +16,14 @@
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 public interface SystemControl
 {
 
-  public default void getPowerStateInfo(@NotNull PowerPort output) throws IOException
-  {
-    getPowerStateInfo(Collections.singleton(Objects.requireNonNull(output,
-                                                                   "output is null")));
-  }
-
   public void getPowerStateInfo(@NotNull Collection<PowerPort> outputs) throws IOException;
 
   public void setPowerModeInfo(@NotNull PowerPort output,
                                @NotNull PowerMode mode) throws IOException;
-//
-//  public default Future<PowerInfo> getOutputState(@NotNull PowerPort output) throws IOException, InterruptedException
-//  {
-//    return getOutputState(Collections.singleton(output)).stream().findFirst().orElse(null);
-//  }
-//
-//  public List<Future<PowerInfo>> getOutputState(@NotNull Collection<? extends PowerPort> outputs) throws IOException,
-//                                                                                                           InterruptedException;
-//
-//  public List<Future<PowerInfo>> setOutputState(@NotNull Map<PowerOutput, PowerMode> modes) throws IOException,
-//                                                                                                   InterruptedException;
-
-  public void loadDump() throws IOException;
 
 }

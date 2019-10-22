@@ -15,40 +15,11 @@
  */
 package at.or.reder.zcan20;
 
-import at.or.reder.zcan20.packet.DataGroupCountPacketAdapter;
-import java.io.IOException;
-import javax.validation.constraints.NotNull;
-
 /**
  *
  * @author Wolfgang Reder
  */
 public interface ObjectData
 {
-
-  /**
-   * Post a request to get the count of object in the DataGroup {@code group}.
-   *
-   * @param group DataGroup to query
-   * @throws IOException on IO Error
-   */
-  public void getObjectCount(@NotNull DataGroup group) throws IOException;
-
-  /**
-   * Retries the count of objects in the DataGroup {@code group}. If there is no answer in {@code timeout} ms, {@code -1} is
-   * returned.
-   *
-   * @param group DataGroup to query
-   * @param timeout milliseconds to wait
-   * @return The objectcount or -1
-   * @throws IOException on IO Error
-   */
-  public DataGroupCountPacketAdapter getObjectCount(@NotNull DataGroup group,
-                                                    long timeout) throws IOException;
-
-  public void getObjectInfoByIndex(@NotNull DataGroup group,
-                                   short index) throws IOException;
-
-  public void getObjectInfoByNid(short nid) throws IOException;
 
 }

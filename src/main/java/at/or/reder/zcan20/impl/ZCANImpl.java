@@ -18,18 +18,14 @@ package at.or.reder.zcan20.impl;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
-import at.or.reder.zcan20.DataGroup;
-import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.LinkState;
 import at.or.reder.zcan20.LinkStateListener;
 import at.or.reder.zcan20.PacketListener;
 import at.or.reder.zcan20.PowerMode;
 import at.or.reder.zcan20.PowerPort;
-import at.or.reder.zcan20.ProviderID;
 import at.or.reder.zcan20.ZCAN;
 import at.or.reder.zcan20.ZCANFactory;
 import at.or.reder.zcan20.packet.CVInfoAdapter;
-import at.or.reder.zcan20.packet.DataGroupCountPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketBuilder;
@@ -171,29 +167,6 @@ public final class ZCANImpl implements ZCAN
 
   }
 
-  private final class PacketNotifier implements Runnable
-  {
-
-    private final Packet packet;
-
-    public PacketNotifier(Packet packet)
-    {
-      this.packet = packet;
-    }
-
-    @Override
-    public void run()
-    {
-      try {
-        port.sendPacket(packet);
-      } catch (IOException ex) {
-        LOGGER.log(Level.SEVERE,
-                   null,
-                   ex);
-      }
-    }
-
-  }
   private static final Logger LOGGER = Logger.getLogger("at.or.reder.zcan20");
   private final ZPort port;
   private final AtomicInteger threadCounter = new AtomicInteger();
@@ -683,19 +656,6 @@ public final class ZCANImpl implements ZCAN
   }
 
   @Override
-  public void setInterfaceOption(InterfaceOptionType type,
-                                 ProviderID provider) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void getInterfaceOption(InterfaceOptionType type) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
   public void getPowerStateInfo(@NotNull final Collection<PowerPort> output) throws IOException
   {
     if (Collections.frequency(Objects.requireNonNull(output,
@@ -730,12 +690,6 @@ public final class ZCANImpl implements ZCAN
                                                        Collections.singleton(output),
                                                        state);
     doSendPacket(packet);
-  }
-
-  @Override
-  public void loadDump() throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
@@ -806,72 +760,6 @@ public final class ZCANImpl implements ZCAN
                                                 & (~CanIdMatcher.MASK_COMMAND)),
                        CVInfoAdapter.class,
                        timeout);
-  }
-
-  @Override
-  public void getMode(int address) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void takeOwnership(int address) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void getObjectCount(DataGroup group) throws IOException
-  {
-    Objects.requireNonNull(group,
-                           "group is null");
-    PacketBuilder builder = createPacketBuilder();
-    Packet packet = builder.buildDataGroupCountPacket(masterNID.get(),
-                                                      group);
-    doSendPacket(packet);
-  }
-
-  @Override
-  public DataGroupCountPacketAdapter getObjectCount(DataGroup group,
-                                                    long timeout) throws IOException
-  {
-    Objects.requireNonNull(group,
-                           "group is null");
-    PacketBuilder builder = createPacketBuilder();
-    Packet packet = builder.buildDataGroupCountPacket(masterNID.get(),
-                                                      group);
-    return sendReceive(packet,
-                       new CanIdMatcher(CanId.valueOf(CommandGroup.DATA,
-                                                      CommandGroup.DATA_GROUP_COUNT,
-                                                      CommandMode.ACK,
-                                                      masterNID.get()),
-                                        CanIdMatcher.MASK_ALL).
-                               and(DataGroupCountPacketAdapter.matchesDataGroup(
-                                       group)),
-                       DataGroupCountPacketAdapter.class,
-                       timeout);
-  }
-
-  @Override
-  public void getObjectInfoByIndex(DataGroup group,
-                                   short index) throws IOException
-  {
-    Objects.requireNonNull(group,
-                           "group is null");
-    PacketBuilder builder = createPacketBuilder();
-    Packet packet = builder.buildDataPacket(masterNID.get(),
-                                            group,
-                                            index);
-    doSendPacket(packet);
-  }
-
-  @Override
-  public void getObjectInfoByNid(short nid) throws IOException
-  {
-    PacketBuilder builder = createPacketBuilder();
-    Packet packet = builder.buildDataPacket(masterNID.get(),
-                                            nid);
-    doSendPacket(packet);
   }
 
 }
