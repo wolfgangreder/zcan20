@@ -35,7 +35,8 @@ import org.testng.annotations.Test;
 public class UDPUnmarshallerTest
 {
 
-  @Test
+  @Test(enabled = false)
+
   public void testUnmarshalReadCV1118_29() throws IOException
   {
     byte[] data = Utils.toByteArray(0x0a,
@@ -85,7 +86,7 @@ public class UDPUnmarshallerTest
                  info.getValue());
   }
 
-  @Test
+  @Test(enabled = false)
   public void testUnmarshalReadCV1118_03busy() throws IOException, ParseException
   {
     ByteBuffer buffer = Utils.hexString2ByteBuffer("0a:00:01:00:16:0b:a6:c0:a6:c0:5e:04:03:00:00:00:00:10",

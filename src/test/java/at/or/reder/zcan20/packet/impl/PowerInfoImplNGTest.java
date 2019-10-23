@@ -51,7 +51,8 @@ public class PowerInfoImplNGTest
     return result;
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testPacketDecode() throws IOException
   {
     ByteBuffer buffer = createBuffer("160000001802a6c0a6c000000837a3000000a8367c000100070089742d00");

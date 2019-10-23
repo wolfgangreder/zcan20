@@ -15,13 +15,9 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.packet.DataGroupCountPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -30,26 +26,26 @@ import org.openide.util.lookup.ServiceProvider;
 final class DataGroupCountPacketAdapterImpl extends AbstractPacketAdapter implements DataGroupCountPacketAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      return group == CommandGroup.DATA && command == CommandGroup.DATA_GROUP_COUNT && mode == CommandMode.ACK;
-    }
-
-    @Override
-    public DataGroupCountPacketAdapter createAdapter(Packet packet)
-    {
-      return new DataGroupCountPacketAdapterImpl(packet);
-    }
-
-  }
-
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      return group == CommandGroup.DATA && command == CommandGroup.DATA_GROUP_COUNT && mode == CommandMode.ACK;
+//    }
+//
+//    @Override
+//    public DataGroupCountPacketAdapter createAdapter(Packet packet)
+//    {
+//      return new DataGroupCountPacketAdapterImpl(packet);
+//    }
+//
+//  }
   private DataGroupCountPacketAdapterImpl(Packet packet)
   {
     super(packet);

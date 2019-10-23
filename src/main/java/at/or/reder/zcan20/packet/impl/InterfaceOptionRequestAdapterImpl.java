@@ -15,14 +15,10 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.packet.InterfaceOptionRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -31,26 +27,26 @@ import org.openide.util.lookup.ServiceProvider;
 final class InterfaceOptionRequestAdapterImpl extends AbstractPacketAdapter implements InterfaceOptionRequestAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      return group == CommandGroup.NETWORK && command == CommandGroup.NETWORK_INTERFACE_OPTION && mode == CommandMode.REQUEST;
-    }
-
-    @Override
-    public InterfaceOptionRequestAdapter createAdapter(Packet packet)
-    {
-      return new InterfaceOptionRequestAdapterImpl(packet);
-    }
-
-  }
-
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      return group == CommandGroup.NETWORK && command == CommandGroup.NETWORK_INTERFACE_OPTION && mode == CommandMode.REQUEST;
+//    }
+//
+//    @Override
+//    public InterfaceOptionRequestAdapter createAdapter(Packet packet)
+//    {
+//      return new InterfaceOptionRequestAdapterImpl(packet);
+//    }
+//
+//  }
   private InterfaceOptionRequestAdapterImpl(Packet packet)
   {
     super(packet);

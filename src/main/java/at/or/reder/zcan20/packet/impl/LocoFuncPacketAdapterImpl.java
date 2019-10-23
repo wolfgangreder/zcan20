@@ -15,13 +15,9 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.packet.LocoFuncPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -30,29 +26,29 @@ import org.openide.util.lookup.ServiceProvider;
 final class LocoFuncPacketAdapterImpl extends AbstractPacketAdapter implements LocoFuncPacketAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      if (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_SWITCH) {
-        return mode == CommandMode.COMMAND || mode == CommandMode.ACK;
-      }
-      return false;
-    }
-
-    @Override
-    public LocoFuncPacketAdapter createAdapter(Packet packet)
-    {
-      return new LocoFuncPacketAdapterImpl(packet);
-    }
-
-  }
-
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      if (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_SWITCH) {
+//        return mode == CommandMode.COMMAND || mode == CommandMode.ACK;
+//      }
+//      return false;
+//    }
+//
+//    @Override
+//    public LocoFuncPacketAdapter createAdapter(Packet packet)
+//    {
+//      return new LocoFuncPacketAdapterImpl(packet);
+//    }
+//
+//  }
   private LocoFuncPacketAdapterImpl(Packet packet)
   {
     super(packet);

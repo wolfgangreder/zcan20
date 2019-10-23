@@ -15,15 +15,11 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PowerPort;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PowerInfoRequestAdapter;
 import at.or.reder.zcan20.util.Utils;
 import java.util.Set;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -32,26 +28,26 @@ import org.openide.util.lookup.ServiceProvider;
 final class PowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements PowerInfoRequestAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      return group == CommandGroup.SYSTEM && command == CommandGroup.SYSTEM_POWER && mode == CommandMode.REQUEST;
-    }
-
-    @Override
-    public PowerInfoRequestAdapter createAdapter(Packet packet)
-    {
-      return new PowerInfoRequestAdapterImpl(packet);
-    }
-
-  }
-
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      return group == CommandGroup.SYSTEM && command == CommandGroup.SYSTEM_POWER && mode == CommandMode.REQUEST;
+//    }
+//
+//    @Override
+//    public PowerInfoRequestAdapter createAdapter(Packet packet)
+//    {
+//      return new PowerInfoRequestAdapterImpl(packet);
+//    }
+//
+//  }
   private PowerInfoRequestAdapterImpl(Packet packet)
   {
     super(packet);

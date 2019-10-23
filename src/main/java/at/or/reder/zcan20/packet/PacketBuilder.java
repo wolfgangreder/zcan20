@@ -55,8 +55,7 @@ public interface PacketBuilder
 
   public PacketBuilder data(ByteBuffer data);
 
-  public PacketBuilder adapterFactory(
-          Function<? super Packet, ? extends PacketAdapter> adpaterFactory);
+  public PacketBuilder adapterFactory(Function<Packet, PacketAdapter> adpaterFactory);
 
   public Packet build();
 

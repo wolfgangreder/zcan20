@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,17 @@
  */
 package at.or.reder.zcan20.packet;
 
-import at.or.reder.zcan20.PacketSelector;
-import org.openide.util.lookup.InstanceContent;
-
 /**
  *
  * @author Wolfgang Reder
  */
-public interface PacketAdapterFactory extends InstanceContent.Convertor<Packet, PacketAdapter>
+public interface AccessoryPacketCommandAdapter extends PacketAdapter
 {
 
-  public boolean isValid(PacketSelector selector);
+  public short getNID();
 
-  @Override
-  public default String id(Packet obj)
-  {
-    return obj.toString();
-  }
+  public byte getPort();
 
-  @Override
-  public default String displayName(Packet obj)
-  {
-    return obj.toString();
-  }
+  public byte getValue();
 
 }

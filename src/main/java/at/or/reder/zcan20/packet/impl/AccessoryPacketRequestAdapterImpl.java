@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.PowerPort;
-import at.or.reder.zcan20.packet.ModulePowerInfoRequestAdapter;
+import at.or.reder.zcan20.packet.AccessoryPacketRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
@@ -30,17 +29,17 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements ModulePowerInfoRequestAdapter
+final class AccessoryPacketRequestAdapterImpl extends AbstractPacketAdapter implements AccessoryPacketRequestAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
   public static final class Factory implements PacketAdapterFactory
   {
 
-    public static final PacketSelector SELECTOR = new PacketSelector(CommandGroup.CONFIG,
-                                                                     CommandGroup.CONFIG_POWER_INFO,
-                                                                     CommandMode.REQUEST,
-                                                                     3);
+    private static final PacketSelector SELECTOR = new PacketSelector(CommandGroup.ACCESSORY,
+                                                                      CommandGroup.ACCESSORY_PORT4,
+                                                                      CommandMode.REQUEST,
+                                                                      3);
 
     @Override
     public boolean isValid(PacketSelector selector)
@@ -49,55 +48,49 @@ final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter impl
     }
 
     @Override
-    public ModulePowerInfoRequestAdapter convert(Packet packet)
+    public AccessoryPacketRequestAdapter convert(Packet packet)
     {
-      return new ModulePowerInfoRequestAdapterImpl(packet);
+      return new AccessoryPacketRequestAdapterImpl(packet);
     }
 
     @Override
     public Class<? extends PacketAdapter> type(Packet obj)
     {
-      return ModulePowerInfoRequestAdapter.class;
+      return AccessoryPacketRequestAdapter.class;
     }
 
   }
 
-  private ModulePowerInfoRequestAdapterImpl(Packet packet)
+  public AccessoryPacketRequestAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public short getTargetNID()
+  public short getNID()
   {
-    return buffer.getShort(0);
+    return (short) (buffer.getShort(0) & 0x1ff);
   }
 
   @Override
-  public PowerPort getOutput()
+  public byte getPort()
   {
-    switch (buffer.get(2)) {
-      case 0:
-        return PowerPort.OUT_1;
-      case 1:
-        return PowerPort.OUT_2;
-      case 2:
-        return PowerPort.BOOSTER;
-      default:
-        return PowerPort.UNKNOWN;
-    }
+    return (byte) (buffer.get(2) & 0xff);
   }
 
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("MODULE_POWER_INFO(0x");
-    Utils.appendHexString(getTargetNID() & 0xffff,
+    StringBuilder builder = new StringBuilder("AccessoryPacketRequest(nid=0x");
+    Utils.appendHexString(getNID() & 0xffff,
                           builder,
                           4);
-    builder.append(", ");
-    builder.append(getOutput());
-    return builder.append(')').toString();
+    builder.append(", port=0x");
+    Utils.appendHexString(getPort() & 0xff,
+                          builder,
+                          2);
+    builder.append(')');
+    return builder.toString();
   }
 
 }

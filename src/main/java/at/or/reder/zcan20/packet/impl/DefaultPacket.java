@@ -24,10 +24,10 @@ import at.or.reder.zcan20.util.Utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
-import java.util.function.Function;
 import javax.validation.constraints.NotNull;
 import org.openide.util.Lookup;
-import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
 
 /**
  *
@@ -51,7 +51,7 @@ public final class DefaultPacket implements Packet
                 byte command,
                 short address,
                 ByteBuffer data,
-                Function<? super Packet, ? extends PacketAdapter> adapterFactory)
+                InstanceContent.Convertor<Packet, PacketAdapter> adapterFactory)
   {
     this.group = group;
     this.mode = mode;
@@ -66,15 +66,18 @@ public final class DefaultPacket implements Packet
     } else {
       this.data = ByteBuffer.allocate(0).asReadOnlyBuffer();
     }
-    if (adapterFactory != null) {
-      lookup = Lookups.singleton(adapterFactory.apply(this));
-    } else {
-      lookup = Lookup.EMPTY;
-    }
     canId = CanId.valueOf(group,
                           command,
                           mode,
                           address);
+    if (adapterFactory != null) {
+      InstanceContent ic = new InstanceContent();
+      ic.add(this,
+             adapterFactory);
+      lookup = new AbstractLookup(ic);
+    } else {
+      lookup = Lookup.EMPTY;
+    }
   }
 
   @Override
@@ -123,6 +126,12 @@ public final class DefaultPacket implements Packet
   public ByteBuffer getData()
   {
     return data.duplicate().order(ByteOrder.LITTLE_ENDIAN);
+  }
+
+  @Override
+  public int getDLC()
+  {
+    return data.limit();
   }
 
   @Override

@@ -15,13 +15,9 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.packet.DataGroupNidPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -29,26 +25,27 @@ import org.openide.util.lookup.ServiceProvider;
  */
 final class DataGroupNidPacketAdapterImpl extends AbstractPacketAdapter implements DataGroupNidPacketAdapter
 {
-
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      return group == CommandGroup.DATA && command == CommandGroup.DATA_ITEMLIST_NID && mode == CommandMode.REQUEST;
-    }
-
-    @Override
-    public DataGroupNidPacketAdapter createAdapter(Packet packet)
-    {
-      return new DataGroupNidPacketAdapterImpl(packet);
-    }
-
-  }
+//
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      return group == CommandGroup.DATA && command == CommandGroup.DATA_ITEMLIST_NID && mode == CommandMode.REQUEST;
+//    }
+//
+//    @Override
+//    public DataGroupNidPacketAdapter createAdapter(Packet packet)
+//    {
+//      return new DataGroupNidPacketAdapterImpl(packet);
+//    }
+//
+//  }
 
   private DataGroupNidPacketAdapterImpl(Packet packet)
   {

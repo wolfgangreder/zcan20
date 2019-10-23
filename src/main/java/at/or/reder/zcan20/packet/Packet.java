@@ -73,6 +73,8 @@ public interface Packet extends PacketAdapter, Lookup.Provider
    */
   public ByteBuffer getData();
 
+  public int getDLC();
+
   public default <T extends PacketAdapter> T getAdapter(Class<? extends T> clazz)
   {
     return getLookup().lookup(clazz);

@@ -16,12 +16,9 @@
 package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.packet.DataGroupInfoPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -30,28 +27,29 @@ import org.openide.util.lookup.ServiceProvider;
 final class DataGroupInfoPacketAdapterImpl extends AbstractPacketAdapter implements DataGroupInfoPacketAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      if (group == CommandGroup.DATA && mode == CommandMode.ACK) {
-        return command == CommandGroup.DATA_ITEMLIST_INDEX || command == CommandGroup.DATA_ITEMLIST_NID;
-      }
-      return false;
-    }
-
-    @Override
-    public DataGroupInfoPacketAdapter createAdapter(Packet packet)
-    {
-      return new DataGroupInfoPacketAdapterImpl(packet);
-    }
-
-  }
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      if (group == CommandGroup.DATA && mode == CommandMode.ACK) {
+//        return command == CommandGroup.DATA_ITEMLIST_INDEX || command == CommandGroup.DATA_ITEMLIST_NID;
+//      }
+//      return false;
+//    }
+//
+//    @Override
+//    public DataGroupInfoPacketAdapter createAdapter(Packet packet)
+//    {
+//      return new DataGroupInfoPacketAdapterImpl(packet);
+//    }
+//
+//  }
   private final int indexOffset;
   private final int nidOffset;
 

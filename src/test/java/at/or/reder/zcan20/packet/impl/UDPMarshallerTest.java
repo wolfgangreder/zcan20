@@ -430,7 +430,8 @@ public class UDPMarshallerTest
                  buffer.array());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testMarshalGetPowerMode()
   {
     short objectNid = (short) 0x1234;

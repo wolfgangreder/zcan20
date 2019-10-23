@@ -15,12 +15,8 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.packet.LocoActivePacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -29,26 +25,26 @@ import org.openide.util.lookup.ServiceProvider;
 final class LocoActivePacketAdapterImpl extends AbstractPacketAdapter implements LocoActivePacketAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      return group == CommandGroup.LOCO && command == CommandGroup.LOCO_ACTIVE && mode == CommandMode.EVENT;
-    }
-
-    @Override
-    public LocoActivePacketAdapter createAdapter(Packet packet)
-    {
-      return new LocoActivePacketAdapterImpl(packet);
-    }
-
-  }
-
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      return group == CommandGroup.LOCO && command == CommandGroup.LOCO_ACTIVE && mode == CommandMode.EVENT;
+//    }
+//
+//    @Override
+//    public LocoActivePacketAdapter createAdapter(Packet packet)
+//    {
+//      return new LocoActivePacketAdapterImpl(packet);
+//    }
+//
+//  }
   LocoActivePacketAdapterImpl(Packet packet)
   {
     super(packet);

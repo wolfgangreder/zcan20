@@ -68,7 +68,8 @@ public class DefaultPacketBuilderNGTest
                  packet.getCommand());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testBuildLogoutPacket()
   {
     DefaultPacketBuilder builder = new DefaultPacketBuilder((short) 0xbabe);
@@ -90,7 +91,8 @@ public class DefaultPacketBuilderNGTest
                adapter.getPacket());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testBuildDataGroupCountPacket()
   {
     DefaultPacketBuilder builder = new DefaultPacketBuilder((short) 0xbabe);
@@ -115,7 +117,8 @@ public class DefaultPacketBuilderNGTest
                adapter.getPacket());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testBuildDataPacketIndex()
   {
     final DataGroup grp = DataGroup.MX8;
@@ -145,7 +148,7 @@ public class DefaultPacketBuilderNGTest
                adapter.getPacket());
   }
 
-  @Test
+  @Test(enabled = false)
   public void testBuildDataPacketNID()
   {
     final short nid = 0x1234;
@@ -290,7 +293,8 @@ public class DefaultPacketBuilderNGTest
                                        Collections.singleton(out));
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testBuildModuleInfoPacket()
   {
     short myNID = (short) 0xbabe;
@@ -396,7 +400,8 @@ public class DefaultPacketBuilderNGTest
                adapter.getInfoType());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testBuildInterfaceOptionPacket()
   {
     short myNID = (short) 0xbabe;
@@ -442,7 +447,8 @@ public class DefaultPacketBuilderNGTest
                adapter.getOptionType());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testBuildGetPowerModePacket()
   {
     short myNID = (short) 0xbabe;
@@ -529,7 +535,8 @@ public class DefaultPacketBuilderNGTest
                                     set);
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testGetLocoStatePacket()
   {
     short myNID = (short) 0xcafe;
@@ -578,7 +585,8 @@ public class DefaultPacketBuilderNGTest
     builder.buildLocoStatePacket(locoNid);
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testGetLocoModePacket()
   {
     short myNID = (short) 0xcafe;
@@ -611,7 +619,8 @@ public class DefaultPacketBuilderNGTest
     builder.buildLocoModePacket(locoNid);
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testSetLocoModePacket()
   {
     short myNID = (short) 0xcafe;
@@ -827,7 +836,8 @@ public class DefaultPacketBuilderNGTest
 
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testGetLocoSpeedPacket()
   {
     short locoNid = 0x123;
@@ -860,7 +870,8 @@ public class DefaultPacketBuilderNGTest
     builder.buildLocoSpeedPacket(locoNid);
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testSetLocoSpeedPacket()
   {
     short locoNid = 0x123;
@@ -898,7 +909,8 @@ public class DefaultPacketBuilderNGTest
                  adapter.getDivisor());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testGetLocoFuncInfoPacket()
   {
     short locoNid = 0x123;
@@ -922,7 +934,8 @@ public class DefaultPacketBuilderNGTest
                  adapter.getMasterNID());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testGetLocoFuncPacket()
   {
     short locoNid = 0x123;
@@ -947,7 +960,8 @@ public class DefaultPacketBuilderNGTest
 
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testSetLocoFuncPacket()
   {
     short locoNid = 0x123;
@@ -980,7 +994,8 @@ public class DefaultPacketBuilderNGTest
 
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testGetCVValue()
   {
     short locoNid = 0x123;
@@ -1014,7 +1029,8 @@ public class DefaultPacketBuilderNGTest
                  adapter.getValue());
   }
 
-  @Test
+  @Test(enabled = false)
+
   public void testSetCVValue()
   {
     short locoNid = 0x123;

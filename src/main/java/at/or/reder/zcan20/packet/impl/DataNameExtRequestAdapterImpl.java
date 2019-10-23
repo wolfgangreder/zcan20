@@ -15,16 +15,12 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.packet.DataNameExtRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -33,27 +29,27 @@ import org.openide.util.lookup.ServiceProvider;
 final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter implements DataNameExtRequestAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      return group == CommandGroup.DATA && (mode == CommandMode.REQUEST || mode == CommandMode.ACK) && command
-                                                                                                               == CommandGroup.DATA_NAME_EXT;
-    }
-
-    @Override
-    public DataNameExtRequestAdapter createAdapter(Packet packet)
-    {
-      return new DataNameExtRequestAdapterImpl(packet);
-    }
-
-  }
-
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      return group == CommandGroup.DATA && (mode == CommandMode.REQUEST || mode == CommandMode.ACK) && command
+//                                                                                                               == CommandGroup.DATA_NAME_EXT;
+//    }
+//
+//    @Override
+//    public DataNameExtRequestAdapter createAdapter(Packet packet)
+//    {
+//      return new DataNameExtRequestAdapterImpl(packet);
+//    }
+//
+//  }
   private DataNameExtRequestAdapterImpl(Packet packet)
   {
     super(packet);

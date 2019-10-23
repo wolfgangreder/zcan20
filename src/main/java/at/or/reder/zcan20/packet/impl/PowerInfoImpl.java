@@ -17,12 +17,16 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.packet.Packet;
+import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PowerInfo;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.openide.util.lookup.ServiceProvider;
@@ -38,19 +42,32 @@ final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
   public static final class Factory implements PacketAdapterFactory
   {
 
+    private static final Set<PacketSelector> SELECTOR = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            new PacketSelector(CommandGroup.CONFIG,
+                               CommandGroup.CONFIG_POWER_INFO,
+                               CommandMode.EVENT,
+                               22),
+            new PacketSelector(CommandGroup.CONFIG,
+                               CommandGroup.CONFIG_POWER_INFO,
+                               CommandMode.ACK,
+                               22))));
+
     @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
+    public boolean isValid(PacketSelector selector)
     {
-      return group == CommandGroup.CONFIG && command == CommandGroup.CONFIG_POWER_INFO && (mode == CommandMode.EVENT
-                                                                                           || mode == CommandMode.ACK);
+      return SELECTOR.stream().filter((s) -> s.matches(selector)).findAny().isPresent();
     }
 
     @Override
-    public PowerInfo createAdapter(Packet packet)
+    public PowerInfo convert(Packet packet)
     {
       return new PowerInfoImpl(packet);
+    }
+
+    @Override
+    public Class<? extends PacketAdapter> type(Packet obj)
+    {
+      return PowerInfo.class;
     }
 
   }

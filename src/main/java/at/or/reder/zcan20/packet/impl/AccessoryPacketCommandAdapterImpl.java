@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,10 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.PowerMode;
-import at.or.reder.zcan20.PowerPort;
+import at.or.reder.zcan20.packet.AccessoryPacketCommandAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
-import at.or.reder.zcan20.packet.PowerStateInfo;
 import at.or.reder.zcan20.util.Utils;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +33,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerStateInfo
+final class AccessoryPacketCommandAdapterImpl extends AbstractPacketAdapter implements AccessoryPacketCommandAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -43,17 +41,17 @@ final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerSta
   {
 
     private static final Set<PacketSelector> SELECTOR = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            new PacketSelector(CommandGroup.SYSTEM,
-                               CommandGroup.SYSTEM_POWER,
+            new PacketSelector(CommandGroup.ACCESSORY,
+                               CommandGroup.ACCESSORY_PORT4,
+                               CommandMode.ACK,
+                               4),
+            new PacketSelector(CommandGroup.ACCESSORY,
+                               CommandGroup.ACCESSORY_PORT4,
                                CommandMode.COMMAND,
                                4),
-            new PacketSelector(CommandGroup.SYSTEM,
-                               CommandGroup.SYSTEM_POWER,
+            new PacketSelector(CommandGroup.ACCESSORY,
+                               CommandGroup.ACCESSORY_PORT4,
                                CommandMode.EVENT,
-                               4),
-            new PacketSelector(CommandGroup.SYSTEM,
-                               CommandGroup.SYSTEM_POWER,
-                               CommandMode.ACK,
                                4))));
 
     @Override
@@ -63,63 +61,61 @@ final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerSta
     }
 
     @Override
-    public PowerStateInfo convert(Packet packet)
+    public PacketAdapter convert(Packet obj)
     {
-      return new PowerStateInfoImpl(packet);
+      return new AccessoryPacketCommandAdapterImpl(obj);
     }
 
     @Override
     public Class<? extends PacketAdapter> type(Packet obj)
     {
-      return PowerStateInfo.class;
+      return AccessoryPacketCommandAdapter.class;
     }
 
   }
-  private final int offset;
 
-  private PowerStateInfoImpl(Packet packet)
+  public AccessoryPacketCommandAdapterImpl(Packet packet)
   {
     super(packet);
-    if (buffer.capacity() < 4) {
-      throw new IllegalArgumentException("invalid dlc");
-    }
-    if (buffer.capacity() == 4) {
-      offset = 0;
-    } else {
-      offset = 2;
-    }
   }
 
   @Override
-  public int getSystemNID()
+  public short getNID()
   {
-    return buffer.getShort(offset) & 0xffff;
+    return (short) (buffer.getShort(0) & 0x1ff);
   }
 
   @Override
-  public PowerPort getOutput()
+  public byte getPort()
   {
-    return PowerPort.valueOfMagic(buffer.get(offset + 2) & 0xff);
+    return (byte) (buffer.get(2) & 0xff);
   }
 
   @Override
-  public PowerMode getMode()
+  public byte getValue()
   {
-    return PowerMode.valueOfMagic(buffer.get(offset + 3) & 0xff);
+    return (byte) (buffer.get(3) & 0xff);
   }
 
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("SYSTEM_POWER(SystemNID: 0x");
-    Utils.appendHexString(getSystemNID(),
+    StringBuilder builder = new StringBuilder("AccessoryPacketRequest(");
+    builder.append(getPacket().getCommandMode());
+    builder.append(", nid=0x");
+    Utils.appendHexString(getNID() & 0xffff,
                           builder,
                           4);
-    builder.append(", Port: ");
-    builder.append(getOutput());
-    builder.append(", Mode: ");
-    builder.append(getMode());
-    return builder.append(')').toString();
+    builder.append(", port=0x");
+    Utils.appendHexString(getPort() & 0xff,
+                          builder,
+                          2);
+    builder.append(", value=0x");
+    Utils.appendHexString(getValue() & 0xff,
+                          builder,
+                          2);
+    builder.append(')');
+    return builder.toString();
   }
 
 }

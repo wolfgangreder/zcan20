@@ -21,7 +21,7 @@ import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
-import at.or.reder.zcan20.packet.Ping;
+import at.or.reder.zcan20.packet.PingRequest;
 import at.or.reder.zcan20.util.Utils;
 import javax.validation.constraints.NotNull;
 import org.openide.util.lookup.ServiceProvider;
@@ -30,7 +30,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-final class PingImpl extends AbstractPacketAdapter implements Ping
+final class PingRequestImpl extends AbstractPacketAdapter implements PingRequest
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -39,8 +39,8 @@ final class PingImpl extends AbstractPacketAdapter implements Ping
 
     private static final PacketSelector SELECTOR = new PacketSelector(CommandGroup.NETWORK,
                                                                       CommandGroup.NETWORK_PING,
-                                                                      CommandMode.EVENT,
-                                                                      8);
+                                                                      CommandMode.REQUEST,
+                                                                      2);
 
     @Override
     public boolean isValid(PacketSelector selector)
@@ -49,20 +49,20 @@ final class PingImpl extends AbstractPacketAdapter implements Ping
     }
 
     @Override
-    public Ping convert(Packet packet)
+    public PingRequest convert(Packet packet)
     {
-      return new PingImpl(packet);
+      return new PingRequestImpl(packet);
     }
 
     @Override
     public Class<? extends PacketAdapter> type(Packet obj)
     {
-      return Ping.class;
+      return PingRequest.class;
     }
 
   }
 
-  private PingImpl(@NotNull Packet packet)
+  private PingRequestImpl(@NotNull Packet packet)
   {
     super(packet);
     if (packet.getCommandGroup() != CommandGroup.NETWORK) {
@@ -71,7 +71,7 @@ final class PingImpl extends AbstractPacketAdapter implements Ping
     if (packet.getCommand() != CommandGroup.NETWORK_PING) {
       throw new IllegalArgumentException("illegal command");
     }
-    if (packet.getCommandMode() != CommandMode.EVENT) {
+    if (packet.getCommandMode() != CommandMode.REQUEST) {
       throw new IllegalArgumentException("illegal commandMode");
     }
     if (buffer.capacity() < 8) {
@@ -80,36 +80,16 @@ final class PingImpl extends AbstractPacketAdapter implements Ping
   }
 
   @Override
-  public int getMasterNID()
+  public short getNID()
   {
-    return buffer.getInt(0);
-  }
-
-  @Override
-  public short getType()
-  {
-    return buffer.getShort(4);
-  }
-
-  @Override
-  public short getSession()
-  {
-    return buffer.getShort(6);
+    return buffer.getShort(0);
   }
 
   @Override
   public String toString()
   {
     StringBuilder builder = new StringBuilder("PING(0x");
-    Utils.appendHexString(getMasterNID(),
-                          builder,
-                          8);
-    builder.append(", 0x");
-    Utils.appendHexString(getType(),
-                          builder,
-                          4);
-    builder.append(", 0x");
-    Utils.appendHexString(getSession(),
+    Utils.appendHexString(getNID(),
                           builder,
                           4);
     return builder.append(')').toString();

@@ -15,16 +15,12 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedSteps;
 import at.or.reder.zcan20.SpeedlimitMode;
 import at.or.reder.zcan20.packet.LocoModePacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -33,29 +29,29 @@ import org.openide.util.lookup.ServiceProvider;
 final class LocoModePacketAdapterImpl extends AbstractPacketAdapter implements LocoModePacketAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      if (group == CommandGroup.LOCO && command == CommandGroup.LOCO_MODE) {
-        return mode == CommandMode.COMMAND || mode == CommandMode.ACK;
-      }
-      return false;
-    }
-
-    @Override
-    public LocoModePacketAdapter createAdapter(Packet packet)
-    {
-      return new LocoModePacketAdapterImpl(packet);
-    }
-
-  }
-
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      if (group == CommandGroup.LOCO && command == CommandGroup.LOCO_MODE) {
+//        return mode == CommandMode.COMMAND || mode == CommandMode.ACK;
+//      }
+//      return false;
+//    }
+//
+//    @Override
+//    public LocoModePacketAdapter createAdapter(Packet packet)
+//    {
+//      return new LocoModePacketAdapterImpl(packet);
+//    }
+//
+//  }
   private LocoModePacketAdapterImpl(Packet packet)
   {
     super(packet);

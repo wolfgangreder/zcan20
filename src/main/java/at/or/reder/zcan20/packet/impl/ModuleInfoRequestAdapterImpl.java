@@ -15,14 +15,10 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.packet.ModuleInfoRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -31,26 +27,26 @@ import org.openide.util.lookup.ServiceProvider;
 final class ModuleInfoRequestAdapterImpl extends AbstractPacketAdapter implements ModuleInfoRequestAdapter
 {
 
-  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
-  {
-
-    @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
-    {
-      return group == CommandGroup.CONFIG && command == CommandGroup.CONFIG_MODULE_INFO && mode == CommandMode.REQUEST;
-    }
-
-    @Override
-    public ModuleInfoRequestAdapter createAdapter(Packet packet)
-    {
-      return new ModuleInfoRequestAdapterImpl(packet);
-    }
-
-  }
-
+//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+//  public static final class Factory implements PacketAdapterFactory
+//  {
+//
+//    @Override
+//    public boolean isValid(CommandGroup group,
+//                           int command,
+//                           CommandMode mode,
+//                           int dlc)
+//    {
+//      return group == CommandGroup.CONFIG && command == CommandGroup.CONFIG_MODULE_INFO && mode == CommandMode.REQUEST;
+//    }
+//
+//    @Override
+//    public ModuleInfoRequestAdapter createAdapter(Packet packet)
+//    {
+//      return new ModuleInfoRequestAdapterImpl(packet);
+//    }
+//
+//  }
   private ModuleInfoRequestAdapterImpl(Packet packet)
   {
     super(packet);

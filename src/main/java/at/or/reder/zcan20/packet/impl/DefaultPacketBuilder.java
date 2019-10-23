@@ -21,6 +21,7 @@ import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.LocoActive;
 import at.or.reder.zcan20.ModuleInfoType;
+import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.PowerMode;
 import at.or.reder.zcan20.PowerPort;
 import at.or.reder.zcan20.PowerState;
@@ -38,10 +39,13 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import org.openide.util.lookup.InstanceContent;
 import org.openide.util.lookup.Lookups;
 
 /**
@@ -51,12 +55,49 @@ import org.openide.util.lookup.Lookups;
 public final class DefaultPacketBuilder implements PacketBuilder
 {
 
+  private static final class FactoryAdapter implements InstanceContent.Convertor<Packet, PacketAdapter>
+  {
+
+    private final Function<Packet, PacketAdapter> function;
+
+    public FactoryAdapter(Function<Packet, PacketAdapter> function)
+    {
+      this.function = function;
+    }
+
+    @Override
+    public PacketAdapter convert(Packet obj)
+    {
+      return function.apply(obj);
+    }
+
+    @Override
+    public Class<? extends PacketAdapter> type(Packet obj)
+    {
+      return PacketAdapter.class;
+    }
+
+    @Override
+    public String id(Packet obj)
+    {
+      return obj.toString();
+    }
+
+    @Override
+    public String displayName(Packet obj)
+    {
+      return obj.toString();
+    }
+
+  }
   private CommandGroup commandGroup;
   private CommandMode commandMode;
   private byte command;
   private short senderNID;
   private ByteBuffer data;
-  private Function<? super Packet, ? extends PacketAdapter> adapterFactory;
+  private Function<Packet, PacketAdapter> givenAdapterFactory;
+  private InstanceContent.Convertor<Packet, PacketAdapter> adapterFactory;
+  private final ConcurrentMap<PacketSelector, PacketAdapterFactory> factoryCache = new ConcurrentHashMap<>();
 
   public DefaultPacketBuilder(short senderNID)
   {
@@ -150,30 +191,39 @@ public final class DefaultPacketBuilder implements PacketBuilder
   }
 
   @Override
-  public PacketBuilder adapterFactory(Function<? super Packet, ? extends PacketAdapter> adpaterFactory)
+  public PacketBuilder adapterFactory(Function<Packet, PacketAdapter> adpaterFactory)
   {
-    this.adapterFactory = adpaterFactory;
+    this.givenAdapterFactory = adpaterFactory;
     return this;
   }
 
-  private Function<Packet, ? extends PacketAdapter> createAdapterFactory()
+  private InstanceContent.Convertor<Packet, PacketAdapter> createAdapterFactory()
   {
-    for (PacketAdapterFactory ef : Lookups.forPath(Packet.LOOKUPPATH).lookupAll(PacketAdapterFactory.class)) {
-      if (ef.isValid(commandGroup,
-                     command,
-                     commandMode)) {
-        return ef::createAdapter;
-      }
-    }
-    return null;
+    PacketSelector selector = new PacketSelector(commandGroup,
+                                                 command,
+                                                 commandMode,
+                                                 data != null ? data.limit() : 0);
+    return factoryCache.computeIfAbsent(selector,
+                                        (s) -> {
+                                          for (PacketAdapterFactory ef : Lookups.forPath(Packet.LOOKUPPATH).lookupAll(
+                                                  PacketAdapterFactory.class)) {
+                                            if (ef.isValid(s)) {
+                                              return ef;
+                                            }
+                                          }
+//                                          System.err.println("Found no packetadapter for " + s.toString());
+                                          return null;
+                                        });
   }
 
   @Override
   public Packet build()
   {
     final Function<String, RuntimeException> exFactory = IllegalStateException::new;
-    if (adapterFactory == null) {
+    if (givenAdapterFactory == null) {
       adapterFactory = createAdapterFactory();
+    } else {
+      adapterFactory = new FactoryAdapter(givenAdapterFactory);
     }
     if (data != null) {
       data.rewind();

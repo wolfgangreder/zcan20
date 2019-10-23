@@ -17,10 +17,16 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.NIDOnlyPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
+import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.util.Utils;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -34,17 +40,24 @@ final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implements NI
   public static final class Factory implements PacketAdapterFactory
   {
 
+    private final Set<PacketSelector> SELECTOR = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            new PacketSelector(CommandGroup.NETWORK,
+                               CommandGroup.NETWORK_PORT_CLOSE,
+                               CommandMode.COMMAND,
+                               0))));
+
     @Override
-    public boolean isValid(CommandGroup group,
-                           int command,
-                           CommandMode mode)
+    public boolean isValid(PacketSelector selector)
     {
-      return (group == CommandGroup.NETWORK && command == CommandGroup.NETWORK_PORT_CLOSE && mode == CommandMode.COMMAND)
-             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_STATE && mode == CommandMode.REQUEST)
-             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_MODE && mode == CommandMode.REQUEST)
-             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_INFO && mode == CommandMode.REQUEST)
-             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_SWITCH && mode == CommandMode.REQUEST)
-             || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_SPEED && mode == CommandMode.REQUEST);
+      return SELECTOR.stream().
+              filter((PacketSelector f) -> f.matches(selector)).
+              findAny().isPresent();
+//      return (group == CommandGroup.NETWORK && command == CommandGroup.NETWORK_PORT_CLOSE && mode == CommandMode.COMMAND)
+//                     || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_STATE && mode == CommandMode.REQUEST)
+//                     || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_MODE && mode == CommandMode.REQUEST)
+//                     || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_INFO && mode == CommandMode.REQUEST)
+//                     || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_FUNC_SWITCH && mode == CommandMode.REQUEST)
+//                     || (group == CommandGroup.LOCO && command == CommandGroup.LOCO_SPEED && mode == CommandMode.REQUEST);
     }
 
     private String getPacketName(Packet packet)
@@ -68,7 +81,13 @@ final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implements NI
     }
 
     @Override
-    public NIDOnlyPacketAdapter createAdapter(Packet packet)
+    public Class<? extends PacketAdapter> type(Packet obj)
+    {
+      return NIDOnlyPacketAdapter.class;
+    }
+
+    @Override
+    public NIDOnlyPacketAdapter convert(Packet packet)
     {
       return new NIDOnlyPacketAdapterImpl(packet,
                                           getPacketName(packet));
