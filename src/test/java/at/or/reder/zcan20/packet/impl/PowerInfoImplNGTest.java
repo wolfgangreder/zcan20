@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.PowerPort;
+import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.impl.UDPMarshaller;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PowerInfo;

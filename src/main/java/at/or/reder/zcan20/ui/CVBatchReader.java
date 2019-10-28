@@ -118,25 +118,25 @@ public final class CVBatchReader implements Runnable
   public Set<Integer> readCVS(Collection<Integer> toRead)
   {
     Set<Integer> notRead = new TreeSet<>();
-    for (int i : toRead) {
-      try {
-        CVInfoAdapter adapter = device.readCV(address,
-                                              i,
-                                              5000,
-                                              (p) -> waitBusy(p,
-                                                              i)
-        );
-        if (adapter != null && adapter.getReadState() == CVReadState.READ && adapter.getNumber() == i) {
-          infoConsumer.accept(adapter);
-          result.put(i,
-                     adapter);
-        } else {
-          notRead.add(i);
-        }
-      } catch (IOException ex) {
-        Exceptions.printStackTrace(ex);
-      }
-    }
+//    for (int i : toRead) {
+//      try {
+//        CVInfoAdapter adapter = device.readCV(address,
+//                                              i,
+//                                              5000,
+//                                              (p) -> waitBusy(p,
+//                                                              i)
+//        );
+//        if (adapter != null && adapter.getReadState() == CVReadState.READ && adapter.getNumber() == i) {
+//          infoConsumer.accept(adapter);
+//          result.put(i,
+//                     adapter);
+//        } else {
+//          notRead.add(i);
+//        }
+//      } catch (IOException ex) {
+//        Exceptions.printStackTrace(ex);
+//      }
+//    }
     return notRead;
   }
 

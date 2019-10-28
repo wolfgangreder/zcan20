@@ -14,15 +14,19 @@
  * limitations under the License.
  */package at.or.reder.zcan20;
 
+import at.or.reder.dcc.LinkState;
+import at.or.reder.dcc.LinkStateListener;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketBuilder;
 import java.io.IOException;
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 import org.openide.util.Lookup;
 
-public interface ZCAN extends AutoCloseable, NetworkControl, SystemControl, TrackConfig, LocoManagement, ObjectData,
-                              Lookup.Provider
+public interface ZCAN extends AutoCloseable, Lookup.Provider
 {
+
+  public static final Logger LOGGER = Logger.getLogger("at.or.reder.zcan20");
 
   public LinkState getLinkState();
 

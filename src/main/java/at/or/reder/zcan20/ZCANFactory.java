@@ -108,7 +108,8 @@ public final class ZCANFactory
                              remotePort,
                              localPort);
     ZCANImpl result = new ZCANImpl(port,
-                                   properties);
+                                   properties,
+                                   null);
     result.open(timeOut,
                 unit);
     return result;

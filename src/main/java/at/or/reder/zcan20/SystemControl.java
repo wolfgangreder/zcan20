@@ -14,7 +14,11 @@
  * limitations under the License.
  */package at.or.reder.zcan20;
 
+import at.or.reder.dcc.PowerPort;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collection;
 import javax.validation.constraints.NotNull;
 
@@ -25,5 +29,29 @@ public interface SystemControl
 
   public void setPowerModeInfo(@NotNull PowerPort output,
                                @NotNull PowerMode mode) throws IOException;
+
+  public String getHardwareVersion() throws IOException;
+
+  public String getSoftwareVersion() throws IOException;
+
+  public LocalDate getSoftwareBuildDate() throws IOException;
+
+  public LocalTime getSoftwareBuildTime() throws IOException;
+
+  public LocalDate getRealtimeDate() throws IOException;
+
+  public LocalTime getRealtimeTime() throws IOException;
+
+  public void setRealtimeDateTime(@NotNull LocalDateTime dt) throws IOException;
+
+  public String getMiwiHardwareVersion() throws IOException;
+
+  public String getMiwiSoftwareVersion() throws IOException;
+
+  public String getMiwiChannel() throws IOException;
+
+  public int getModuleNumber() throws IOException;
+
+  public int getModuleType() throws IOException;
 
 }

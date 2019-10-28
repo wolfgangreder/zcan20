@@ -55,7 +55,7 @@ public class Main implements AutoCloseable
                               null,
                               5,
                               TimeUnit.SECONDS);
-    device.setAutopingEnabled(true);
+//    device.setAutopingEnabled(true);
   }
 
   private void checkOpen() throws IOException

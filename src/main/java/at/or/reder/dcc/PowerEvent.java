@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20;
+package at.or.reder.dcc;
 
-import java.util.EventListener;
-
-@FunctionalInterface
-public interface LinkStateListener extends EventListener
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public interface PowerEvent extends DCCEventObject
 {
 
-  public void onLinkStateChanged(ZCAN intf,
-                                 LinkState linkState);
+  public PowerPort getPort();
+
+  public PowerMode getMode();
 
 }

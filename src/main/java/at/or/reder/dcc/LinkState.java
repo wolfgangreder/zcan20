@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.packet;
-
-import at.or.reder.dcc.PowerPort;
-import java.util.Set;
+package at.or.reder.dcc;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface PowerInfoRequestAdapter extends PacketAdapter
+public enum LinkState
 {
-
-  public short getMasterNID();
-
-  public Set<PowerPort> getOutputs();
-
+  OPEN,
+  BROKEN,
+  CLOSED
 }

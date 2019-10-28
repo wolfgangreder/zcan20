@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.ui;
 
 import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.PowerPort;
+import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.ZCAN;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PowerInfo;

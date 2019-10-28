@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet;
 
-import at.or.reder.zcan20.PowerPort;
+import at.or.reder.dcc.PowerPort;
 
 /**
  *

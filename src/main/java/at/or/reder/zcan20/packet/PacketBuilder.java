@@ -22,7 +22,7 @@ import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.LocoActive;
 import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.PowerMode;
-import at.or.reder.zcan20.PowerPort;
+import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedFlags;

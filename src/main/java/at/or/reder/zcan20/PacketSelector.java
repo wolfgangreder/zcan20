@@ -137,7 +137,26 @@ public final class PacketSelector implements Predicate<Packet>
   @Override
   public String toString()
   {
-    return "PacketSelector{" + "group=" + group + ", command=" + command + ", mode=" + mode + ", dlc=" + dlc + '}';
+    StringBuilder builder = new StringBuilder("PacketSelector{group=");
+    builder.append(group);
+    builder.append(", command=");
+    builder.append(command);
+    builder.append(", mode=");
+    if (mode != null) {
+      builder.append(mode);
+      builder.append(" 0b");
+      String tmp = Integer.toBinaryString(mode.getMagic() & 0x3);
+      if (tmp.length() == 1) {
+        builder.append('0');
+      }
+      builder.append(tmp);
+    } else {
+      builder.append("null");
+    }
+    builder.append(", dlc=");
+    builder.append(dlc);
+    builder.append('}');
+    return builder.toString();
   }
 
 }

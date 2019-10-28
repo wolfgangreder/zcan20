@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,28 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
-import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.packet.ModuleInfoRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.zcan20.packet.PortOpenPacketAdapter;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-final class ModuleInfoRequestAdapterImpl extends AbstractPacketAdapter implements ModuleInfoRequestAdapter
+final class PortOpenPacketAdapterImpl extends AbstractPacketAdapter implements PortOpenPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
   public static final class Factory implements PacketAdapterFactory
   {
 
-    public static final PacketSelector SELECTOR = new PacketSelector(CommandGroup.CONFIG,
-                                                                     CommandGroup.CONFIG_MODULE_INFO,
-                                                                     CommandMode.REQUEST,
-                                                                     4);
+    private final PacketSelector SELECTOR = new PacketSelector(CommandGroup.NETWORK,
+                                                               CommandGroup.NETWORK_PORT_OPEN,
+                                                               CommandMode.COMMAND,
+                                                               0);
 
     @Override
     public boolean isValid(PacketSelector selector)
@@ -51,44 +49,20 @@ final class ModuleInfoRequestAdapterImpl extends AbstractPacketAdapter implement
     @Override
     public Class<? extends PacketAdapter> type(Packet obj)
     {
-      return ModuleInfoRequestAdapter.class;
+      return PortOpenPacketAdapter.class;
     }
 
     @Override
-    public ModuleInfoRequestAdapter convert(Packet packet)
+    public PortOpenPacketAdapter convert(Packet packet)
     {
-      return new ModuleInfoRequestAdapterImpl(packet);
+      return new PortOpenPacketAdapterImpl(packet);
     }
 
   }
 
-  private ModuleInfoRequestAdapterImpl(Packet packet)
+  private PortOpenPacketAdapterImpl(Packet packet)
   {
     super(packet);
-  }
-
-  @Override
-  public short getModuleNID()
-  {
-    return buffer.getShort(0);
-  }
-
-  @Override
-  public ModuleInfoType getInfoType()
-  {
-    return ModuleInfoType.valueOf(buffer.getShort(2));
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder builder = new StringBuilder("MODULE_INFO(0x");
-    Utils.appendHexString(getModuleNID(),
-                          builder,
-                          4);
-    builder.append(", ");
-    builder.append(getInfoType());
-    return builder.append(')').toString();
   }
 
 }

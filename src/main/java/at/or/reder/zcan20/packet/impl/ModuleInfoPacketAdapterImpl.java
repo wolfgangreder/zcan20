@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,9 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.packet.ModuleInfoRequestAdapter;
+import at.or.reder.zcan20.packet.ModuleInfoPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
@@ -30,17 +28,12 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-final class ModuleInfoRequestAdapterImpl extends AbstractPacketAdapter implements ModuleInfoRequestAdapter
+final class ModuleInfoPacketAdapterImpl extends AbstractPacketAdapter implements ModuleInfoPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
   public static final class Factory implements PacketAdapterFactory
   {
-
-    public static final PacketSelector SELECTOR = new PacketSelector(CommandGroup.CONFIG,
-                                                                     CommandGroup.CONFIG_MODULE_INFO,
-                                                                     CommandMode.REQUEST,
-                                                                     4);
 
     @Override
     public boolean isValid(PacketSelector selector)
@@ -51,26 +44,26 @@ final class ModuleInfoRequestAdapterImpl extends AbstractPacketAdapter implement
     @Override
     public Class<? extends PacketAdapter> type(Packet obj)
     {
-      return ModuleInfoRequestAdapter.class;
+      return ModuleInfoPacketAdapter.class;
     }
 
     @Override
-    public ModuleInfoRequestAdapter convert(Packet packet)
+    public ModuleInfoPacketAdapter convert(Packet packet)
     {
-      return new ModuleInfoRequestAdapterImpl(packet);
+      return new ModuleInfoPacketAdapterImpl(packet);
     }
 
   }
 
-  private ModuleInfoRequestAdapterImpl(Packet packet)
+  ModuleInfoPacketAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public short getModuleNID()
+  public Class<?> getValueClass()
   {
-    return buffer.getShort(0);
+    return getInfoType().getValueClass();
   }
 
   @Override
@@ -80,15 +73,33 @@ final class ModuleInfoRequestAdapterImpl extends AbstractPacketAdapter implement
   }
 
   @Override
+  public int getRawValue()
+  {
+    return buffer.getInt(4);
+  }
+
+  @Override
+  public <C> C getValue(Class<? extends C> clazz) throws IllegalArgumentException
+  {
+    ModuleInfoType infoType = getInfoType();
+    if (clazz != infoType.getValueClass() && clazz != Integer.class) {
+      throw new IllegalArgumentException("Invalid value class");
+    }
+    int rawValue = getRawValue();
+    return clazz.cast(infoType.convertValue(rawValue));
+  }
+
+  @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("MODULE_INFO(0x");
-    Utils.appendHexString(getModuleNID(),
+    StringBuilder builder = new StringBuilder("ModuleInfo(type=");
+    builder.append(getInfoType().toString());
+    builder.append(", rawValue=0x");
+    Utils.appendHexString(getRawValue(),
                           builder,
-                          4);
-    builder.append(", ");
-    builder.append(getInfoType());
-    return builder.append(')').toString();
+                          8);
+    builder.append(')');
+    return builder.toString();
   }
 
 }

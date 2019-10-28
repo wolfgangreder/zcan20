@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.packet;
+package at.or.reder.dcc;
 
-import at.or.reder.dcc.PowerPort;
-import java.util.Set;
+import java.io.IOException;
+import org.openide.util.Lookup;
 
 /**
+ * Basisobjekt zur Bibliothek.
  *
  * @author Wolfgang Reder
  */
-public interface PowerInfoRequestAdapter extends PacketAdapter
+public interface Controller extends DriveControl, SwitchControl, POMControl, PowerControl, BaseControl, AutoCloseable,
+                                    Lookup.Provider
 {
 
-  public short getMasterNID();
+  public void open() throws IOException;
 
-  public Set<PowerPort> getOutputs();
+  @Override
+  public void close() throws IOException;
 
 }

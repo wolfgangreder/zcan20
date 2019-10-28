@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */package at.or.reder.zcan20;
+ */package at.or.reder.dcc;
 
 import java.util.Collection;
 import java.util.EnumSet;

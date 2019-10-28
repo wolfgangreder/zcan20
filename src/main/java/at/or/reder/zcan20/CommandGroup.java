@@ -123,6 +123,9 @@ public final class CommandGroup implements Serializable
                                                     CONFIG_UNKNOWN_5,
                                                     CONFIG_MODULE_INFO,
                                                     CONFIG_MODULE_POWER_INFO);
+  public static final byte CONFIG_0_UNKNOWN_2 = 0x02; // wird bei einem modulestart als ACK mit dlc=8 gesendet
+  public static final CommandGroup CONFIG_0 = valueOf((byte) 0x08,
+                                                      "CONFIG_0");
   public static final CommandGroup PUBLIC = valueOf((byte) 0x09,
                                                     "PUBLIC");
   public static final byte NETWORK_PING = 0x00;

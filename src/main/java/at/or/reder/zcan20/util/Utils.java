@@ -28,9 +28,12 @@ import java.nio.ByteOrder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
@@ -39,35 +42,43 @@ import javax.validation.constraints.NotNull;
  *
  * @author Wolfgang Reder
  */
-public final class Utils {
+public final class Utils
+{
 
   public static final Logger LOGGER = Logger.getLogger("at.or.reder.zcan20");
 
-  public static byte byte1(int i) {
+  public static byte byte1(int i)
+  {
     return (byte) (i & 0xff);
   }
 
-  public static byte byte2(int i) {
+  public static byte byte2(int i)
+  {
     return (byte) ((i & 0xff00) >> 8);
   }
 
-  public static byte byte3(int i) {
+  public static byte byte3(int i)
+  {
     return (byte) ((i & 0xff0000) >> 16);
   }
 
-  public static byte byte4(int i) {
+  public static byte byte4(int i)
+  {
     return (byte) ((i & 0xff000000) >> 24);
   }
 
-  public static short short1(int i) {
+  public static short short1(int i)
+  {
     return (short) ((i & 0xffff));
   }
 
-  public static short short2(int i) {
+  public static short short2(int i)
+  {
     return (short) ((i & 0xffff0000) >> 16);
   }
 
-  public static byte[] toByteArray(int... in) {
+  public static byte[] toByteArray(int... in)
+  {
     byte[] result = new byte[in.length];
     for (int i = 0; i < in.length; i++) {
       result[i] = (byte) in[i];
@@ -81,7 +92,8 @@ public final class Utils {
    * @param size size of buffer
    * @return a Buffer with byteorder {@code ByteOrder.LITTLE_ENDIAN}
    */
-  public static ByteBuffer allocateLEBuffer(int size) {
+  public static ByteBuffer allocateLEBuffer(int size)
+  {
     ByteBuffer result = ByteBuffer.allocate(size);
     result.order(ByteOrder.LITTLE_ENDIAN);
     return result;
@@ -96,26 +108,26 @@ public final class Utils {
    * @see #appendHexString(int, java.lang.StringBuilder, int)
    */
   public static StringBuilder appendHexString(int pValue,
-                                              StringBuilder builder) {
+                                              StringBuilder builder)
+  {
     return appendHexString(pValue,
                            builder,
                            -1);
   }
 
   /**
-   * Converts {@code pValue} to hex and appends the result to {@code builder}.
-   * If necessary leading zeros will be added to append at least
-   * {@code minimumDigits} to {@code builder}.
+   * Converts {@code pValue} to hex and appends the result to {@code builder}. If necessary leading zeros will be added to append
+   * at least {@code minimumDigits} to {@code builder}.
    *
    * @param pValue The Integer to convert.
    * @param builder The Buidler to append the result to.
-   * @param minimumDigits miminumDigits to append, or {@code -1} to append only
-   * the mimimal requried digits.
+   * @param minimumDigits miminumDigits to append, or {@code -1} to append only the mimimal requried digits.
    * @return {@code builder}
    */
   public static StringBuilder appendHexString(int pValue,
                                               StringBuilder builder,
-                                              int minimumDigits) {
+                                              int minimumDigits)
+  {
     String tmp = Integer.toHexString(pValue);
     for (int i = tmp.length(); i < minimumDigits; ++i) {
       builder.append('0');
@@ -123,27 +135,32 @@ public final class Utils {
     return builder.append(tmp);
   }
 
-  private static final class InterfaceItem implements Comparable<InterfaceItem> {
+  private static final class InterfaceItem implements Comparable<InterfaceItem>
+  {
 
     private final InterfaceAddress address;
     private final boolean isSubIterface;
 
     public InterfaceItem(InterfaceAddress address,
-                         boolean isSubIterface) {
+                         boolean isSubIterface)
+    {
       this.address = address;
       this.isSubIterface = isSubIterface;
     }
 
-    public InterfaceAddress getAddress() {
+    public InterfaceAddress getAddress()
+    {
       return address;
     }
 
-    public boolean isIsSubIterface() {
+    public boolean isIsSubIterface()
+    {
       return isSubIterface;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
       int hash = 3;
       hash = 79 * hash + Objects.hashCode(this.address);
       hash = 79 * hash + (this.isSubIterface ? 1 : 0);
@@ -151,7 +168,8 @@ public final class Utils {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
       if (this == obj) {
         return true;
       }
@@ -170,7 +188,8 @@ public final class Utils {
     }
 
     @Override
-    public int compareTo(InterfaceItem o) {
+    public int compareTo(InterfaceItem o)
+    {
       if (o == this) {
         return 0;
       }
@@ -198,9 +217,9 @@ public final class Utils {
     }
 
     @Override
-    public String toString() {
-      return "InterfaceItem{" + "address=" + address + ", isSubIterface=" +
-             isSubIterface + '}';
+    public String toString()
+    {
+      return "InterfaceItem{" + "address=" + address + ", isSubIterface=" + isSubIterface + '}';
     }
 
   }
@@ -211,7 +230,8 @@ public final class Utils {
    * @return List of addresses, or empty if no network available
    * @throws java.net.SocketException on error
    */
-  public static List<InterfaceAddress> getAllInterfaceAddresses() throws SocketException {
+  public static List<InterfaceAddress> getAllInterfaceAddresses() throws SocketException
+  {
     Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
     List<InterfaceItem> result = new ArrayList<>();
     while (e.hasMoreElements()) {
@@ -219,7 +239,7 @@ public final class Utils {
       master.getInterfaceAddresses().
               stream().
               map((i) -> new InterfaceItem(i,
-                                             false)).
+                                           false)).
               forEach(result::add);
       Enumeration<NetworkInterface> sub = master.getSubInterfaces();
       while (sub.hasMoreElements()) {
@@ -227,7 +247,7 @@ public final class Utils {
                 getInterfaceAddresses().
                 stream().
                 map((i) -> new InterfaceItem(i,
-                                               true)).
+                                             true)).
                 forEach(result::add);
       }
     }
@@ -238,20 +258,20 @@ public final class Utils {
   }
 
   /**
-   * Prüft ob die beiden Addresse <code>addr1</code> und <code>addr2</code> im
-   * dur <code>subnetRange</code> definierten Subnet liegen.
+   * Prüft ob die beiden Addresse <code>addr1</code> und <code>addr2</code> im dur <code>subnetRange</code> definierten Subnet
+   * liegen.
    *
    * @param addr1 erste Adresse
    * @param addr2 zweite Adresse
    * @param subnetRange breite des Subnets in bits
    * @return true falls die beiden Adresse im gleichen Subnet liegen.
-   * @throws IllegalArgumentException falls <code>addr1</code> oder
-   * <code>addr2</code> gleich <code>null</code>, * * oder
+   * @throws IllegalArgumentException falls <code>addr1</code> oder <code>addr2</code> gleich <code>null</code>, * * oder
    * <code>subnetRange&lt;0</code>
    */
   public static boolean matchesSubnet(InetAddress addr1,
                                       InetAddress addr2,
-                                      short subnetRange) throws IllegalArgumentException {
+                                      short subnetRange) throws IllegalArgumentException
+  {
     if (addr1 == null) {
       throw new IllegalArgumentException("addr1==null");
     }
@@ -282,7 +302,8 @@ public final class Utils {
     return equals;
   }
 
-  private static byte[] createMask(short bitCount) {
+  private static byte[] createMask(short bitCount)
+  {
     int maskLen = bitCount / 8;
     if (bitCount % 8 != 0) {
       ++maskLen;
@@ -317,17 +338,15 @@ public final class Utils {
   }
 
   /**
-   * Converts the array {@code value} to a hex string. Each byte is 2 digits
-   * wide.
+   * Converts the array {@code value} to a hex string. Each byte is 2 digits wide.
    *
    * @param value the array
    * @return a String with the length {@code 2*value.length}
-   * @see #byteBuffer2HexString(java.nio.ByteBuffer, java.lang.StringBuilder,
-   * char)
-   * @see #byteArray2HexString(@javax.validation.constraints.NotNull byte[],
-   * int, int)
+   * @see #byteBuffer2HexString(java.nio.ByteBuffer, java.lang.StringBuilder, char)
+   * @see #byteArray2HexString(@javax.validation.constraints.NotNull byte[], int, int)
    */
-  public static String byteArray2HexString(@NotNull byte[] value) {
+  public static String byteArray2HexString(@NotNull byte[] value)
+  {
     Objects.requireNonNull(value,
                            "value is null");
     return byteArray2HexString(value,
@@ -336,21 +355,20 @@ public final class Utils {
   }
 
   /**
-   * Converts the array {@code value} beginnig with {@code offset} to a hex
-   * string. Each byte is 2 digits wide. if {@code value.length<=offset+len} a
-   * {@link java.lang.IndexOutOfBoundsException} is thrown.
+   * Converts the array {@code value} beginnig with {@code offset} to a hex string. Each byte is 2 digits wide. if
+   * {@code value.length<=offset+len} a {@link java.lang.IndexOutOfBoundsException} is thrown.
    *
    * @param value the array
    * @param offset beginning offset
    * @param len number bytes to convert
    * @return a String with the length {@code 2*len}
-   * @see #byteBuffer2HexString(java.nio.ByteBuffer, java.lang.StringBuilder,
-   * char)
+   * @see #byteBuffer2HexString(java.nio.ByteBuffer, java.lang.StringBuilder, char)
    * @see #byteArray2HexString(@javax.validation.constraints.NotNull byte[])
    */
   public static String byteArray2HexString(@NotNull byte[] value,
                                            int offset,
-                                           int len) {
+                                           int len)
+  {
     Objects.requireNonNull(value,
                            "value is null");
     if (value.length <= offset + len) {
@@ -366,22 +384,19 @@ public final class Utils {
   }
 
   /**
-   * Converts the ByteBuffer {@code buffer} to a hex string and appends the
-   * result to {@code builder}. Each byte is 2 digits wide. If {@code builder}
-   * is {@code null} a new {@link java.lang.StringBuilder} is created. If
-   * {@code interByteChar} is {@code !=0} this character is appended between
-   * each byte.
+   * Converts the ByteBuffer {@code buffer} to a hex string and appends the result to {@code builder}. Each byte is 2 digits wide.
+   * If {@code builder} is {@code null} a new {@link java.lang.StringBuilder} is created. If {@code interByteChar} is {@code !=0}
+   * this character is appended between each byte.
    *
    * @param buffer The data to convert
    * @param builder The builder to append the result to.
-   * @param interByteChar if {@code !=0} this character is appended between each
-   * byte.
-   * @return if {@code builder!=null builder} or the created
-   * {@link java.lang.StringBuilder}
+   * @param interByteChar if {@code !=0} this character is appended between each byte.
+   * @return if {@code builder!=null builder} or the created {@link java.lang.StringBuilder}
    */
   public static StringBuilder byteBuffer2HexString(@NotNull ByteBuffer buffer,
                                                    StringBuilder builder,
-                                                   char interByteChar) {
+                                                   char interByteChar)
+  {
     Objects.requireNonNull(buffer,
                            "input is null");
     StringBuilder result;
@@ -409,7 +424,8 @@ public final class Utils {
   }
 
   private static int convertHexChar(char ch,
-                                    int position) throws ParseException {
+                                    int position) throws ParseException
+  {
     if (ch >= '0' && ch <= '9') {
       return ch - '0';
     } else if (ch >= 'A' && ch <= 'F') {
@@ -425,35 +441,35 @@ public final class Utils {
   /**
    * Helper class to mask IOException in ByteSink.
    */
-  private static final class IOExceptionWrapper extends Error {
+  private static final class IOExceptionWrapper extends Error
+  {
 
-    public IOExceptionWrapper(IOException e) {
+    public IOExceptionWrapper(IOException e)
+    {
       super(e);
     }
 
     @Override
-    public IOException getCause() {
+    public IOException getCause()
+    {
       return (IOException) super.getCause();
     }
 
   }
 
   /**
-   * Convert the hex string {@code seq} to a
-   * {@link java.io.ByteArrayOutputStream}.
+   * Convert the hex string {@code seq} to a {@link java.io.ByteArrayOutputStream}.
    *
    * @param seq Input hex string
    * @param out Output stream
-   * @param interByteChar Optional character to separate bytes. If
-   * {@code \u0000} no separator char is expected.
+   * @param interByteChar Optional character to separate bytes. If {@code \u0000} no separator char is expected.
    * @throws ParseException if the input cannot be parsed.
-   * @see
-   * com.reder.zcan20.util.Utils#hexString2ByteConsumer(java.lang.CharSequence,
-   * com.reder.zcan20.util.ByteConsumer, char)
+   * @see com.reder.zcan20.util.Utils#hexString2ByteConsumer(java.lang.CharSequence, com.reder.zcan20.util.ByteConsumer, char)
    */
   public static void hexString2OutputStream(@NotNull CharSequence seq,
                                             @NotNull ByteArrayOutputStream out,
-                                            char interByteChar) throws ParseException {
+                                            char interByteChar) throws ParseException
+  {
     hexString2ByteConsumer(seq,
                            (b) -> out.write(b & 0xff),
                            interByteChar);
@@ -464,26 +480,24 @@ public final class Utils {
    *
    * @param seq Input hex string
    * @param out Output stream
-   * @param interByteChar Optional character to separate bytes. If
-   * {@code \u0000} no separator char is expected.
+   * @param interByteChar Optional character to separate bytes. If {@code \u0000} no separator char is expected.
    * @throws IOException forwared from {@link java.io.OutputStream#write}
    * @throws ParseException if the input cannot be parsed.
-   * @see
-   * com.reder.zcan20.util.Utils#hexString2ByteConsumer(java.lang.CharSequence,
-   * com.reder.zcan20.util.ByteConsumer, char)
+   * @see com.reder.zcan20.util.Utils#hexString2ByteConsumer(java.lang.CharSequence, com.reder.zcan20.util.ByteConsumer, char)
    */
   public static void hexString2OutputStream(@NotNull CharSequence seq,
                                             @NotNull OutputStream out,
-                                            char interByteChar) throws IOException, ParseException {
+                                            char interByteChar) throws IOException, ParseException
+  {
     try {
       hexString2ByteConsumer(seq,
                              (b) -> {
-                       try {
-                         out.write(b & 0xff);
-                       } catch (IOException ex) {
-                         throw new IOExceptionWrapper(ex);
-                       }
-                     },
+                               try {
+                                 out.write(b & 0xff);
+                               } catch (IOException ex) {
+                                 throw new IOExceptionWrapper(ex);
+                               }
+                             },
                              interByteChar);
     } catch (IOExceptionWrapper e) {
       throw e.getCause();
@@ -491,27 +505,22 @@ public final class Utils {
   }
 
   /**
-   * Convert the hex string {@code seq} to a {@link java.nio.ByteBuffer}. If
-   * {@code buffer} is null, a {@link java.nio.ByteBuffer} is allocated and
-   * returned. Otherwise {@code buffer} is returned. If
-   * {@code buffer.remaining()} is too small to hold all data,
+   * Convert the hex string {@code seq} to a {@link java.nio.ByteBuffer}. If {@code buffer} is null, a {@link java.nio.ByteBuffer}
+   * is allocated and returned. Otherwise {@code buffer} is returned. If {@code buffer.remaining()} is too small to hold all data,
    * {@link java.nio.BufferOverflowException} is thrown.
    *
    * @param seq Input hex string
-   * @param buffer Outputbuffer. If {@code null} a indirect ByteBuffer will be
-   * allocated.
-   * @param interByteChar Optional character to separate bytes. If
-   * {@code \u0000} no separator char is expected.
+   * @param buffer Outputbuffer. If {@code null} a indirect ByteBuffer will be allocated.
+   * @param interByteChar Optional character to separate bytes. If {@code \u0000} no separator char is expected.
    * @return The buffer containing the data.
    * @throws ParseException if the input cannot be parsed.
    * @see java.nio.ByteBuffer#allocate(int)
-   * @see
-   * com.reder.zcan20.util.Utils#hexString2ByteConsumer(java.lang.CharSequence,
-   * com.reder.zcan20.util.ByteConsumer, char)
+   * @see com.reder.zcan20.util.Utils#hexString2ByteConsumer(java.lang.CharSequence, com.reder.zcan20.util.ByteConsumer, char)
    */
   public static ByteBuffer hexString2ByteBuffer(@NotNull CharSequence seq,
                                                 ByteBuffer buffer,
-                                                char interByteChar) throws ParseException {
+                                                char interByteChar) throws ParseException
+  {
     Objects.requireNonNull(seq,
                            "Input is null");
     ByteBuffer result;
@@ -535,19 +544,18 @@ public final class Utils {
   }
 
   /**
-   * Convert the input {@code seq} to bytes. For each converted byte
-   * {@code byteConsumer} is called.
+   * Convert the input {@code seq} to bytes. For each converted byte {@code byteConsumer} is called.
    *
    * @param seq Input sequence
    * @param byteConsumer Consumer of data
-   * @param interByteChar Optional character to separate bytes. If
-   * {@code \u0000} no separator char is expected. A trailing separator char is
-   * allowed.
+   * @param interByteChar Optional character to separate bytes. If {@code \u0000} no separator char is expected. A trailing
+   * separator char is allowed.
    * @throws ParseException if the input cannot be parsed.
    */
   public static void hexString2ByteConsumer(@NotNull CharSequence seq,
                                             @NotNull ByteConsumer byteConsumer,
-                                            char interByteChar) throws ParseException {
+                                            char interByteChar) throws ParseException
+  {
     Objects.requireNonNull(seq,
                            "Input sequence is null");
     Objects.requireNonNull(byteConsumer,
@@ -578,7 +586,8 @@ public final class Utils {
     }
   }
 
-  public static String packetToString(@NotNull Packet packet) {
+  public static String packetToString(@NotNull Packet packet)
+  {
     StringBuilder tmp = new StringBuilder();
     tmp.append("From ");
     tmp.append(Integer.toHexString(packet.getSenderNID() & 0xffff));
@@ -591,6 +600,8 @@ public final class Utils {
     tmp.append(", ");
     tmp.append(packet.getCommandMode().
             name());
+    tmp.append(" 0b");
+    tmp.append(Integer.toBinaryString(packet.getCommandMode().getMagic() & 0x03));
     tmp.append(", ");
     ByteBuffer data = packet.getData();
     tmp.append(data.capacity());
@@ -606,7 +617,62 @@ public final class Utils {
     return tmp.toString();
   }
 
-  private Utils() {
+  public static <C> Set<C> unmodifiableSetOf(C c1,
+                                             C c2)
+  {
+    return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(c1,
+                                                                   c2)));
+  }
+
+  public static <C> Set<C> unmodifiableSetOf(C c1,
+                                             C c2,
+                                             C c3)
+  {
+    return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(c1,
+                                                                   c2,
+                                                                   c3)));
+  }
+
+  public static <C> Set<C> unmodifiableSetOf(C c1,
+                                             C c2,
+                                             C c3,
+                                             C c4)
+  {
+    return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(c1,
+                                                                   c2,
+                                                                   c3,
+                                                                   c4)));
+  }
+
+  private static OSType osType;
+
+  public static synchronized OSType getOSType()
+  {
+    if (osType == null) {
+      String osName = System.getProperty("os.name");
+      if (osName.startsWith("Linux")) {
+        osType = OSType.LINUX;
+      } else if (osName.startsWith("Windows")) {
+        osType = OSType.WINDOWS;
+      } else {
+        osType = OSType.UNKNOWN;
+      }
+    }
+    return osType;
+  }
+
+  public static boolean isWindows()
+  {
+    return getOSType() == OSType.WINDOWS;
+  }
+
+  public static boolean isLinux()
+  {
+    return getOSType() == OSType.LINUX;
+  }
+
+  private Utils()
+  {
   }
 
 }

@@ -18,7 +18,7 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.PowerPort;
+import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;

@@ -15,28 +15,23 @@
  */
 package at.or.reder.zcan20.impl;
 
+import at.or.reder.dcc.LinkState;
+import at.or.reder.dcc.LinkStateListener;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
-import at.or.reder.zcan20.LinkState;
-import at.or.reder.zcan20.LinkStateListener;
 import at.or.reder.zcan20.PacketListener;
-import at.or.reder.zcan20.PowerMode;
-import at.or.reder.zcan20.PowerPort;
+import at.or.reder.zcan20.TrackConfig;
 import at.or.reder.zcan20.ZCAN;
 import at.or.reder.zcan20.ZCANFactory;
-import at.or.reder.zcan20.packet.CVInfoAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketBuilder;
 import at.or.reder.zcan20.packet.Ping;
 import at.or.reder.zcan20.util.CanIdMatcher;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,10 +48,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.validation.constraints.NotNull;
-import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.RequestProcessor;
+import org.openide.util.lookup.Lookups;
 
 public final class ZCANImpl implements ZCAN
 {
@@ -167,7 +162,6 @@ public final class ZCANImpl implements ZCAN
 
   }
 
-  private static final Logger LOGGER = Logger.getLogger("at.or.reder.zcan20");
   private final ZPort port;
   private final AtomicInteger threadCounter = new AtomicInteger();
   private final AtomicInteger listenerThreadCounter = new AtomicInteger();
@@ -175,27 +169,28 @@ public final class ZCANImpl implements ZCAN
   private final ExecutorService packetThread;
   private final AtomicBoolean abortFlag = new AtomicBoolean();
   private Future<?> terminateResult;
-  private final Object lock = new Object();
   private final Set<PacketListener> packetListener = new CopyOnWriteArraySet<>();
   private final ConcurrentMap<CommandGroup, Set<PacketListener>> filteredPacketListener = new ConcurrentHashMap<>();
   private final AtomicReference<Short> masterNID = new AtomicReference<>((short) -1);
   private final AtomicInteger masterUID = new AtomicInteger();
   private final AtomicInteger session = new AtomicInteger();
-  private volatile long lastPacketTimestamp = -1;
   private final short myNID;
-  private volatile RequestProcessor.Task ownerPing;
-  private volatile int ownerPingIntervall = 5000;
-  private volatile int ownerPingJitter = 100;
-  private final Random jitterRandom = new Random();
   private volatile LinkState linkState = LinkState.CLOSED;
   private final RequestProcessor requestProcessor;
   private final RequestProcessor.Task disconnectTimer;
   private volatile int linkTimeout = 10000;
   private final Set<LinkStateListener> linkStateListener = new CopyOnWriteArraySet<>();
+  private final NetworkControlImpl networkControl;
+  private final SystemControlImpl systemControl;
+  private final TrackConfig trackConfig;
+  private final Lookup myLookup;
+  private final Object lock;
 
   public ZCANImpl(@NotNull ZPort port,
-                  Map<String, String> properties)
+                  Map<String, String> properties,
+                  Object lock)
   {
+    this.lock = lock != null ? lock : new Object();
     this.port = Objects.requireNonNull(port,
                                        "port is null");
     this.packetThread = Executors.newFixedThreadPool(1,
@@ -213,6 +208,24 @@ public final class ZCANImpl implements ZCAN
                                             true,
                                             true);
     disconnectTimer = requestProcessor.create(this::onLinkTimeout);
+    networkControl = new NetworkControlImpl(this);
+    systemControl = new SystemControlImpl(this);
+    trackConfig = new TrackConfigImpl(this);
+    myLookup = Lookups.fixed(port,
+                             networkControl,
+                             systemControl,
+                             trackConfig);
+  }
+
+  @Override
+  public Lookup getLookup()
+  {
+    return myLookup;
+  }
+
+  Object getLock()
+  {
+    return lock;
   }
 
   @Override
@@ -245,48 +258,42 @@ public final class ZCANImpl implements ZCAN
     return result;
   }
 
-  private void doSendPacket(@NotNull Packet p) throws IOException
+  void doSendPacket(@NotNull Packet p) throws IOException
   {
-    if (!isOpen()) {
-      throw new IOException("Port is not open");
-    }
-    port.sendPacket(p);
-    // Wir habe etwas gesendet, also kann der ping warten...
-    schedulePing();
+    doSendPacket(p,
+                 null,
+                 null);
   }
 
-  private <T extends PacketAdapter> Future<T> doSendPacket(@NotNull Packet p,
-                                                           CanIdMatcher matcher,
-                                                           @NotNull Class<? extends T> resultData) throws IOException
+  <T extends PacketAdapter> Future<T> doSendPacket(@NotNull Packet p,
+                                                   Predicate<? super Packet> matcher,
+                                                   Class<? extends T> resultData) throws IOException
   {
     if (!isOpen()) {
       throw new IOException("Port is not open");
     }
-    CompletableFuture<T> future = new CompletableFuture<>();
-    FutureListener<T> lf = new FutureListener<>(future,
-                                                matcher,
-                                                resultData);
-    lf.start();
+    CompletableFuture<T> future = null;
+    if (matcher != null && resultData != null) {
+      future = new CompletableFuture<>();
+      FutureListener<T> lf = new FutureListener<>(future,
+                                                  matcher,
+                                                  resultData);
+      lf.start();
+    }
     port.sendPacket(p);
     // Wir habe etwas gesendet, also kann der ping warten...
-    schedulePing();
+    networkControl.schedulePing();
     return future;
   }
 
-  private <T extends PacketAdapter> T sendReceive(Packet packet,
-                                                  Predicate<? super Packet> matcher,
-                                                  Class<? extends T> adapterClass,
-                                                  long timeout) throws IOException
+  <T extends PacketAdapter> T sendReceive(Packet packet,
+                                          Predicate<? super Packet> matcher,
+                                          Class<? extends T> adapterClass,
+                                          long timeout) throws IOException
   {
-    CompletableFuture<T> future = new CompletableFuture<>();
-    FutureListener<T> lf = new FutureListener<>(future,
-                                                matcher,
-                                                adapterClass);
-    lf.start();
-    port.sendPacket(packet);
-    // Wir habe etwas gesendet, also kann der ping warten...
-
-    schedulePing();
+    Future<T> future = doSendPacket(packet,
+                                    matcher,
+                                    adapterClass);
     try {
       return future.get(timeout,
                         TimeUnit.MILLISECONDS);
@@ -305,98 +312,9 @@ public final class ZCANImpl implements ZCAN
     }
   }
 
-  private boolean isOpen()
+  boolean isOpen()
   {
     return terminateResult != null;
-  }
-
-  @Override
-  public boolean sendPing()
-  {
-    try {
-      doSendPacket(createPacketBuilder().
-              buildPingPacket(myNID),
-                   new CanIdMatcher(CanId.valueOf(
-                           CommandGroup.NETWORK,
-                           CommandGroup.NETWORK_PING,
-                           CommandMode.EVENT,
-                           (short) 0),
-                                    CanIdMatcher.MASK_NO_ADDRESS),
-                   Ping.class);
-    } catch (IOException ex) {
-      Exceptions.printStackTrace(ex);
-      return false;
-    }
-    return true;
-  }
-
-  private void postPing() throws IOException
-  {
-    doSendPacket(createPacketBuilder().
-            buildPingPacket(myNID));
-  }
-
-  @Override
-  public boolean isAutopingEnabled()
-  {
-    return ownerPing != null;
-  }
-
-  private int getScheduleTime()
-  {
-    return ownerPingIntervall + jitterRandom.nextInt((int) ownerPingJitter) - (ownerPingJitter / 2);
-  }
-
-  private void schedulePing()
-  {
-    if (ownerPing != null) {
-      int nextSchedule = getScheduleTime();
-      LOGGER.log(Level.FINER,
-                 "Schedule ping in {0,number,0} ms",
-                 new Object[]{nextSchedule});
-      ownerPing.schedule(nextSchedule);
-    }
-  }
-
-  private void onAutomaticPing()
-  {
-    try {
-      postPing();
-    } catch (IOException ex) {
-      LOGGER.log(Level.WARNING,
-                 "onAutomaticPing:" + ex.getMessage(),
-                 ex);
-    } finally {
-      schedulePing();
-    }
-  }
-
-  @Override
-  public void setAutopingEnabled(boolean e)
-  {
-    if (e != isAutopingEnabled()) {
-      if (e && isOpen()) {
-        if (ownerPing == null) {
-          ownerPing = requestProcessor.post(this::onAutomaticPing,
-                                            getScheduleTime());
-        }
-      } else if (ownerPing != null) {
-        ownerPing.cancel();
-        ownerPing = null;
-      }
-    }
-  }
-
-  @Override
-  public int getAutopingIntervall()
-  {
-    return (int) (ownerPingIntervall / 1000);
-  }
-
-  @Override
-  public void setAutopingIntervall(int autoPingIntervall)
-  {
-    this.ownerPingIntervall = autoPingIntervall * 1000;
   }
 
   public void open(long timeout,
@@ -427,7 +345,7 @@ public final class ZCANImpl implements ZCAN
                                   Integer.toHexString(session.get() & 0xffff)});
           setLinkState(LinkState.OPEN);
           disconnectTimer.schedule(linkTimeout);
-          setAutopingEnabled(true);
+          networkControl.setAutopingEnabled(true);
         } catch (InterruptedException ex) {
           Thread.currentThread().interrupt();
           close();
@@ -512,7 +430,6 @@ public final class ZCANImpl implements ZCAN
     }
     masterUID.set(packet.getMasterNID());
     session.set(nsession);
-    lastPacketTimestamp = System.currentTimeMillis();
     LOGGER.log(Level.FINE,
                "Ping received uid=0x{0}, nid=0x{3}, type=0x{1}, session=0x{2}",
                new Object[]{Integer.toHexString(packet.getPacket().getSenderNID() & 0xffff),
@@ -527,10 +444,7 @@ public final class ZCANImpl implements ZCAN
     synchronized (lock) {
       if (isOpen()) {
         try (port) {
-          if (ownerPing != null) {
-            ownerPing.cancel();
-          }
-          ownerPing = null;
+          networkControl.close();
           abortFlag.set(true);
           try {
             terminateResult.get(10,
@@ -584,7 +498,7 @@ public final class ZCANImpl implements ZCAN
     if (state != linkState) {
       this.linkState = state;
       for (LinkStateListener l : linkStateListener) {
-        l.onLinkStateChanged(this,
+        l.onLinkStateChanged(null,
                              state);
       }
     }
@@ -649,117 +563,16 @@ public final class ZCANImpl implements ZCAN
     }
   }
 
-  @Override
-  public long getLastPingTimestamp()
+  short getMasterNID()
   {
-    return lastPacketTimestamp;
+    return masterNID.get();
   }
 
-  @Override
-  public void getPowerStateInfo(@NotNull final Collection<PowerPort> output) throws IOException
+  RequestProcessor.Task post(Runnable run,
+                             long timeout)
   {
-    if (Collections.frequency(Objects.requireNonNull(output,
-                                                     "output is null"),
-                              null) > 0) {
-      throw new NullPointerException("output contains null");
-    }
-    if (output.stream().filter((o) -> !o.isValidInSet()).findAny().isPresent()) {
-      throw new IllegalArgumentException(
-              "output is not valid for set/request methods");
-    }
-    PacketBuilder builder = createPacketBuilder();
-    Packet packet = builder.buildSystemPowerInfoPacket(masterNID.get(),
-                                                       output);
-    doSendPacket(packet);
-  }
-
-  @Override
-  public void setPowerModeInfo(PowerPort output,
-                               PowerMode state) throws IOException
-  {
-    Objects.requireNonNull(output,
-                           "output is null");
-    if (!output.isValidInSet()) {
-      throw new IllegalArgumentException(
-              "output is not valid for set/request methods");
-    }
-    Objects.requireNonNull(state,
-                           "state is null");
-    PacketBuilder builder = createPacketBuilder();
-    Packet packet = builder.buildSystemPowerInfoPacket(masterNID.get(),
-                                                       Collections.singleton(output),
-                                                       state);
-    doSendPacket(packet);
-  }
-
-  @Override
-  public void readCV(short address,
-                     int cv) throws IOException
-  {
-    PacketBuilder builder = createPacketBuilder();
-    Packet packet = builder.buildReadCVPacket(masterNID.get(),
-                                              address,
-                                              cv);
-    doSendPacket(packet);
-  }
-
-  @Override
-  public CVInfoAdapter readCV(short address,
-                              int cv,
-                              long timeout,
-                              Predicate<? super Packet> packetMatcher) throws IOException
-  {
-    Packet packet = createPacketBuilder().
-            buildReadCVPacket(masterNID.get(),
-                              address,
-                              cv);
-    return sendReceive(packet,
-                       new CanIdMatcher(CanId.valueOf(
-                               CommandGroup.TRACK_CONFIG_PRIVATE,
-                               CommandGroup.TSE_PROG_READ,
-                               CommandMode.ACK,
-                               masterNID.get()),
-                                        CanIdMatcher.MASK_NO_ADDRESS
-                                                & (~CanIdMatcher.MASK_COMMAND)).and(
-                               packetMatcher),
-                       CVInfoAdapter.class,
-                       timeout);
-  }
-
-  @Override
-  public void writeCV(short address,
-                      int cv,
-                      short value) throws IOException
-  {
-    Packet packet = createPacketBuilder().
-            buildWriteCVPacket(masterNID.get(),
-                               address,
-                               cv,
-                               value);
-    doSendPacket(packet);
-  }
-
-  @Override
-  public CVInfoAdapter writeCV(short address,
-                               int cv,
-                               short value,
-                               long timeout) throws IOException
-  {
-    Packet packet = createPacketBuilder().
-            buildWriteCVPacket(masterNID.get(),
-                               address,
-                               cv,
-                               value);
-    return sendReceive(packet,
-                       new CanIdMatcher(CanId.valueOf(
-                               CommandGroup.TRACK_CONFIG_PRIVATE,
-                               CommandGroup.TSE_PROG_WRITE,
-                               CommandMode.ACK,
-                               masterNID.get()),
-                                        CanIdMatcher.MASK_NO_ADDRESS
-                                                & (~CanIdMatcher.MASK_COMMAND)),
-                       CVInfoAdapter.class,
-                       timeout);
+    return requestProcessor.post(run,
+                                 linkTimeout);
   }
 
 }

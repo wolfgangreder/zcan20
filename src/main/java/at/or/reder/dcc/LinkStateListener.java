@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.packet;
+package at.or.reder.dcc;
 
-import at.or.reder.dcc.PowerPort;
-import java.util.Set;
+import java.util.EventListener;
 
-/**
- *
- * @author Wolfgang Reder
- */
-public interface PowerInfoRequestAdapter extends PacketAdapter
+@FunctionalInterface
+public interface LinkStateListener extends EventListener
 {
 
-  public short getMasterNID();
-
-  public Set<PowerPort> getOutputs();
+  public void onLinkStateChanged(Controller controller,
+                                 LinkState linkState);
 
 }

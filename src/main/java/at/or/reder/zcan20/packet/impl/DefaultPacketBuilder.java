@@ -23,12 +23,13 @@ import at.or.reder.zcan20.LocoActive;
 import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.PowerMode;
-import at.or.reder.zcan20.PowerPort;
+import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedFlags;
 import at.or.reder.zcan20.SpeedSteps;
 import at.or.reder.zcan20.SpeedlimitMode;
+import at.or.reder.zcan20.ZCAN;
 import at.or.reder.zcan20.ZCANFactory;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
@@ -42,6 +43,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import java.util.logging.Level;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -211,7 +213,8 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                               return ef;
                                             }
                                           }
-//                                          System.err.println("Found no packetadapter for " + s.toString());
+                                          ZCAN.LOGGER.log(Level.WARNING,
+                                                          () -> "Found no packetadapter for " + s.toString());
                                           return null;
                                         });
   }

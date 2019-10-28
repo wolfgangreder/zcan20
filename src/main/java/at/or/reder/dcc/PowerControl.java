@@ -13,12 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20;
+package at.or.reder.dcc;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface AccessoryControl
+public interface PowerControl extends BaseControl
 {
+
+  public static final String PROP_POWERMODE = "powerMode";
+
+  public PowerMode getPowerMode(PowerPort port) throws IOException, TimeoutException;
+
+  public void postPowerModeRequest(PowerPort port) throws IOException;
+
+  public void setPowerMode(PowerPort port,
+                           PowerMode mode) throws IOException;
+
+  public void addPowerEventListener(PowerEventListener listener);
+
+  public void removePowerEventListener(PowerEventListener listener);
+
 }

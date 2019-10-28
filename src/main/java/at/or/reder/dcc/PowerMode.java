@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20;
+package at.or.reder.dcc;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public enum LinkState
+public enum PowerMode
 {
-  OPEN,
-  BROKEN,
-  CLOSED
+  ON,
+  OFF,
+  SSPEM,
+  SSPF0;
 }
