@@ -44,6 +44,8 @@ public class XmlResourceDescriptor
     } else {
       this.loc = null;
     }
+    this.name = name;
+    this.description = desc;
   }
 
   @XmlAttribute(name = "lang")

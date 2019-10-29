@@ -15,8 +15,21 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.dcc.cv.impl.CVBitDescriptorBuilderImpl;
+import at.or.reder.dcc.cv.impl.CVEntryBuilderImpl;
+import at.or.reder.dcc.cv.impl.CVSetBuilderImpl;
 import at.or.reder.dcc.cv.impl.CVValueImpl;
+import at.or.reder.dcc.cv.impl.JAXBHelper;
+import at.or.reder.dcc.cv.impl.XmlCVSet;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 /**
  *
@@ -32,6 +45,58 @@ public final class CVFactories
     return new CVValueImpl(state,
                            value,
                            entry);
+  }
+
+  public static CVBitDescriptorBuilder createBitDescriptorBuilder()
+  {
+    return new CVBitDescriptorBuilderImpl();
+  }
+
+  public static CVEntryBuilder createEntryBuilder()
+  {
+    return new CVEntryBuilderImpl();
+  }
+
+  public static CVSetBuilder createCVSetBuilder()
+  {
+    return new CVSetBuilderImpl();
+  }
+
+  public static void storeCVSetToXML(CVSet set,
+                                     OutputStream out) throws IOException
+  {
+    try {
+      XmlCVSet xs = new XmlCVSet(set);
+      JAXBContext ctx = JAXBHelper.getJAXBContext();
+      Marshaller m = ctx.createMarshaller();
+      m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
+                    true);
+      m.setProperty(Marshaller.JAXB_ENCODING,
+                    StandardCharsets.UTF_8.name());
+      m.marshal(xs,
+                out);
+    } catch (JAXBException ex) {
+      throw new IOException(ex);
+    }
+  }
+
+  public static CVSet loadCVSetFromXML(InputStream is) throws IOException
+  {
+    try {
+      JAXBContext ctx = JAXBHelper.getJAXBContext();
+      Unmarshaller u = ctx.createUnmarshaller();
+      Object tmp = u.unmarshal(is);
+      if (tmp instanceof XmlCVSet) {
+        return ((XmlCVSet) tmp).toCVSet();
+      }
+      return null;
+    } catch (JAXBException ex) {
+      throw new IOException(ex);
+    }
+  }
+
+  private CVFactories()
+  {
   }
 
 }

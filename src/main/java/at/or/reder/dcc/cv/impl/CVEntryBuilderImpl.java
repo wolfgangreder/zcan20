@@ -88,6 +88,39 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
   }
 
   @Override
+  public CVEntryBuilder address(int address)
+  {
+    this.address = address;
+    return this;
+  }
+
+  @Override
+  public CVEntryBuilder bankAddress(int bank0,
+                                    int bank1,
+                                    int bank2,
+                                    int bank3)
+  {
+    bankAddresses.clear();
+    if (bank0 > 0) {
+      bankAddresses.put(CVType.BANKREGISTER_0,
+                        bank0);
+      if (bank1 > 0) {
+        bankAddresses.put(CVType.BANKREGISTER_1,
+                          bank1);
+        if (bank2 > 0) {
+          bankAddresses.put(CVType.BANKREGISTER_2,
+                            bank2);
+          if (bank3 > 0) {
+            bankAddresses.put(CVType.BANKREGISTER_3,
+                              bank3);
+          }
+        }
+      }
+    }
+    return this;
+  }
+
+  @Override
   public CVEntryBuilder type(CVType type)
   {
     this.type = type != null ? type : CVType.NUMERIC;

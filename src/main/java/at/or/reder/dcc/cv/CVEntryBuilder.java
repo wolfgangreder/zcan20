@@ -29,6 +29,32 @@ public interface CVEntryBuilder
 
   public CVEntryBuilder copy(@NotNull CVEntry entry);
 
+  public CVEntryBuilder address(int address);
+
+  public default CVEntryBuilder flatAddress(long flatAddress)
+  {
+    CVEntryBuilder result = address((int) (flatAddress & 0xffff));
+    result = result.bankAddress((int) ((flatAddress & 0xff0000) >> 16),
+                                (int) ((flatAddress & 0xff000000) >> 24),
+                                (int) ((flatAddress & 0xff00000000L) >> 32),
+                                (int) ((flatAddress & 0xff0000000000L) >> 40));
+    return result;
+  }
+
+  public CVEntryBuilder bankAddress(int bank0,
+                                    int bank1,
+                                    int bank2,
+                                    int bank3);
+
+  public default CVEntryBuilder bankAddress(int bank0,
+                                            int bank1)
+  {
+    return bankAddress(bank0,
+                       bank1,
+                       -1,
+                       -1);
+  }
+
   public CVEntryBuilder type(@NotNull CVType type);
 
   public CVEntryBuilder addDescription(Locale locale,

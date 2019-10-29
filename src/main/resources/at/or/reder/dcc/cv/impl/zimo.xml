@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2019 Wolfgang Reder.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<cv-set id="4903ccd9-6528-4509-944a-77d133ffa4ef">
+  <descriptors>
+    <descriptor name="ZIMO CV Liste">CV Liste Stand Mai 2019</descriptor>
+    <descriptor lang="en" name="ZIMO CV list">CV list Version May 2019</descriptor>
+  </descriptors>
+  <entries>
+    <entry address="1" type="NUMERIC" default-value="3" range-min="1" range-max="127" valuemask="127">
+      <descriptors>
+        <descriptor lang="en" name="Primary Address">The “short” (1-byte) vehicle address; This is active, if CV #29, Bit 5 = 0 (basic configuration)</descriptor>
+        <descriptor name=" Fahrzeugadresse">Die “kurze” (1-byte) Fahrzeugadresse; Diese ist aktiv, wenn CV #29 (Grundeinstellungen) Bit 5 = 0 gesetzt ist.</descriptor>
+      </descriptors>
+      <flags>DCC_MANDATORY</flags>
+    </entry>
+    <entry address="2" type="NUMERIC" default-value="1" range-min="1" range-max="252">
+      <descriptors>
+        <descriptor name="Anfahrspannung der Dreipunktkennlinie">Interne Fahrstufe für niedrigste externe Fahrstufe (also Fahrstufe 1). Nur wirksam, wenn CV #29 Bit 4 = 0 gesetzt ist (also Dreipunkt-Kennlinie nach CVs #2,# 5, #6).</descriptor>
+        <descriptor lang="en" name="Start voltage">Internal speed step applied for lowest external speed (i.e. speed step 1). Only valid, if CV #29, Bit 4 = 0 (i.e. 3-point speed table according to CVs #2, 5, 6).</descriptor>
+      </descriptors>
+      <flags>DCC_RECOMMENDED</flags>
+    </entry>
+    <entry address="3" type="NUMERIC" default-value="2">
+      <descriptors>
+        <descriptor name="Beschleunigungszeit">Der Inhalt dieser CV, multipliziert mit 0,9, ergibt die Zeit in Sekunden für den Beschleunigungsvorgang vom Stillstand bis zur vollen Fahrt.</descriptor>
+        <descriptor lang="en" name="Acceleration rate">Multiplied by 0.9 equals the time in sec from standstill to full speed.</descriptor>
+      </descriptors>
+      <flags>DCC_RECOMMENDED</flags>
+    </entry>
+    <entry address="4" type="NUMERIC" default-value="1">
+      <descriptors>
+        <descriptor name="Bremszeit">Der Inhalt dieser CV, multipliziert mit 0,9, ergibt die Zeit in sec für den Bremsvorgang von voller Fahrt bis zum Stillstand.</descriptor>
+        <descriptor lang="en" name="Deceleration rate">Multiplied by 0.9 equals the time in sec from full speed to standstill.</descriptor>
+      </descriptors>
+      <flags>DCC_RECOMMENDED</flags>
+    </entry>
+    <entry address="5" type="NUMERIC" default-value="1">
+      <descriptors>
+        <descriptor name="Maximalgeschwindigkeit">Interne Fahrstufe für höchste externe Fahrstufe (also Fahrstufe 14, 28 bzw. 128 je nach Einstellung in CV #29); “0" und ”1" = keine Wirkung. Nur wirksam, wenn Bit 4 in CV #29 auf 0 gesetzt (also Dreipunkt-Kennlinie nach CVs 2, 5, 6). Elegantere Alternative ist CV #57 (Regelungsreferenz).</descriptor>
+        <descriptor lang="en" name="Top speed">Internal speed step applied for the highest external speed (speed step 14, 28 or 128 according to the adjustments in CV # 29); “0" and ”1" = no effect. Only effective, if CV #29, Bit 4 = 0 (i.e. 3-point speed table according to CVs #2, 5, 6). As an elegant alternative use CV #57 (voltage reference).</descriptor>
+      </descriptors>
+      <flags>DCC_OPTIONAL</flags>
+    </entry>
+    <entry address="6" type="NUMERIC" default-value="0">
+      <descriptors>
+        <descriptor name=" Mittelgeschwindigkeit">Interne Fahrstufe für mittlere externe Fahrstufe (= Fahrstufe 7,14 bzw. 63 je nach Anzahl der Fahrstufen 14, 28 oder 128); ”1" = Default-Kennlinie (Mittelgeschwindigkeit ist ein Drittel der Maximalgeschwindigkeit, also: wenn CV # 5 = 255, dann entsprechend CV #6 = 85, sonst entsprechend niedriger). Die sich aus den CVs #2, 5, 6 ergebene Dreipunkt-Kennlinie wird automatische geglättet; also kein Knick in der Mitte merkbar! Nur wirksam, wenn Bit 4 in CV #29 auf 0 gesetzt.</descriptor>
+        <descriptor lang="en" name="Medium speed">Internal speed step applied for medium external speed (= speed step 7,14 or 63 depending on the number of speed steps: 14, 28 or 128); ”1" = Default-speed table (medium speed is a third of the maximum speed, so: if CV #5 = 255, then CV #6 = 85; or if CV #5 is lower, CV #6 is lowered correspondingly). The 3-point speed table according to CVs #2, 5, 6 is automatically smoothed out; this means no sharp bend in the middle. Only effective if CV #29, Bit 4 = 0.</descriptor>
+      </descriptors>
+      <flags>DCC_OPTIONAL</flags>
+    </entry>
+    <entry address="7" type="NUMERIC" default-value="0">
+      <descriptors>
+        <descriptor name="Versionsnummer"><![CDATA[<p>Hier kann ausgelesen werden, welche SW-Version der vorliegende Decoder enthält.</p>
+          <p>CV7 Hauptversionsnummer – CV65 Subversionsnummer</p>
+          <p>Pseudo-Programmieren (”Pseudo” = programmierter Wert wird nicht wirklich abgespeichert) als Vorausaktion zum Programmieren oder Auslesen “höherer” (# > 99) CVs und/oder höherer (> 99) Werte mit Digitalsystemen, welche nur eingeschränkte CV-Nummern- und Wertebereiche beherrschen.</p>
+          <table><tr><th>Einerstelle</th><th>&nbsp;</th></tr>
+          <tr><td>1</td><td>Bei nachfolgendem Programmiervorgang wird Programmierwert um 100 erhöht.</td></tr>
+          <tr><td>2</td><td>.... um 200 erhöht.</td></tr></table>
+          <table><tr><th>Zehnerstelle</th><th>&nbsp;</th></tr>
+          <tr><td>1</td><td>Bei nachfolgendem Programmiervorgang wird CV-Nummer um 100 erhöht,</td></tr>
+          <tr><td>2</td><td>.... um 200 erhöht,</td></tr>
+          <tr><td>3</td><td>.... um 300 erhöht.</td></tr>
+          <tr><td>4</td><td>... um 400 ... etc.</td></tr></table>
+          <table><tr><th>Hunderterstelle</th><th>&nbsp;</th></tr>
+          <tr><td>1</td><td>Umwertung der CV-Nummer wird beibehalten bis Power-down.</td></tr>
+          <tr><td>2</td><td>... wird beibehalten bis zur Aufhebung durch CV #7 = 0.</td></tr></table>]]>
+        </descriptor>
+        <descriptor lang="en" name="SW version number"><![CDATA[<p>This CV holds the number of the firmware version currently on the decoder.</p>
+          <p>CV #7 number of main version – CV #65 number of sub-version</p>
+          <p>Pseudo-Programming (”Pseudo” = programmed value is not saved) as preliminary action to program or read „higher“ CVs (# > 99) and/or higher values (> 99) with digital systems with limited range.</p>
+          <table><tr><th>Ones digit</th><th>&nbsp;</th></tr>
+          <tr><td>1</td><td>subsequent programming value +100</td></tr>
+          <tr><td>2</td><td>+ 200.</td></tr></table>
+          <table><tr><th>Tens digit</th><th>&nbsp;</th></tr>
+          <tr><td>1</td><td>subsequent CV number +100,</td></tr>
+          <tr><td>2</td><td>+ 200,</td></tr>
+          <tr><td>3</td><td>+ 300.</td></tr>
+          <tr><td>4</td><td>+ 400 ... etc.</td></tr></table>
+          <table><tr><th>Hundreds digit</th><th>&nbsp;</th></tr>
+          <tr><td>1</td><td>revaluation of CV number valid until power-off.</td></tr>
+          <tr><td>2</td><td>... until annulment by CV #7 = 0.</td></tr></table>]]></descriptor>
+      </descriptors>
+      <flags>DCC_MANDATORY READ_ONLY</flags>
+    </entry>
+    <entry address="8" type="NUMERIC" default-value="145">
+      <descriptors>
+        <descriptor name="Herstelleridentifikation und HARD RESET"><![CDATA[<p>Von der NMRA vergebene Herstellernummer; für ZIMO “145” (”10010001”).</p>
+          <p><b>Pseudo-Programmieren</b> (”Pseudo” = programmierter Wert wird nicht gespeichert):</p>
+          <p><b>CV #8 = “8”</b> -> HARD RESET und SOUND RESET (Default Werte des Soundprojektes wie beim Flashen).</p>
+          <p><b>CV #8 = “9”</b> -> HARD RESET für LGB-Betrieb (14 Fahrstufen, Pulskette).</p>
+          <p><b>CV #8 = „0“</b> -> HARD RESET (Default Werte)</p>
+          <p><b>CV #8 = “...”</b> -> Laden vorgegebener oder Herstellerdefinierter CV-Sets von NICHT-Sounddecoder.</p>]]></descriptor>
+        <descriptor lang="en" name="Manufacturer ID and HARD RESET"><![CDATA[<p>The number issued for ZIMO by the NMRA: “145” (”10010001”).</p>
+          <p><b>Pseudo-programming</b> (”Pseudo” = programmed value is not saved):</p>
+          <p><b>CV #8 = “8”</b> -> HARD RESET and SOUND RESET (Default values of the sound project).</p>
+          <p><b>CV #8 = “9”</b> -> HARD RESET for LGB operation (14 speed steps, pulse chain).</p>
+          <p><b>CV #8 = “0“</b> -> HARD RESET (Default values)</p>
+          <p><b>CV #8 = “...”</b> -> loading predefined or manufacturer’s CV sets of NON-sound decoders.</p>]]></descriptor>
+      </descriptors>
+      <flags>DCC_MANDATORY READ_ONLY</flags>
+    </entry>
+  </entries>
+</cv-set>

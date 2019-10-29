@@ -15,11 +15,26 @@
  */
 package at.or.reder.dcc;
 
+import at.or.reder.dcc.cv.CVSet;
+import java.net.URL;
+
 /**
  *
  * @author Wolfgang Reder
  */
 public interface Decoder
 {
+
+  public int getManufacturer();
+
+  public String getName();
+
+  public String getPLU();
+
+  public URL getInfoPage();
+
+  public CVSet getCVSet();
+
+  public DecoderType getType();
 
 }

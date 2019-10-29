@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.dcc.cv.spi;
+package at.or.reder.dcc.cv;
 
-import at.or.reder.dcc.cv.CVSet;
+import at.or.reder.dcc.Decoder;
 import java.util.List;
+import java.util.Map;
 import org.openide.util.Lookup;
 
 /**
@@ -30,6 +31,12 @@ public interface CVSetProvider extends Lookup.Provider
 
   public String getDescription();
 
+  public List<Integer> getSupportedManufacturers();
+
   public List<CVSet> getCVSets();
+
+  public List<Decoder> getDecoders();
+
+  public Decoder findMatchingDecoder(Map<CVAddress, CVValue> values);
 
 }

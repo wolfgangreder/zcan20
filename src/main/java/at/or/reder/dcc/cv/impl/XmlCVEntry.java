@@ -204,6 +204,7 @@ public final class XmlCVEntry
   public CVEntry toCVEntry()
   {
     CVEntryBuilder builder = new CVEntryBuilderImpl();
+    builder.address(address);
     builder.addAllowedValues(allowedValues);
     builder.addBitDescriptors(bitDescriptors);
     flags.stream().forEach(builder::addFlag);
@@ -320,7 +321,7 @@ public final class XmlCVEntry
     this.value = value != null ? value : CVValue.NO_VALUE;
   }
 
-  @XmlElement(name = "address", required = true)
+  @XmlAttribute(name = "address", required = true)
   public int getAddress()
   {
     return address;
@@ -332,6 +333,7 @@ public final class XmlCVEntry
   }
 
   @XmlElement(name = "bank-address")
+  @XmlJavaTypeAdapter(XmlBankAddressAdapter.class)
   @XmlList
   public List<XmlBankAddress> getBankAddresses()
   {
