@@ -22,6 +22,7 @@ import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
 import at.or.reder.dcc.cv.CVValue;
+import at.or.reder.dcc.cv.ResourceDescription;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -29,6 +30,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -48,7 +50,7 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
 {
 
   private CVType type = CVType.NUMERIC;
-  private String name;
+  private final Map<Locale, ResourceDescription> descriptions = new HashMap<>();
   private String description;
   private final Set<CVFlag> flags = EnumSet.noneOf(CVFlag.class);
   private int defaultValue = 0;
@@ -66,8 +68,8 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
   {
     type = Objects.requireNonNull(entry,
                                   "entry is null").getCVType();
-    name = entry.getName();
-    description = entry.getDescription();
+    descriptions.clear();
+    descriptions.putAll(entry.getAllDescriptions());
     flags.clear();
     flags.addAll(entry.getFlags());
     defaultValue = entry.getDefaultValue();
@@ -93,16 +95,45 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
   }
 
   @Override
-  public CVEntryBuilder name(String name)
+  public CVEntryBuilder addDescription(Locale locale,
+                                       ResourceDescription description)
   {
-    this.name = name;
+    if (description != null) {
+      descriptions.put(locale,
+                       description);
+    } else {
+      descriptions.remove(locale);
+    }
     return this;
   }
 
   @Override
-  public CVEntryBuilder description(String description)
+  public CVEntryBuilder addDescriptions(Map<Locale, ResourceDescription> description)
   {
-    this.description = description;
+    if (description != null) {
+      for (Map.Entry<Locale, ResourceDescription> e : description.entrySet()) {
+        if (e.getValue() != null) {
+          descriptions.put(e.getKey(),
+                           e.getValue());
+        } else {
+          descriptions.remove(e.getKey());
+        }
+      }
+    }
+    return this;
+  }
+
+  @Override
+  public CVEntryBuilder removeDescription(Locale locale)
+  {
+    descriptions.remove(locale);
+    return this;
+  }
+
+  @Override
+  public CVEntryBuilder clearDescriptions()
+  {
+    descriptions.clear();
     return this;
   }
 
@@ -243,7 +274,9 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
         type = CVType.BITFIELD;
       }
     }
-    if (name == null || name.isBlank()) {
+    ResourceDescription tmp = descriptions.get(null);
+    if (tmp == null) {
+      String name;
       if (bankAddresses.isEmpty()) {
         name = Bundle.CVEntryBuilderImpl_defaultName_simple(address);
       } else {
@@ -257,10 +290,12 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
         name = Bundle.CVEntryBuilderImpl_defaultName_bank(address,
                                                           bankAddress);
       }
+      descriptions.put(null,
+                       new ResourceDescription(name,
+                                               ""));
     }
     return new CVEntryImpl(type,
-                           name,
-                           description,
+                           descriptions,
                            flags,
                            defaultValue,
                            rangeMin,

@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.dcc.cv;
+package at.or.reder.dcc.cv.spi;
 
-import at.or.reder.dcc.cv.impl.CVValueImpl;
-import javax.validation.constraints.NotNull;
+import at.or.reder.dcc.cv.CVSet;
+import java.util.List;
+import org.openide.util.Lookup;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class CVSetFactory
+public interface CVSetProvider extends Lookup.Provider
 {
 
-  public static CVValue createValue(@NotNull CVValueState state,
-                                    int value,
-                                    CVEntry entry)
-  {
-    return new CVValueImpl(state,
-                           value,
-                           entry);
-  }
+  public String getName();
+
+  public String getDescription();
+
+  public List<CVSet> getCVSets();
 
 }

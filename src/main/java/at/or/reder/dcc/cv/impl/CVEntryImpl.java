@@ -22,10 +22,13 @@ import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
 import at.or.reder.dcc.cv.CVValue;
+import at.or.reder.dcc.cv.ResourceDescription;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -40,53 +43,50 @@ final class CVEntryImpl implements CVEntry
 {
 
   private final CVType type;
-  private final String name;
-  private final String description;
+  private final Map<Locale, ResourceDescription> descriptions;
   private final Set<CVFlag> flags;
   private final int defaultValue;
   private final int rangeMin;
   private final int rangeMax;
   private final Set<Integer> allowedValues;
   private final int valueMask;
-  private final List<CVBitDescriptor> descriptors;
+  private final List<CVBitDescriptor> bitDescriptors;
   private final CVValue value;
   private final int address;
+  private final long flatAddress;
   private final Map<CVType, Integer> bankAddresses;
 
   public CVEntryImpl(CVType type,
-                     String name,
-                     String description,
+                     Map<Locale, ResourceDescription> descriptions,
                      Set<CVFlag> flags,
                      int defaultValue,
                      int rangeMin,
                      int rangeMax,
                      Set<Integer> allowedValues,
                      int valueMask,
-                     List<CVBitDescriptor> descriptors,
+                     List<CVBitDescriptor> bitDescriptors,
                      CVValue value,
                      int address,
                      Map<CVType, Integer> bankAddresses)
   {
     this.type = type;
-    this.name = name;
     if (flags == null || flags.isEmpty()) {
       this.flags = Collections.emptySet();
     } else {
       this.flags = Collections.unmodifiableSet(EnumSet.copyOf(flags));
     }
-    this.description = description;
     this.defaultValue = defaultValue;
     this.rangeMin = rangeMin;
     this.rangeMax = rangeMax;
     this.allowedValues = allowedValues;
     this.valueMask = valueMask;
-    if (description.isEmpty()) {
-      this.descriptors = Collections.emptyList();
+    if (bitDescriptors.isEmpty()) {
+      this.bitDescriptors = Collections.emptyList();
       if (type == CVType.BITFIELD) {
         throw new IllegalArgumentException("CVEntry is a bitfield but contains no bitdescriptors");
       }
     } else {
-      this.descriptors = Collections.unmodifiableList(new ArrayList<>(descriptors));
+      this.bitDescriptors = Collections.unmodifiableList(new ArrayList<>(bitDescriptors));
     }
     if (value != null) {
       this.value = new CVValueImpl(value.getState(),
@@ -109,6 +109,49 @@ final class CVEntryImpl implements CVEntry
         this.bankAddresses = tmp;
       }
     }
+    if (descriptions == null || descriptions.isEmpty()) {
+      this.descriptions = Collections.emptyMap();
+    } else {
+      Map<Locale, ResourceDescription> tmp = new HashMap<>(descriptions);
+      if (tmp.get(null) == null) {
+        tmp.put(null,
+                buildDefaultResourceDescription());
+      }
+      this.descriptions = Collections.unmodifiableMap(tmp);
+    }
+    flatAddress = buildFlatAddress();
+  }
+
+  private long buildFlatAddress()
+  {
+    long result = 0;
+    int b = getBankAddress(CVType.BANKREGISTER_3);
+    if (b != -1) {
+      result += b & 0xff;
+    }
+    result <<= 8;
+    b = getBankAddress(CVType.BANKREGISTER_2);
+    if (b != -1) {
+      result += b & 0xff;
+    }
+    result <<= 8;
+    b = getBankAddress(CVType.BANKREGISTER_1);
+    if (b != -1) {
+      result += b & 0xff;
+    }
+    result <<= 8;
+    b = getBankAddress(CVType.BANKREGISTER_0);
+    if (b != -1) {
+      result += b & 0xff;
+    }
+    result <<= 16;
+    return result + (address & 0xffff);
+  }
+
+  @Override
+  public long getFlatAddress()
+  {
+    return flatAddress;
   }
 
   @Override
@@ -118,15 +161,15 @@ final class CVEntryImpl implements CVEntry
   }
 
   @Override
-  public String getName()
+  public Map<Locale, ResourceDescription> getAllDescriptions()
   {
-    return name;
+    return descriptions;
   }
 
   @Override
-  public String getDescription()
+  public ResourceDescription getDefaultDescription()
   {
-    return description;
+    return descriptions.get(null);
   }
 
   @Override
@@ -168,7 +211,7 @@ final class CVEntryImpl implements CVEntry
   @Override
   public List<CVBitDescriptor> getBitDescriptors()
   {
-    return descriptors;
+    return bitDescriptors;
   }
 
   @Override
@@ -234,7 +277,7 @@ final class CVEntryImpl implements CVEntry
   @Override
   public String toString()
   {
-    return "CVEntryImpl{" + "name=" + name + ", address=" + address + '}';
+    return "CVEntryImpl{" + "name=" + getDefaultDescription().getName() + ", address=" + address + '}';
   }
 
 }

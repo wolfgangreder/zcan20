@@ -32,10 +32,26 @@ public interface CVAddress
   public int getAddress();
 
   /**
+   * Adresse mit folgendem Layout.
+   * <pre>
+   * Byte 0: getAdress()&0xff;
+   * Byte 1: getAdress()&0xff00>>8
+   * Byte 2: getBankAddress(CVType.BANKADDRESS_0)
+   * Byte 3: getBankAddress(CVType.BANKADDRESS_1)
+   * Byte 4: getBankAddress(CVType.BANKADDRESS_2)
+   * Byte 5: getBankAddress(CVType.BANKADDRESS_3)
+   * </pre>
+   *
+   * @return flat address
+   */
+  public long getFlatAddress();
+
+  /**
    * Ermittle die Registerbankadresse dieser CV
    *
    * @param type Bestimmt für welches Bankregister der Wert ermittelt werden soll
-   * @return die einzutragende Adresse oder {@code -1} wenn es sich um keine Bank-CV handelt, oder dieses BankRegister nicht verwendet wird.
+   * @return die einzutragende Adresse oder {@code -1} wenn es sich um keine Bank-CV handelt, oder dieses BankRegister nicht
+   * verwendet wird.
    * @see at.or.reder.dcc.cv.CVType
    */
   public default int getBankAddress(CVType type)

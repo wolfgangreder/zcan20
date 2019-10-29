@@ -58,7 +58,7 @@ public interface CVEntry extends Lookup.Provider, CVAddress
 
   public default ResourceDescription getDefaultDescription()
   {
-    return buildDefaultResourceDescription();
+    return getAllDescriptions().get(null);
   }
 
   public Set<CVFlag> getFlags();
