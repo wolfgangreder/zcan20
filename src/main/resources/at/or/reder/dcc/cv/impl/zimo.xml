@@ -113,5 +113,21 @@ limitations under the License.
       </descriptors>
       <flags>DCC_MANDATORY READ_ONLY</flags>
     </entry>
+    <entry address="" type="NUMERIC" default-value="0">
+      <descriptors>
+        <descriptor name="Motoransteuerungsperiode bzw. -frequenz und EMK-Abtastrate"><![CDATA[<p>= 0: Default mäßige Motoransteuerung mit Hochfrequenz (20 / 40 kHz) und einer Abtastrate für die Motor-EMK-Messung, die automatisch zwischen 200 Hz (Langsamfahrt) und 50 Hz variiert
+          <ul><li>Zehnerstelle 1 - 4: Abtastrate begrenzt gegenüber default-mäßiger (weniger Antriebsgeräusch !)</li>
+          <li>Zehnerstelle 6 - 9: Abtastrate höher als Default mäßige (als Maßnahme gegen Ruckeln !)</li>
+          <li>Einerstelle 1 - 4: EMK-Messlücke kürzer als Default mäßig (gut bei Faulhaber, Maxxon, .. weniger Antriebsgeräusch, mehr Leistung)</li>
+          <li>Einerstelle 5 - 9: EMK-Messlücke länger als Default mäßig (ev. nötig bei 3-pol-Motor o.ä.)</li>
+          <li>= 255 - 178: Niederfrequenz.</li></ul>
+          <table><tr><th colspan="2">Beispielwerte für Niederfrequenz:</th></tr>
+          <tr><td>CV #9 = 255</td><td>Motorfrequenz 30 Hz</td></tr>
+          <tr><td>CV #9 = 208</td><td>Motorfrequenz 80 Hz</td></tr>
+          <tr><td>CV #9 = 192</td><td>Motorfrequenz 120 Hz</td></tr></table]]></descriptor>
+        <descriptor lang="en" name=""></descriptor>
+      </descriptors>
+      <flags>DCC_OPTIONAL</flags>
+    </entry>
   </entries>
 </cv-set>
