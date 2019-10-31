@@ -15,6 +15,7 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.zcan20.util.ResourceDescription;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -31,27 +32,28 @@ public interface CVBitDescriptorBuilder
 
   public CVBitDescriptorBuilder bitMask(int bitMask);
 
+  public CVBitDescriptorBuilder minValue(int minValue);
+
+  public CVBitDescriptorBuilder maxValue(int maxValue);
+
   public CVBitDescriptorBuilder defaultValue(int defaultValue);
 
-  public CVBitDescriptorBuilder addAllowedValue(int value);
+  public CVBitDescriptorBuilder addAllowedValue(@NotNull EnumeratedValue value);
 
-  public CVBitDescriptorBuilder addAllowedValues(@NotNull Collection< ? extends Number> values);
+  public CVBitDescriptorBuilder addAllowedValues(@NotNull Collection< ? extends EnumeratedValue> values);
 
-  public CVBitDescriptorBuilder removeAllowedValue(int value);
+  public CVBitDescriptorBuilder removeAllowedValue(EnumeratedValue value);
 
   public CVBitDescriptorBuilder clearAllowedValues();
 
-  public CVBitDescriptorBuilder addValueDescription(Locale locale,
-                                                    int value,
-                                                    ResourceDescription desc);
+  public CVBitDescriptorBuilder addDescription(Locale locale,
+                                               ResourceDescription desc);
 
-  public CVBitDescriptorBuilder addValueDescriptions(Locale locale,
-                                                     @NotNull Map<Integer, ResourceDescription> names);
+  public CVBitDescriptorBuilder addDescriptions(@NotNull Map<Locale, ResourceDescription> names);
 
-  public CVBitDescriptorBuilder removeValueDescription(Locale locale,
-                                                       int value);
+  public CVBitDescriptorBuilder removeDescription(Locale locale);
 
-  public CVBitDescriptorBuilder clearValueDescriptions();
+  public CVBitDescriptorBuilder clearDescriptions();
 
   public CVBitDescriptor build();
 

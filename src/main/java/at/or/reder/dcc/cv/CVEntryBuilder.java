@@ -15,6 +15,7 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.zcan20.util.ResourceDescription;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -78,14 +79,6 @@ public interface CVEntryBuilder
 
   public CVEntryBuilder rangeMax(int rangeMax);
 
-  public CVEntryBuilder addAllowedValue(int value);
-
-  public CVEntryBuilder addAllowedValues(@NotNull Collection<? extends Number> values);
-
-  public CVEntryBuilder removeAllowedValue(int value);
-
-  public CVEntryBuilder clearAllowedValues();
-
   public CVEntryBuilder valueMask(int mask);
 
   public CVEntryBuilder addBitDescriptor(@NotNull CVBitDescriptor descriptor);
@@ -95,8 +88,6 @@ public interface CVEntryBuilder
   public CVEntryBuilder removeBitDescriptor(@NotNull CVBitDescriptor descriptor);
 
   public CVEntryBuilder clearBitDescriptors();
-
-  public CVEntryBuilder setValue(CVValue value);
 
   public CVEntry build();
 

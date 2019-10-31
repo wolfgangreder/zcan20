@@ -17,24 +17,20 @@ package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.CVBitDescriptor;
 import at.or.reder.dcc.cv.CVBitDescriptorBuilder;
-import at.or.reder.dcc.cv.ResourceDescription;
+import at.or.reder.zcan20.util.XmlDescripted;
+import at.or.reder.zcan20.util.XmlIntAdapter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class XmlCVBitDescriptor
+public final class XmlCVBitDescriptor extends XmlDescripted
 {
 
   public static final class Adapter extends XmlAdapter<XmlCVBitDescriptor, CVBitDescriptor>
@@ -60,42 +56,11 @@ public final class XmlCVBitDescriptor
 
   }
 
-  public static final class MappedResourceDescriptor extends XmlResourceDescriptor
-  {
-
-    private int value;
-
-    public MappedResourceDescriptor()
-    {
-    }
-
-    public MappedResourceDescriptor(int value,
-                                    Locale loc,
-                                    String name,
-                                    String desc)
-    {
-      super(loc,
-            name,
-            desc);
-      this.value = value;
-    }
-
-    @XmlAttribute(name = "value", required = true)
-    public int getValue()
-    {
-      return value;
-    }
-
-    public void setValue(int value)
-    {
-      this.value = value;
-    }
-
-  }
-  private int bitMask;
+  private int bitMask = 0xff;
   private int defaultValue;
-  private Set<Integer> allowedValues = new HashSet<>();
-  private List<MappedResourceDescriptor> descriptors = new ArrayList<>();
+  private int min;
+  private int max;
+  private final List<XmlEnumeratedValue> allowedValues = new ArrayList<>();
 
   public XmlCVBitDescriptor()
   {
@@ -103,72 +68,78 @@ public final class XmlCVBitDescriptor
 
   public XmlCVBitDescriptor(CVBitDescriptor d)
   {
+    super(d.getAllResourceDescriptions());
     bitMask = d.getBitMask() & 0xff;
     defaultValue = d.getDefaultValue() & bitMask;
-    allowedValues.addAll(d.getAllowedValues());
-    for (Map.Entry<Locale, Map<Integer, ResourceDescription>> le : d.getAllValueDescriptions().entrySet()) {
-      Locale loc = le.getKey();
-      for (Map.Entry<Integer, ResourceDescription> ve : le.getValue().entrySet()) {
-        descriptors.add(new MappedResourceDescriptor(ve.getKey(),
-                                                     loc,
-                                                     ve.getValue().getName(),
-                                                     ve.getValue().getDescrption()));
-      }
-    }
+    d.getAllowedValues().stream().filter((f) -> f != null).map(XmlEnumeratedValue::new).forEach(allowedValues::add);
+    min = d.getMinValue();
+    max = d.getMaxValue();
   }
 
   public CVBitDescriptor toBitDescriptor()
   {
     CVBitDescriptorBuilder builder = new CVBitDescriptorBuilderImpl();
-    builder.addAllowedValues(allowedValues);
+    allowedValues.stream().map(XmlEnumeratedValue::toEnumeratedValue).forEach(builder::addAllowedValue);
     builder.bitMask(bitMask);
     builder.defaultValue(defaultValue);
-    for (MappedResourceDescriptor rd : descriptors) {
-      Locale loc = null;
-      if (rd.getLoc() != null) {
-        loc = Locale.forLanguageTag(rd.getLoc());
-      }
-      builder.addValueDescription(loc,
-                                  rd.getValue(),
-                                  rd.toResourceDescription());
-    }
+    builder.minValue(min);
+    builder.maxValue(max);
+    builder.addDescriptions(toMap());
     return builder.build();
   }
 
   @XmlAttribute(name = "bitmask")
-  public int getBitMask()
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getBitMask()
   {
     return bitMask;
   }
 
-  public void setBitMask(int bm)
+  public void setBitMask(Integer bm)
   {
-    this.bitMask = bm & 0xff;
+    this.bitMask = bm != null ? bm & 0xff : 0xff;
   }
 
-  @XmlAttribute(name = "default-value")
-  public int getDefaultValue()
+  @XmlAttribute(name = "defaultvalue")
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getDefaultValue()
   {
     return defaultValue & bitMask;
   }
 
-  public void setDefaultValue(int defaultValue)
+  public void setDefaultValue(Integer defaultValue)
   {
-    this.defaultValue = defaultValue & 0xff;
+    this.defaultValue = defaultValue != null ? defaultValue & 0xff : 0;
+  }
+
+  @XmlAttribute(name = "range-min")
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getMinValue()
+  {
+    return min;
+  }
+
+  public void setMinValue(Integer min)
+  {
+    this.min = min != null ? min & bitMask : 0;
+  }
+
+  @XmlAttribute(name = "range-max")
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getMaxValue()
+  {
+    return max;
+  }
+
+  public void setMaxValue(Integer max)
+  {
+    this.max = (max != null ? max : 0xff) & bitMask;
   }
 
   @XmlElement(name = "allowed-values")
-  @XmlList
-  public Set<Integer> getAllowedValues()
+  public List<XmlEnumeratedValue> getAllowedValues()
   {
     return allowedValues;
-  }
-
-  @XmlElement(name = "value-descriptor")
-  @XmlElementWrapper(name = "value-descriptors")
-  public List<MappedResourceDescriptor> getDescriptors()
-  {
-    return descriptors;
   }
 
 }

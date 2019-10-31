@@ -20,46 +20,31 @@ import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVEntryBuilder;
 import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
-import at.or.reder.dcc.cv.CVUtils;
-import at.or.reder.dcc.cv.CVValue;
-import at.or.reder.dcc.cv.ResourceDescription;
-import java.util.ArrayList;
+import at.or.reder.zcan20.util.AbstractDescriptedBuilder;
+import at.or.reder.zcan20.util.ResourceDescription;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import org.openide.util.NbBundle.Messages;
 
 /**
  *
  * @author Wolfgang Reder
  */
-@Messages({"# {0} - address",
-           "CVEntryBuilderImpl_defaultName_simple=CV #{0,number,0}",
-           "# {0} - address",
-           "# {1} - bankAddress",
-           "CVEntryBuilderImpl_defaultName_bank=CV #{1}:{0,number,0}"})
-public final class CVEntryBuilderImpl implements CVEntryBuilder
+public final class CVEntryBuilderImpl extends AbstractDescriptedBuilder<CVEntryBuilder> implements CVEntryBuilder
 {
 
   private CVType type = CVType.NUMERIC;
-  private final Map<Locale, ResourceDescription> descriptions = new HashMap<>();
-  private String description;
   private final Set<CVFlag> flags = EnumSet.noneOf(CVFlag.class);
   private int defaultValue = 0;
   private int rangeMin = 0;
   private int rangeMax = 255;
-  private final Set<Integer> allowedValues = new HashSet<>();
   private int valueMask = 0xff;
-  private final List<CVBitDescriptor> descriptors = new ArrayList<>();
-  private CVValue value = CVValue.NO_VALUE;
+  private final Set<CVBitDescriptor> descriptors = new HashSet<>();
   private int address = 0;
   private final Map<CVType, Integer> bankAddresses = new HashMap<>();
 
@@ -68,19 +53,15 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
   {
     type = Objects.requireNonNull(entry,
                                   "entry is null").getCVType();
-    descriptions.clear();
-    descriptions.putAll(entry.getAllDescriptions());
+    super.copy(entry);
     flags.clear();
     flags.addAll(entry.getFlags());
     defaultValue = entry.getDefaultValue();
     rangeMin = entry.getRangeMin();
     rangeMax = entry.getRangeMax();
-    allowedValues.clear();
-    allowedValues.addAll(entry.getAllowedValues());
     valueMask = entry.getValueMask();
     descriptors.clear();
     descriptors.addAll(entry.getBitDescriptors());
-    value = entry.getValue();
     address = entry.getAddress();
     bankAddresses.clear();
     bankAddresses.putAll(entry.getBankAddresses());
@@ -217,39 +198,6 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
   }
 
   @Override
-  public CVEntryBuilder addAllowedValue(int value)
-  {
-    allowedValues.add(value & 0xff);
-    return this;
-  }
-
-  @Override
-  public CVEntryBuilder addAllowedValues(Collection<? extends Number> values)
-  {
-    if (values != null) {
-      values.stream().
-              filter((v) -> v != null).
-              map((n) -> n.intValue() & 0xff).
-              forEach(this.allowedValues::add);
-    }
-    return this;
-  }
-
-  @Override
-  public CVEntryBuilder removeAllowedValue(int value)
-  {
-    this.allowedValues.remove(value & 0xff);
-    return this;
-  }
-
-  @Override
-  public CVEntryBuilder clearAllowedValues()
-  {
-    this.allowedValues.clear();
-    return this;
-  }
-
-  @Override
   public CVEntryBuilder valueMask(int mask)
   {
     this.valueMask = mask & 0xff;
@@ -291,41 +239,10 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
   }
 
   @Override
-  public CVEntryBuilder setValue(CVValue value)
-  {
-    this.value = value != null ? value : CVValue.NO_VALUE;
-    return this;
-  }
-
-  @Override
   public CVEntry build()
   {
     if (type == null) {
-      if (descriptors.isEmpty()) {
-        type = CVType.NUMERIC;
-      } else {
-        type = CVType.BITFIELD;
-      }
-    }
-    ResourceDescription tmp = descriptions.get(null);
-    if (tmp == null) {
-      String name;
-      if (bankAddresses.isEmpty()) {
-        name = Bundle.CVEntryBuilderImpl_defaultName_simple(address);
-      } else {
-        String bankAddress = bankAddresses.entrySet().stream().
-                filter((f) -> f.getValue() != null && CVUtils.isBankAddress(f.getKey())).
-                sorted(Comparator.comparing(Map.Entry::getKey)).
-                map((e) -> Integer.toString(e.getValue())).
-                collect(Collectors.joining(",",
-                                           "[",
-                                           "]"));
-        name = Bundle.CVEntryBuilderImpl_defaultName_bank(address,
-                                                          bankAddress);
-      }
-      descriptions.put(null,
-                       new ResourceDescription(name,
-                                               ""));
+      type = CVType.NUMERIC;
     }
     return new CVEntryImpl(type,
                            descriptions,
@@ -333,10 +250,8 @@ public final class CVEntryBuilderImpl implements CVEntryBuilder
                            defaultValue,
                            rangeMin,
                            rangeMax,
-                           allowedValues,
                            valueMask,
                            descriptors,
-                           value,
                            address,
                            bankAddresses);
   }

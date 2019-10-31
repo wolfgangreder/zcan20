@@ -17,12 +17,10 @@ package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.CVBitDescriptor;
 import at.or.reder.dcc.cv.CVBitDescriptorBuilder;
-import at.or.reder.dcc.cv.ResourceDescription;
+import at.or.reder.dcc.cv.EnumeratedValue;
+import at.or.reder.zcan20.util.AbstractDescriptedBuilder;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -30,26 +28,33 @@ import java.util.Set;
  *
  * @author Wolfgang Reder
  */
-public final class CVBitDescriptorBuilderImpl implements CVBitDescriptorBuilder
+public final class CVBitDescriptorBuilderImpl extends AbstractDescriptedBuilder<CVBitDescriptorBuilder> implements
+        CVBitDescriptorBuilder
 {
 
-  private int bitMask;
+  private int bitMask = 0xff;
   private int defaultValue;
-  private final Set<Integer> defaultValues = new HashSet<>();
-  private final Map<Locale, Map<Integer, ResourceDescription>> descriptions = new HashMap<>();
+  private int minValue;
+  private int maxValue;
+  private final Set<EnumeratedValue> validValues = new HashSet<>();
+
+  @SuppressWarnings("LeakingThisInConstructor")
+  public CVBitDescriptorBuilderImpl()
+  {
+    setThis(this);
+  }
 
   @Override
   public CVBitDescriptorBuilder copy(CVBitDescriptor descriptor)
   {
     this.bitMask = Objects.requireNonNull(descriptor,
                                           "descriptor is null").getBitMask() & 0xff;
+    super.copy(descriptor);
     this.defaultValue = descriptor.getDefaultValue() & bitMask;
-    this.defaultValues.clear();
+    this.maxValue = descriptor.getMaxValue();
+    this.minValue = descriptor.getMinValue();
+    this.validValues.clear();
     addAllowedValues(descriptor.getAllowedValues());
-    this.descriptions.clear();
-    this.descriptions.putAll(descriptor.getAllValueDescriptions());
-    this.descriptions.put(null,
-                          descriptor.getDefaultValueDescriptions());
     return this;
   }
 
@@ -68,78 +73,48 @@ public final class CVBitDescriptorBuilderImpl implements CVBitDescriptorBuilder
   }
 
   @Override
-  public CVBitDescriptorBuilder addAllowedValue(int value)
+  public CVBitDescriptorBuilder minValue(int minValue)
   {
-    this.defaultValues.add(value & 0xff);
+    this.minValue = minValue;
     return this;
   }
 
   @Override
-  public CVBitDescriptorBuilder addAllowedValues(Collection<? extends Number> values)
+  public CVBitDescriptorBuilder maxValue(int maxValue)
   {
-    if (values != null) {
-      values.stream().filter((v) -> v != null).map((n) -> n.intValue() & 0xff).forEach(defaultValues::add);
+    this.maxValue = maxValue;
+    return this;
+  }
+
+  @Override
+  public CVBitDescriptorBuilder addAllowedValue(EnumeratedValue value)
+  {
+    if (value != null) {
+      validValues.add(value);
     }
     return this;
   }
 
   @Override
-  public CVBitDescriptorBuilder removeAllowedValue(int value)
+  public CVBitDescriptorBuilder addAllowedValues(Collection<? extends EnumeratedValue> values)
   {
-    defaultValues.remove(value & 0xff);
+    if (values != null) {
+      values.stream().filter((v) -> v != null).forEach(validValues::add);
+    }
+    return this;
+  }
+
+  @Override
+  public CVBitDescriptorBuilder removeAllowedValue(EnumeratedValue value)
+  {
+    validValues.remove(value);
     return this;
   }
 
   @Override
   public CVBitDescriptorBuilder clearAllowedValues()
   {
-    defaultValues.clear();
-    return this;
-  }
-
-  @Override
-  public CVBitDescriptorBuilder addValueDescription(Locale locale,
-                                                    int value,
-                                                    ResourceDescription desc)
-  {
-    Map<Integer, ResourceDescription> m = descriptions.computeIfAbsent(locale,
-                                                                       (l) -> new HashMap<>());
-    if (desc != null) {
-      m.put(value & 0xff,
-            desc);
-    } else {
-      m.remove(value & 0xff);
-    }
-    return this;
-  }
-
-  @Override
-  public CVBitDescriptorBuilder addValueDescriptions(Locale locale,
-                                                     Map<Integer, ResourceDescription> names)
-  {
-    for (Map.Entry<Integer, ResourceDescription> e : names.entrySet()) {
-      addValueDescription(locale,
-                          e.getKey(),
-                          e.getValue());
-    }
-    return this;
-  }
-
-  @Override
-  public CVBitDescriptorBuilder removeValueDescription(Locale locale,
-                                                       int value)
-  {
-    Map<Integer, ResourceDescription> m = descriptions.get(locale);
-    if (m != null) {
-      m.remove(value & 0xff);
-    }
-    return this;
-  }
-
-  @Override
-  public CVBitDescriptorBuilder clearValueDescriptions()
-  {
-    descriptions.clear();
+    validValues.clear();
     return this;
   }
 
@@ -147,8 +122,10 @@ public final class CVBitDescriptorBuilderImpl implements CVBitDescriptorBuilder
   public CVBitDescriptor build()
   {
     return new CVBitDescriptorImpl(bitMask,
-                                   defaultValue & bitMask,
-                                   defaultValues,
+                                   defaultValue,
+                                   minValue,
+                                   maxValue,
+                                   validValues,
                                    descriptions);
   }
 

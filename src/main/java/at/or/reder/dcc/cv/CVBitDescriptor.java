@@ -15,58 +15,45 @@
  */
 package at.or.reder.dcc.cv;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import at.or.reder.zcan20.util.Descripted;
+import java.util.List;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface CVBitDescriptor
+public interface CVBitDescriptor extends Descripted
 {
+
+  public default int getMinValue()
+  {
+    return 0;
+  }
+
+  public default int getMaxValue()
+  {
+    return 0xff & getBitMask();
+  }
+
+  public List<EnumeratedValue> getAllowedValues();
 
   public default int getOffset()
   {
     return Integer.lowestOneBit(getBitMask());
   }
 
+  public default int getWidth()
+  {
+    return Integer.bitCount(-getBitMask());
+  }
+
   public int getBitMask();
 
   public int getDefaultValue();
 
-  public Set<Integer> getAllowedValues();
-
-  public default ResourceDescription getValueDescription(int value)
+  public default int normalizeValue(int value)
   {
-    return getValueDescription(Locale.getDefault(),
-                               value);
+    return (value & getBitMask()) >> getOffset();
   }
-
-  public default ResourceDescription getValueDescription(Locale locale,
-                                                         int value)
-  {
-    Map<Integer, ResourceDescription> map = getValueDescriptions(locale);
-    ResourceDescription result = null;
-    if (map != null) {
-      result = map.get(value & getBitMask());
-    }
-    if (result == null) {
-      result = new ResourceDescription(Integer.toString(value),
-                                       "");
-    }
-    return result;
-  }
-
-  public default Map<Integer, ResourceDescription> getValueDescriptions(Locale locale)
-  {
-    return CVUtils.filterLocaleMap(getAllValueDescriptions(),
-                                   locale,
-                                   this::getDefaultValueDescriptions);
-  }
-
-  public Map<Locale, Map<Integer, ResourceDescription>> getAllValueDescriptions();
-
-  public Map<Integer, ResourceDescription> getDefaultValueDescriptions();
 
 }

@@ -19,12 +19,9 @@ import at.or.reder.dcc.cv.CVAddress;
 import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVSet;
 import at.or.reder.dcc.cv.CVSetBuilder;
-import at.or.reder.dcc.cv.ResourceDescription;
+import at.or.reder.zcan20.util.AbstractDescriptedBuilder;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -34,22 +31,27 @@ import java.util.UUID;
  *
  * @author Wolfgang Reder
  */
-public final class CVSetBuilderImpl implements CVSetBuilder
+public final class CVSetBuilderImpl extends AbstractDescriptedBuilder<CVSetBuilder> implements CVSetBuilder
 {
 
   private UUID id;
-  private final Map<Locale, ResourceDescription> descriptions = new HashMap<>();
   private final SortedSet<CVEntry> entries = new TreeSet<>(Comparator.comparing(CVEntry::getFlatAddress));
+
+  @SuppressWarnings("LeakingThisInConstructor")
+  public CVSetBuilderImpl()
+  {
+    setThis(this);
+  }
 
   @Override
   public CVSetBuilder copy(CVSet set)
   {
     this.id = Objects.requireNonNull(set,
                                      "set is null").getId();
+    super.copy(set);
     descriptions.clear();
-    descriptions.putAll(set.getAllDescriptions());
     entries.clear();
-    entries.addAll(set.getEntries());
+    addEntries(set.getEntries());
     return this;
   }
 
@@ -57,45 +59,6 @@ public final class CVSetBuilderImpl implements CVSetBuilder
   public CVSetBuilder id(UUID id)
   {
     this.id = id;
-    return this;
-  }
-
-  @Override
-  public CVSetBuilder addDescription(Locale loc,
-                                     ResourceDescription name)
-  {
-    if (name != null) {
-      descriptions.put(loc,
-                       name);
-    } else {
-      descriptions.remove(loc);
-    }
-    return this;
-  }
-
-  @Override
-  public CVSetBuilder addDescriptions(Map<Locale, ResourceDescription> descriptions)
-  {
-    if (descriptions != null) {
-      for (Map.Entry<Locale, ResourceDescription> e : descriptions.entrySet()) {
-        addDescription(e.getKey(),
-                       e.getValue());
-      }
-    }
-    return this;
-  }
-
-  @Override
-  public CVSetBuilder removeDescription(Locale loc)
-  {
-    descriptions.remove(loc);
-    return this;
-  }
-
-  @Override
-  public CVSetBuilder clearDescriptions()
-  {
-    descriptions.clear();
     return this;
   }
 

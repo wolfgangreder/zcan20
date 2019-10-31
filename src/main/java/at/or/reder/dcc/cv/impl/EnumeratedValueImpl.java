@@ -13,43 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.dcc.cv;
+package at.or.reder.dcc.cv.impl;
 
-import java.util.Objects;
+import at.or.reder.dcc.cv.EnumeratedValue;
+import at.or.reder.zcan20.util.AbstractDescripted;
+import at.or.reder.zcan20.util.ResourceDescription;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class ResourceDescription
+final class EnumeratedValueImpl extends AbstractDescripted implements EnumeratedValue
 {
 
-  private final String name;
-  private final String descrption;
+  private final int value;
 
-  public ResourceDescription(String name,
-                             String descrption)
+  public EnumeratedValueImpl(int value,
+                             Map<Locale, ? extends ResourceDescription> descriptions)
   {
-    this.name = name;
-    this.descrption = descrption;
+    super(descriptions,
+          null);
+    this.value = value;
   }
 
-  public String getName()
+  @Override
+  public String getDefaultName()
   {
-    return name;
+    return Integer.toString(getValue());
   }
 
-  public String getDescrption()
+  @Override
+  public int getValue()
   {
-    return descrption;
+    return value;
   }
 
   @Override
   public int hashCode()
   {
     int hash = 7;
-    hash = 97 * hash + Objects.hashCode(this.name);
-    hash = 97 * hash + Objects.hashCode(this.descrption);
+    hash = 53 * hash + this.value;
     return hash;
   }
 
@@ -65,22 +70,14 @@ public final class ResourceDescription
     if (getClass() != obj.getClass()) {
       return false;
     }
-    final ResourceDescription other = (ResourceDescription) obj;
-    if (!Objects.equals(this.name,
-                        other.name)) {
-      return false;
-    }
-    if (!Objects.equals(this.descrption,
-                        other.descrption)) {
-      return false;
-    }
-    return true;
+    final EnumeratedValueImpl other = (EnumeratedValueImpl) obj;
+    return this.value == other.value;
   }
 
   @Override
   public String toString()
   {
-    return "ResourceDescription{" + "name=" + name + '}';
+    return "EnumeratedValueImpl{" + getName() + '}';
   }
 
 }

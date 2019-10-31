@@ -18,15 +18,12 @@ package at.or.reder.dcc.cv.impl;
 import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVSet;
 import at.or.reder.dcc.cv.CVSetBuilder;
-import at.or.reder.dcc.cv.ResourceDescription;
+import at.or.reder.zcan20.util.XmlDescripted;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -36,7 +33,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * @author Wolfgang Reder
  */
 @XmlRootElement(name = "cv-set")
-public final class XmlCVSet
+public final class XmlCVSet extends XmlDescripted
 {
 
   public static final class Adapter extends XmlAdapter<XmlCVSet, CVSet>
@@ -62,7 +59,6 @@ public final class XmlCVSet
 
   }
   private UUID id;
-  private final List<XmlResourceDescriptor> descriptors = new ArrayList<>();
   private final List<CVEntry> entries = new ArrayList<>();
 
   public XmlCVSet()
@@ -71,13 +67,9 @@ public final class XmlCVSet
 
   public XmlCVSet(CVSet set)
   {
+    super(set.getAllResourceDescriptions());
     id = set.getId();
     entries.addAll(set.getEntries());
-    for (Map.Entry<Locale, ResourceDescription> e : set.getAllDescriptions().entrySet()) {
-      descriptors.add(new XmlResourceDescriptor(e.getKey(),
-                                                e.getValue().getName(),
-                                                e.getValue().getDescrption()));
-    }
   }
 
   public CVSet toCVSet()
@@ -85,14 +77,7 @@ public final class XmlCVSet
     CVSetBuilder builder = new CVSetBuilderImpl();
     builder.id(id);
     builder.addEntries(entries);
-    for (XmlResourceDescriptor r : descriptors) {
-      Locale loc = null;
-      if (r.getLoc() != null && !r.getLoc().isBlank()) {
-        loc = Locale.forLanguageTag(r.getLoc());
-      }
-      builder.addDescription(loc,
-                             r.toResourceDescription());
-    }
+    builder.addDescriptions(toMap());
     return builder.build();
   }
 
@@ -108,15 +93,7 @@ public final class XmlCVSet
     this.id = id;
   }
 
-  @XmlElement(name = "descriptor")
-  @XmlElementWrapper(name = "descriptors")
-  public List<XmlResourceDescriptor> getDescriptors()
-  {
-    return descriptors;
-  }
-
   @XmlElement(name = "entry")
-  @XmlElementWrapper(name = "entries")
   @XmlJavaTypeAdapter(XmlCVEntry.Adapter.class)
   public List<CVEntry> getEntries()
   {

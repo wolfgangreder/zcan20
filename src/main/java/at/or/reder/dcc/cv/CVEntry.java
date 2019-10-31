@@ -15,10 +15,10 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.zcan20.util.Descripted;
+import at.or.reder.zcan20.util.ResourceDescription;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import org.openide.util.Lookup;
 
@@ -26,7 +26,7 @@ import org.openide.util.Lookup;
  *
  * @author Wolfgang Reder
  */
-public interface CVEntry extends Lookup.Provider, CVAddress
+public interface CVEntry extends Lookup.Provider, CVAddress, Descripted
 {
 
   /**
@@ -36,29 +36,11 @@ public interface CVEntry extends Lookup.Provider, CVAddress
    */
   public CVType getCVType();
 
-  public default ResourceDescription getDescription()
-  {
-    return getDescription(Locale.getDefault());
-  }
-
-  public default ResourceDescription getDescription(Locale locale)
-  {
-    return CVUtils.filterLocaleMap(getAllDescriptions(),
-                                   locale,
-                                   this::getDefaultDescription);
-  }
-
-  public default ResourceDescription buildDefaultResourceDescription()
+  @Override
+  public default ResourceDescription getFallbackDescription()
   {
     return new ResourceDescription("CV " + Integer.toString(getAddress()),
                                    "");
-  }
-
-  public Map<Locale, ResourceDescription> getAllDescriptions();
-
-  public default ResourceDescription getDefaultDescription()
-  {
-    return getAllDescriptions().get(null);
   }
 
   public Set<CVFlag> getFlags();
@@ -83,24 +65,24 @@ public interface CVEntry extends Lookup.Provider, CVAddress
     return 255;
   }
 
-  public default Set<Integer> getAllowedValues()
-  {
-    return Collections.emptySet();
-  }
-
   public default int getValueMask()
   {
     return 255;
   }
 
+  public default int getOffset()
+  {
+    return Integer.lowestOneBit(getValueMask());
+  }
+
+  public default int getWidth()
+  {
+    return Integer.bitCount(-getValueMask());
+  }
+
   public default List<CVBitDescriptor> getBitDescriptors()
   {
     return Collections.emptyList();
-  }
-
-  public default CVValue getValue()
-  {
-    return CVValue.NO_VALUE;
   }
 
 }

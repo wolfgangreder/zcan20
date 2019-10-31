@@ -26,16 +26,11 @@ public enum CVType
    */
   NUMERIC,
   /**
-   * Bitfeld CV.
-   */
-  BITFIELD,
-  /**
    * Niederwertigstes Bankregister.
    */
   BANKREGISTER_0,
   /**
-   * Bankregister.
-   * Wenn es nur zwei Bankregister gibt, ist dieses Register das höherwertige.
+   * Bankregister. Wenn es nur zwei Bankregister gibt, ist dieses Register das höherwertige.
    */
   BANKREGISTER_1,
   /**

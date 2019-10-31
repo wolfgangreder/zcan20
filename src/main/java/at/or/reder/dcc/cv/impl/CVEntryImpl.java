@@ -21,12 +21,13 @@ import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
-import at.or.reder.dcc.cv.CVValue;
-import at.or.reder.dcc.cv.ResourceDescription;
+import at.or.reder.zcan20.util.AbstractDescripted;
+import at.or.reder.zcan20.util.ResourceDescription;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,24 +35,27 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 /**
  *
  * @author Wolfgang Reder
  */
-final class CVEntryImpl implements CVEntry
+@NbBundle.Messages({"# {0} - address",
+                    "CVEntryImpl_defaultName_simple=CV #{0,number,0}",
+                    "# {0} - address",
+                    "# {1} - bankAddress",
+                    "CVEntryImpl_defaultName_bank=CV #{1}:{0,number,0}"})
+final class CVEntryImpl extends AbstractDescripted implements CVEntry
 {
 
   private final CVType type;
-  private final Map<Locale, ResourceDescription> descriptions;
   private final Set<CVFlag> flags;
   private final int defaultValue;
   private final int rangeMin;
   private final int rangeMax;
-  private final Set<Integer> allowedValues;
   private final int valueMask;
   private final List<CVBitDescriptor> bitDescriptors;
-  private final CVValue value;
   private final int address;
   private final long flatAddress;
   private final Map<CVType, Integer> bankAddresses;
@@ -62,38 +66,33 @@ final class CVEntryImpl implements CVEntry
                      int defaultValue,
                      int rangeMin,
                      int rangeMax,
-                     Set<Integer> allowedValues,
                      int valueMask,
-                     List<CVBitDescriptor> bitDescriptors,
-                     CVValue value,
+                     Collection<? extends CVBitDescriptor> bitDescriptors,
                      int address,
                      Map<CVType, Integer> bankAddresses)
   {
+    super(descriptions,
+          null);
     this.type = type;
     if (flags == null || flags.isEmpty()) {
       this.flags = Collections.emptySet();
     } else {
       this.flags = Collections.unmodifiableSet(EnumSet.copyOf(flags));
     }
-    this.defaultValue = defaultValue;
-    this.rangeMin = rangeMin;
-    this.rangeMax = rangeMax;
-    this.allowedValues = allowedValues;
     this.valueMask = valueMask;
+    this.rangeMin = Math.min(rangeMax & valueMask,
+                             rangeMin & valueMask);
+    this.rangeMax = Math.max(rangeMax & valueMask,
+                             rangeMin & valueMask);
+    this.defaultValue = Math.min(rangeMax,
+                                 Math.max(rangeMin,
+                                          defaultValue & valueMask));
     if (bitDescriptors.isEmpty()) {
       this.bitDescriptors = Collections.emptyList();
-      if (type == CVType.BITFIELD) {
-        throw new IllegalArgumentException("CVEntry is a bitfield but contains no bitdescriptors");
-      }
     } else {
-      this.bitDescriptors = Collections.unmodifiableList(new ArrayList<>(bitDescriptors));
-    }
-    if (value != null) {
-      this.value = new CVValueImpl(value.getState(),
-                                   value.getValue(),
-                                   this);
-    } else {
-      this.value = CVValue.NO_VALUE;
+      List<CVBitDescriptor> tmp = new ArrayList<>(bitDescriptors);
+      tmp.sort(Comparator.comparing(CVBitDescriptor::getDefaultValue));
+      this.bitDescriptors = Collections.unmodifiableList(tmp);
     }
     this.address = address;
     if (bankAddresses == null || bankAddresses.isEmpty()) {
@@ -109,17 +108,25 @@ final class CVEntryImpl implements CVEntry
         this.bankAddresses = tmp;
       }
     }
-    if (descriptions == null || descriptions.isEmpty()) {
-      this.descriptions = Collections.emptyMap();
-    } else {
-      Map<Locale, ResourceDescription> tmp = new HashMap<>(descriptions);
-      if (tmp.get(null) == null) {
-        tmp.put(null,
-                buildDefaultResourceDescription());
-      }
-      this.descriptions = Collections.unmodifiableMap(tmp);
-    }
     flatAddress = buildFlatAddress();
+  }
+
+  @Override
+  public String getDefaultName()
+  {
+    if (bankAddresses.isEmpty()) {
+      return Bundle.CVEntryImpl_defaultName_simple(address);
+    } else {
+      String ba = bankAddresses.entrySet().stream().
+              filter((f) -> f.getValue() != null && CVUtils.isBankAddress(f.getKey())).
+              sorted(Comparator.comparing(Map.Entry::getKey)).
+              map((e) -> Integer.toString(e.getValue())).
+              collect(Collectors.joining(",",
+                                         "[",
+                                         "]"));
+      return Bundle.CVEntryImpl_defaultName_bank(address,
+                                                 ba);
+    }
   }
 
   private long buildFlatAddress()
@@ -161,18 +168,6 @@ final class CVEntryImpl implements CVEntry
   }
 
   @Override
-  public Map<Locale, ResourceDescription> getAllDescriptions()
-  {
-    return descriptions;
-  }
-
-  @Override
-  public ResourceDescription getDefaultDescription()
-  {
-    return descriptions.get(null);
-  }
-
-  @Override
   public Set<CVFlag> getFlags()
   {
     return flags;
@@ -197,12 +192,6 @@ final class CVEntryImpl implements CVEntry
   }
 
   @Override
-  public Set<Integer> getAllowedValues()
-  {
-    return allowedValues;
-  }
-
-  @Override
   public int getValueMask()
   {
     return valueMask;
@@ -212,12 +201,6 @@ final class CVEntryImpl implements CVEntry
   public List<CVBitDescriptor> getBitDescriptors()
   {
     return bitDescriptors;
-  }
-
-  @Override
-  public CVValue getValue()
-  {
-    return value;
   }
 
   @Override
@@ -277,7 +260,7 @@ final class CVEntryImpl implements CVEntry
   @Override
   public String toString()
   {
-    return "CVEntryImpl{" + "name=" + getDefaultDescription().getName() + ", address=" + address + '}';
+    return "CVEntryImpl{" + "name=" + getName() + ", address=" + address + '}';
   }
 
 }

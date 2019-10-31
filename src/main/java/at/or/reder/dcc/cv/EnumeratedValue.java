@@ -16,21 +16,22 @@
 package at.or.reder.dcc.cv;
 
 import at.or.reder.zcan20.util.Descripted;
-import java.util.List;
-import java.util.UUID;
-import org.openide.util.Lookup;
+import at.or.reder.zcan20.util.ResourceDescription;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface CVSet extends Lookup.Provider, Descripted
+public interface EnumeratedValue extends Descripted
 {
 
-  public UUID getId();
+  public int getValue();
 
-  public List<CVEntry> getEntries();
-
-  public CVEntry getEntry(CVAddress address);
+  @Override
+  public default ResourceDescription getFallbackDescription()
+  {
+    return new ResourceDescription(Integer.toString(getValue()),
+                                   "");
+  }
 
 }

@@ -16,57 +16,57 @@
 package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.CVBitDescriptor;
-import at.or.reder.dcc.cv.ResourceDescription;
+import at.or.reder.dcc.cv.EnumeratedValue;
+import at.or.reder.zcan20.util.AbstractDescripted;
+import at.or.reder.zcan20.util.ResourceDescription;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  *
  * @author Wolfgang Reder
  */
-final class CVBitDescriptorImpl implements CVBitDescriptor
+final class CVBitDescriptorImpl extends AbstractDescripted implements CVBitDescriptor
 {
 
   private final int bitMask;
   private final int defaultValue;
-  private final Set<Integer> allowedValues;
-  private final Map<Locale, Map<Integer, ResourceDescription>> descriptors;
+  private final int minValue;
+  private final int maxValue;
+  private final List<EnumeratedValue> allowedValues;
 
   public CVBitDescriptorImpl(int bitMask,
                              int defaultValue,
-                             Set<Integer> allowedValues,
-                             Map<Locale, Map<Integer, ResourceDescription>> valueDescriptions)
+                             int min,
+                             int max,
+                             Collection<? extends EnumeratedValue> allowedValues,
+                             Map<Locale, ResourceDescription> valueDescriptions)
   {
+    super(valueDescriptions,
+          null);
     this.bitMask = bitMask;
-    this.defaultValue = defaultValue & bitMask;
+    this.minValue = Math.min(min & bitMask,
+                             max & bitMask);
+    this.maxValue = Math.max(max & bitMask,
+                             min & bitMask);
+    this.defaultValue = Math.max(min,
+                                 Math.min(max,
+                                          defaultValue & bitMask));
     if (allowedValues == null || allowedValues.isEmpty()) {
-      this.allowedValues = Collections.emptySet();
+      this.allowedValues = Collections.emptyList();
     } else {
-      this.allowedValues = allowedValues.stream().
-              map((v) -> v & bitMask).
-              collect(Collectors.toUnmodifiableSet());
-    }
-    if (valueDescriptions == null || valueDescriptions.isEmpty()) {
-      this.descriptors = Collections.emptyMap();
-    } else {
-      Map<Locale, Map<Integer, ResourceDescription>> tmpMap = new HashMap<>();
-      for (Map.Entry<Locale, Map<Integer, ResourceDescription>> le : valueDescriptions.entrySet()) {
-        if (!le.getValue().isEmpty()) {
-          Map<Integer, ResourceDescription> map = tmpMap.computeIfAbsent(le.getKey(),
-                                                                         (l) -> new HashMap<>());
-          for (Map.Entry<Integer, ResourceDescription> me : le.getValue().entrySet()) {
-            if (me.getKey() != null && me.getValue() != null) {
-              map.put(me.getKey() & bitMask,
-                      me.getValue());
-            }
-          }
-        }
-      }
-      this.descriptors = Collections.unmodifiableMap(tmpMap);
+      SortedSet<EnumeratedValue> tmp = new TreeSet<>(Comparator.comparing(EnumeratedValue::getValue));
+      allowedValues.stream().
+              filter((v) -> v != null).
+              forEach(tmp::add);
+      this.allowedValues = Collections.unmodifiableList(new ArrayList<>(tmp));
     }
   }
 
@@ -83,22 +83,27 @@ final class CVBitDescriptorImpl implements CVBitDescriptor
   }
 
   @Override
-  public Set<Integer> getAllowedValues()
+  public int getMinValue()
+  {
+    return minValue;
+  }
+
+  @Override
+  public int getMaxValue()
+  {
+    return maxValue;
+  }
+
+  @Override
+  public String getDefaultName()
+  {
+    return Integer.toString(defaultValue);
+  }
+
+  @Override
+  public List<EnumeratedValue> getAllowedValues()
   {
     return allowedValues;
-  }
-
-  @Override
-  public Map<Locale, Map<Integer, ResourceDescription>> getAllValueDescriptions()
-  {
-    return descriptors;
-  }
-
-  @Override
-  public Map<Integer, ResourceDescription> getDefaultValueDescriptions()
-  {
-    return descriptors.getOrDefault(null,
-                                    Collections.emptyMap());
   }
 
   @Override
@@ -122,10 +127,13 @@ final class CVBitDescriptorImpl implements CVBitDescriptor
       return false;
     }
     final CVBitDescriptorImpl other = (CVBitDescriptorImpl) obj;
-    if (this.bitMask != other.bitMask) {
-      return false;
-    }
-    return true;
+    return this.bitMask == other.bitMask;
+  }
+
+  @Override
+  public String toString()
+  {
+    return "CVBitDescriptorImpl{" + getName() + '}';
   }
 
 }

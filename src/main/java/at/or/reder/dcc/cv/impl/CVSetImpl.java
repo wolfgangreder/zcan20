@@ -18,63 +18,56 @@ package at.or.reder.dcc.cv.impl;
 import at.or.reder.dcc.cv.CVAddress;
 import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVSet;
-import at.or.reder.dcc.cv.ResourceDescription;
-import java.util.ArrayList;
+import at.or.reder.zcan20.util.AbstractDescripted;
+import at.or.reder.zcan20.util.ResourceDescription;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.openide.util.Lookup;
 
 /**
  *
  * @author Wolfgang Reder
  */
-final class CVSetImpl implements CVSet
+final class CVSetImpl extends AbstractDescripted implements CVSet
 {
 
   private final UUID id;
-  private final Map<Locale, ResourceDescription> descriptions;
   private final List<CVEntry> entries;
+  private static final Comparator<CVAddress> entryComparator = Comparator.comparing(CVAddress::getFlatAddress);
 
   public CVSetImpl(UUID id,
                    Map<Locale, ResourceDescription> descriptions,
                    Collection<? extends CVEntry> entries)
   {
+    super(descriptions,
+          null);
     this.id = id;
-    Map<Locale, ResourceDescription> tmp = new HashMap<>(descriptions);
-    if (tmp.get(null) == null) {
-      tmp.put(null,
-              new ResourceDescription("CV Set " + id.toString(),
-                                      ""));
-    }
-    this.descriptions = Collections.unmodifiableMap(tmp);
     if (entries.isEmpty()) {
       this.entries = Collections.emptyList();
     } else {
-      this.entries = Collections.unmodifiableList(new ArrayList<>(entries));
+      this.entries = entries.stream().
+              filter((f) -> f != null).
+              sorted(entryComparator).
+              collect(Collectors.toUnmodifiableList());
     }
+  }
+
+  @Override
+  public String getDefaultName()
+  {
+    return "CV Set " + id.toString();
   }
 
   @Override
   public UUID getId()
   {
     return id;
-  }
-
-  @Override
-  public Map<Locale, ResourceDescription> getAllDescriptions()
-  {
-    return descriptions;
-  }
-
-  @Override
-  public ResourceDescription getDefaultDescription()
-  {
-    return descriptions.get(null);
   }
 
   @Override
@@ -86,7 +79,12 @@ final class CVSetImpl implements CVSet
   @Override
   public CVEntry getEntry(CVAddress address)
   {
-    int index = entries.indexOf(address);
+    if (address == null) {
+      return null;
+    }
+    int index = Collections.binarySearch(entries,
+                                         address,
+                                         entryComparator);
     if (index >= 0) {
       return entries.get(index);
     }

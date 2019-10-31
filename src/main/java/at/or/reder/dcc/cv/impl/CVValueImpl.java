@@ -50,11 +50,7 @@ public final class CVValueImpl implements CVValue
   public int getValue()
   {
     if (entry != null) {
-      int result = value & entry.getValueMask();
-      if (!entry.getAllowedValues().isEmpty() && !entry.getAllowedValues().contains(result)) {
-        return -1;
-      }
-      return result;
+      return value & entry.getValueMask();
     } else {
       return value;
     }

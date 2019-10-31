@@ -15,6 +15,7 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.zcan20.util.ResourceDescription;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;

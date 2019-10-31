@@ -17,144 +17,118 @@ limitations under the License.
 
 
 <cv-set id="00000000-0000-0000-0000-000000000000">
-  <descriptors>
-    <descriptor name="Basis CV Set">Basis CV Set nach RCN-225</descriptor>
-    <descriptor lang="en" name="Basic CV Set">Basic CV Set  RCN-225</descriptor>
-  </descriptors>
-  <entries>
-    <entry address="1" type="NUMERIC" default-value="3" range-min="1" range-max="127" valuemask="127">
-      <descriptors>
-        <descriptor lang="en" name="Primary Address">Bits 0-6 contain an address with a value between 1 and 127. Bit seven must have a value of "0". If the value of Configuration Variable #1 is "00000000" then the decoder will go out of NMRA digital mode and convert to the alternate power source as defined by Configuration Variable #12. This setting will not affect the Digital Decoder's ability to respond to service mode packets (see RP 9.2.3). The default value for this Configuration Variable is 3, if the decoder is not installed in a locomotive or other unit when shipped from the manufacturer.</descriptor>
-        <descriptor name="Basis-Adresse"></descriptor>
-      </descriptors>
-      <flags>DCC_MANDATORY</flags>
-    </entry>
-    <entry address="2" type="NUMERIC" default-value="1">
-      <descriptors>
-        <descriptor name="Minimale Geschwindigkeit"></descriptor>
-        <descriptor lang="en" name="Vstart">Vstart is used to define the voltage drive level used as the start voltage on the motor. The voltage drive levels shall correspond linearly to the voltage applied to the motor at speed step one, as a fraction of available rectified supply voltage. When the voltage drive level is equal to zero, there shall be zero voltage applied to the motor. When it is at maximum "11111111", the full available rectified voltage shall be applied.</descriptor>
-      </descriptors>
-      <flags>DCC_RECOMMENDED</flags>
-    </entry>
-    <entry address="3" type="NUMERIC" default-value="1">
-      <descriptors>
-        <descriptor name="Faktor Beschleunigung"></descriptor>
-        <descriptor lang="en" name="Acceleration Rate"></descriptor>
-      </descriptors>
-      <flags>DCC_RECOMMENDED</flags>
-    </entry>
-    <entry address="4" type="NUMERIC" default-value="1">
-      <descriptors>
-        <descriptor name="Faktor Bremsen"></descriptor>
-        <descriptor lang="en" name="Deceleration Rate"></descriptor>
-      </descriptors>
-      <flags>DCC_RECOMMENDED</flags>
-    </entry>
-    <entry address="5" type="NUMERIC" default-value="0">
-      <descriptors>
-        <descriptor name="Maximale Geschwindigkeit"></descriptor>
-        <descriptor lang="en" name="Vhigh"></descriptor>
-      </descriptors>
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="6" type="NUMERIC" default-value="0">
-      <descriptors>
-        <descriptor name="Mittlere Geschwindigkeit"></descriptor>
-        <descriptor lang="en" name="Vmid"></descriptor>
-      </descriptors>
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="7" type="NUMERIC" default-value="0">
-      <descriptors>
-        <descriptor name="Dekoder Versionsnummer"></descriptor>
-        <descriptor lang="en" name="Manufacturer Version No."></descriptor>
-      </descriptors>
-      <flags>DCC_MANDATORY READ_ONLY</flags>
-    </entry>
-    <entry address="8" type="NUMERIC" default-value="0">
-      <descriptors>
-        <descriptor name="Dekoder Hersteller"></descriptor>
-        <descriptor lang="en" name="Manufacturer No."></descriptor>
-      </descriptors>
-      <flags>DCC_MANDATORY READ_ONLY</flags>
-    </entry>
-    <entry address="9" type="NUMERIC" default-value="0">
-      <descriptors>
-        <descriptor name="Periode Pulsweite"></descriptor>
-        <descriptor lang="en" name="Total PWM Period"></descriptor>
-      </descriptors>
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="10" type="NUMERIC" default-value="0">
-      <descriptors>
-        <descriptor name="Herstellerspezifisches CV"></descriptor>
-        <descriptor lang="en" name="EMF Feedback Cutout">Contains a value between 1 and 128 that indicates the speed step above which the back EMF motor control cuts off. When 14 or 28 speed steps are used the LSB's of the value are truncated appropriately.</descriptor>
-      </descriptors>
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="11" type="NUMERIC" default-value="0">
-      <descriptors>
-        <descriptor name="Maximalzeit ohne Datenempfang"></descriptor>
-        <descriptor lang="en" name="Packet Time-Out Value">Contains the maximum time period that the decoder will maintain its speed without receiving a valid packet.</descriptor>
-      </descriptors>
-      <flags>DCC_RECOMMENDED</flags>
-    </entry>
-    <entry address="12" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="13" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="14" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="15" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="16" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="17" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="18" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="19" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="21" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="22" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="23" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="24" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="25" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="26" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="27" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="28" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="29" type="NUMERIC" default-value="0">
-      <flags>DCC_MANDATORY</flags>
-    </entry>
-    <entry address="107" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-    <entry address="108" type="NUMERIC" default-value="0">
-      <flags>DCC_OPTIONAL</flags>
-    </entry>
-  </entries>
+  <descriptor name="Basis CV Set">Basis CV Set nach RCN-225</descriptor>
+  <descriptor lang="en" name="Basic CV Set">Basic CV Set  RCN-225</descriptor>
+  <entry address="1" type="NUMERIC" defaultvalue="3" range-min="1" range-max="127" valuemask="0x7f">
+    <descriptor lang="en" name="Primary Address">Bits 0-6 contain an address with a value between 1 and 127. Bit seven must have a value of "0". If the value of Configuration Variable #1 is "00000000" then the decoder will go out of NMRA digital mode and convert to the alternate power source as defined by Configuration Variable #12. This setting will not affect the Digital Decoder's ability to respond to service mode packets (see RP 9.2.3). The default value for this Configuration Variable is 3, if the decoder is not installed in a locomotive or other unit when shipped from the manufacturer.</descriptor>
+    <descriptor name="Basis-Adresse"></descriptor>
+    <flags>DCC_MANDATORY</flags>
+  </entry>
+  <entry address="2" type="NUMERIC" defaultvalue="1">
+    <descriptor name="Minimale Geschwindigkeit"></descriptor>
+    <descriptor lang="en" name="Vstart">Vstart is used to define the voltage drive level used as the start voltage on the motor. The voltage drive levels shall correspond linearly to the voltage applied to the motor at speed step one, as a fraction of available rectified supply voltage. When the voltage drive level is equal to zero, there shall be zero voltage applied to the motor. When it is at maximum "11111111", the full available rectified voltage shall be applied.</descriptor>
+    <flags>DCC_RECOMMENDED</flags>
+  </entry>
+  <entry address="3" type="NUMERIC" defaultvalue="1">
+    <descriptor name="Faktor Beschleunigung"></descriptor>
+    <descriptor lang="en" name="Acceleration Rate"></descriptor>
+    <flags>DCC_RECOMMENDED</flags>
+  </entry>
+  <entry address="4" type="NUMERIC" defaultvalue="1">
+    <descriptor name="Faktor Bremsen"></descriptor>
+    <descriptor lang="en" name="Deceleration Rate"></descriptor>
+    <flags>DCC_RECOMMENDED</flags>
+  </entry>
+  <entry address="5" type="NUMERIC" defaultvalue="0">
+    <descriptor name="Maximale Geschwindigkeit"></descriptor>
+    <descriptor lang="en" name="Vhigh"></descriptor>
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="6" type="NUMERIC" defaultvalue="0">
+    <descriptor name="Mittlere Geschwindigkeit"></descriptor>
+    <descriptor lang="en" name="Vmid"></descriptor>
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="7" type="NUMERIC" defaultvalue="0">
+    <descriptor name="Dekoder Versionsnummer"></descriptor>
+    <descriptor lang="en" name="Manufacturer Version No."></descriptor>
+    <flags>DCC_MANDATORY READ_ONLY</flags>
+  </entry>
+  <entry address="8" type="NUMERIC" defaultvalue="0">
+    <descriptor name="Dekoder Hersteller"></descriptor>
+    <descriptor lang="en" name="Manufacturer No."></descriptor>
+    <flags>DCC_MANDATORY READ_ONLY</flags>
+  </entry>
+  <entry address="9" type="NUMERIC" defaultvalue="0">
+    <descriptor name="Periode Pulsweite"></descriptor>
+    <descriptor lang="en" name="Total PWM Period"></descriptor>
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="10" type="NUMERIC" defaultvalue="0">
+    <descriptor name="Herstellerspezifisches CV"></descriptor>
+    <descriptor lang="en" name="EMF Feedback Cutout">Contains a value between 1 and 128 that indicates the speed step above which the back EMF motor control cuts off. When 14 or 28 speed steps are used the LSB's of the value are truncated appropriately.</descriptor>
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="11" type="NUMERIC" defaultvalue="0">
+    <descriptor name="Maximalzeit ohne Datenempfang"></descriptor>
+    <descriptor lang="en" name="Packet Time-Out Value">Contains the maximum time period that the decoder will maintain its speed without receiving a valid packet.</descriptor>
+    <flags>DCC_RECOMMENDED</flags>
+  </entry>
+  <entry address="12" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="13" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="14" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="15" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="16" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="17" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="18" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="19" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="21" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="22" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="23" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="24" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="25" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="26" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="27" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="28" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="29" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_MANDATORY</flags>
+  </entry>
+  <entry address="107" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
+  <entry address="108" type="NUMERIC" defaultvalue="0">
+    <flags>DCC_OPTIONAL</flags>
+  </entry>
 </cv-set>

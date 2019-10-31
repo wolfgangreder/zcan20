@@ -15,19 +15,17 @@
  */
 package at.or.reder.dcc.cv.impl;
 
-import at.or.reder.dcc.cv.CVBitDescriptor;
 import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVEntryBuilder;
 import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
-import at.or.reder.dcc.cv.CVValue;
-import at.or.reder.dcc.cv.ResourceDescription;
+import at.or.reder.zcan20.util.XmlDescripted;
+import at.or.reder.zcan20.util.XmlIntAdapter;
+import at.or.reder.zcan20.util.XmlResourceDescriptor;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -35,7 +33,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -44,7 +41,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *
  * @author Wolfgang Reder
  */
-public final class XmlCVEntry
+public final class XmlCVEntry extends XmlDescripted
 {
 
   public static final class XmlBankAddress
@@ -166,10 +163,8 @@ public final class XmlCVEntry
   private int defaultValue = 0;
   private int rangeMin = 0;
   private int rangeMax = 255;
-  private final Set<Integer> allowedValues = new HashSet<>();
   private int valueMask = 0xff;
-  private final List<CVBitDescriptor> bitDescriptors = new ArrayList<>();
-  private CVValue value = CVValue.NO_VALUE;
+  private final List<XmlCVBitDescriptor> bitDescriptors = new ArrayList<>();
   private int address = 0;
   private final List<XmlBankAddress> bankAddresses;
 
@@ -180,20 +175,18 @@ public final class XmlCVEntry
 
   public XmlCVEntry(CVEntry e)
   {
+    super(e.getAllResourceDescriptions());
     type = e.getCVType();
-    for (Map.Entry<Locale, ResourceDescription> d : e.getAllDescriptions().entrySet()) {
-      descriptors.add(new XmlResourceDescriptor(d.getKey(),
-                                                d.getValue().getName(),
-                                                d.getValue().getDescrption()));
-    }
     flags.addAll(e.getFlags());
     defaultValue = e.getDefaultValue();
     rangeMax = e.getRangeMax();
     rangeMin = e.getRangeMin();
-    allowedValues.addAll(e.getAllowedValues());
     valueMask = e.getValueMask();
-    bitDescriptors.addAll(e.getBitDescriptors());
-    value = e.getValue();
+    e.getBitDescriptors().
+            stream().
+            filter((b) -> b != null).
+            map(XmlCVBitDescriptor::new).
+            forEach(bitDescriptors::add);
     address = e.getAddress();
     bankAddresses = e.getBankAddresses().entrySet().stream().
             filter((me) -> CVUtils.isBankAddress(me.getKey())).
@@ -205,23 +198,17 @@ public final class XmlCVEntry
   {
     CVEntryBuilder builder = new CVEntryBuilderImpl();
     builder.address(address);
-    builder.addAllowedValues(allowedValues);
-    builder.addBitDescriptors(bitDescriptors);
+    bitDescriptors.stream().
+            filter((d) -> d != null).
+            map(XmlCVBitDescriptor::toBitDescriptor).
+            forEach(builder::addBitDescriptor);
     flags.stream().forEach(builder::addFlag);
     builder.defaultValue(defaultValue);
     builder.rangeMax(rangeMax);
     builder.rangeMin(rangeMin);
-    builder.setValue(value);
     builder.type(type);
     builder.valueMask(valueMask);
-    for (XmlResourceDescriptor d : descriptors) {
-      Locale loc = null;
-      if (d.getLoc() != null && !d.getLoc().isBlank()) {
-        loc = Locale.forLanguageTag(d.getLoc());
-      }
-      builder.addDescription(loc,
-                             d.toResourceDescription());
-    }
+    builder.addDescriptions(toMap());
     return builder.build();
   }
 
@@ -236,13 +223,6 @@ public final class XmlCVEntry
     this.type = type != null ? type : CVType.NUMERIC;
   }
 
-  @XmlElement(name = "descriptor")
-  @XmlElementWrapper(name = "descriptors")
-  public List<XmlResourceDescriptor> getDescriptors()
-  {
-    return descriptors;
-  }
-
   @XmlElement(name = "flags")
   @XmlList
   public Set<CVFlag> getFlags()
@@ -250,84 +230,68 @@ public final class XmlCVEntry
     return flags;
   }
 
-  @XmlAttribute(name = "default-value")
-  public int getDefaultValue()
+  @XmlAttribute(name = "defaultvalue")
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getDefaultValue()
   {
-    return defaultValue;
+    return defaultValue & valueMask;
   }
 
-  public void setDefaultValue(int defaultValue)
+  public void setDefaultValue(Integer defaultValue)
   {
-    this.defaultValue = defaultValue;
+    this.defaultValue = defaultValue != null ? defaultValue : 0;
   }
 
   @XmlAttribute(name = "range-min")
-  public int getRangeMin()
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getRangeMin()
   {
-    return rangeMin;
+    return rangeMin & valueMask;
   }
 
-  public void setRangeMin(int rangeMin)
+  public void setRangeMin(Integer rangeMin)
   {
-    this.rangeMin = rangeMin;
+    this.rangeMin = rangeMin != null ? rangeMin : 0;
   }
 
   @XmlAttribute(name = "range-max")
-  public int getRangeMax()
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getRangeMax()
   {
     return rangeMax;
   }
 
-  public void setRangeMax(int rangeMax)
+  public void setRangeMax(Integer rangeMax)
   {
-    this.rangeMax = rangeMax;
-  }
-
-  @XmlElement(name = "allowed-values")
-  @XmlList
-  public Set<Integer> getAllowedValues()
-  {
-    return allowedValues;
+    this.rangeMax = rangeMax != null ? rangeMax : 0xff;
   }
 
   @XmlAttribute(name = "valuemask")
-  public int getValueMask()
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getValueMask()
   {
-    return valueMask;
+    return valueMask & 0xff;
   }
 
-  public void setValueMask(int valueMask)
+  public void setValueMask(Integer valueMask)
   {
-    this.valueMask = valueMask;
+    this.valueMask = valueMask != null ? valueMask & 0xff : 0xff;
   }
 
   @XmlElement(name = "bit-descriptor")
-  @XmlElementWrapper(name = "bit-descriptors")
-  @XmlJavaTypeAdapter(XmlCVBitDescriptor.Adapter.class)
-  public List<CVBitDescriptor> getBitDescriptors()
+  public List<XmlCVBitDescriptor> getBitDescriptors()
   {
     return bitDescriptors;
   }
 
-  @XmlElement(name = "value")
-  @XmlJavaTypeAdapter(XmlCVValue.Adapter.class)
-  public CVValue getValue()
-  {
-    return value;
-  }
-
-  public void setValue(CVValue value)
-  {
-    this.value = value != null ? value : CVValue.NO_VALUE;
-  }
-
   @XmlAttribute(name = "address", required = true)
-  public int getAddress()
+  @XmlJavaTypeAdapter(XmlIntAdapter.class)
+  public Integer getAddress()
   {
     return address;
   }
 
-  public void setAddress(int address)
+  public void setAddress(Integer address)
   {
     this.address = address;
   }

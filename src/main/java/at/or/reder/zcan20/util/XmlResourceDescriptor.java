@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.dcc.cv.impl;
+package at.or.reder.zcan20.util;
 
-import at.or.reder.dcc.cv.ResourceDescription;
 import java.util.Locale;
+import java.util.Map;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlValue;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public class XmlResourceDescriptor
+public final class XmlResourceDescriptor
 {
 
   private String loc;
@@ -33,6 +34,13 @@ public class XmlResourceDescriptor
 
   public XmlResourceDescriptor()
   {
+  }
+
+  public XmlResourceDescriptor(Map.Entry<Locale, ResourceDescription> e)
+  {
+    this(e.getKey(),
+         e.getValue().getName(),
+         e.getValue().getDescrption());
   }
 
   public XmlResourceDescriptor(Locale loc,
@@ -46,6 +54,12 @@ public class XmlResourceDescriptor
     }
     this.name = name;
     this.description = desc;
+  }
+
+  @XmlTransient
+  public Locale getLocale()
+  {
+    return loc != null ? Locale.forLanguageTag(loc) : null;
   }
 
   @XmlAttribute(name = "lang")
