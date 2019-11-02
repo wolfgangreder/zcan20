@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Wolfgang Reder.
+ * Copyright 2017 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.util;
+package at.or.reder.dcc.util;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public enum OSType
+public final class Predicates
 {
-  WINDOWS,
-  LINUX,
-  UNKNOWN;
+
+  public static boolean isNull(Object o)
+  {
+    return o == null;
+  }
+
+  public static boolean isNotNull(Object o)
+  {
+    return o != null;
+  }
+
+  private Predicates()
+  {
+  }
+
 }

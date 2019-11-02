@@ -20,9 +20,9 @@ import at.or.reder.dcc.cv.CVEntryBuilder;
 import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
-import at.or.reder.zcan20.util.XmlDescripted;
-import at.or.reder.zcan20.util.XmlIntAdapter;
-import at.or.reder.zcan20.util.XmlResourceDescriptor;
+import at.or.reder.dcc.util.XmlDescripted;
+import at.or.reder.dcc.util.XmlIntAdapter;
+import at.or.reder.dcc.util.XmlResourceDescriptor;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -83,16 +83,16 @@ public final class XmlCVEntry extends XmlDescripted
             result.address = address;
             switch (index) {
               case 0:
-                result.type = CVType.BANKREGISTER_0;
+                result.type = CVType.INDEX_0;
                 break;
               case 1:
-                result.type = CVType.BANKREGISTER_1;
+                result.type = CVType.INDEX_1;
                 break;
               case 2:
-                result.type = CVType.BANKREGISTER_2;
+                result.type = CVType.INDEX_2;
                 break;
               case 3:
-                result.type = CVType.BANKREGISTER_3;
+                result.type = CVType.INDEX_3;
                 break;
               default:
                 return null;
@@ -112,16 +112,16 @@ public final class XmlCVEntry extends XmlDescripted
       if (v != null) {
         StringBuilder builder = new StringBuilder();
         switch (v.type) {
-          case BANKREGISTER_0:
+          case INDEX_0:
             builder.append("0=");
             break;
-          case BANKREGISTER_1:
+          case INDEX_1:
             builder.append("1=");
             break;
-          case BANKREGISTER_2:
+          case INDEX_2:
             builder.append("2=");
             break;
-          case BANKREGISTER_3:
+          case INDEX_3:
             builder.append("3=");
             break;
           default:
@@ -296,7 +296,7 @@ public final class XmlCVEntry extends XmlDescripted
     this.address = address;
   }
 
-  @XmlElement(name = "bank-address")
+  @XmlElement(name = "index-address")
   @XmlJavaTypeAdapter(XmlBankAddressAdapter.class)
   @XmlList
   public List<XmlBankAddress> getBankAddresses()

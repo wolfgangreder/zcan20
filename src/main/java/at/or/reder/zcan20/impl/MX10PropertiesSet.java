@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.impl;
 
 import at.or.reder.dcc.PropertySet;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

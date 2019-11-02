@@ -20,7 +20,7 @@ import at.or.reder.zcan20.SpeedSteps;
 import at.or.reder.zcan20.SpeedlimitMode;
 import at.or.reder.zcan20.packet.LocoModePacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 
 /**
  *

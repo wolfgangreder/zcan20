@@ -19,7 +19,7 @@ import at.or.reder.zcan20.CVReadState;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.packet.CVInfoAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 
 /**
  *

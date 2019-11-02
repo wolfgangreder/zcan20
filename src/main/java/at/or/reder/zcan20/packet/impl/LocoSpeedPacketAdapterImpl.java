@@ -18,7 +18,7 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.SpeedFlags;
 import at.or.reder.zcan20.packet.LocoSpeedPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import java.util.Set;
 
 /**

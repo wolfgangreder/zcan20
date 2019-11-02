@@ -15,7 +15,7 @@
  */
 package at.or.reder.dcc.cv;
 
-import at.or.reder.zcan20.util.ResourceDescription;
+import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Locale;
 import java.util.Map;
 import javax.validation.constraints.NotNull;

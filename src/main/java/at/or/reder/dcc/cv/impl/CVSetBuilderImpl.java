@@ -19,7 +19,7 @@ import at.or.reder.dcc.cv.CVAddress;
 import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVSet;
 import at.or.reder.dcc.cv.CVSetBuilder;
-import at.or.reder.zcan20.util.AbstractDescriptedBuilder;
+import at.or.reder.dcc.util.AbstractDescriptedBuilder;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;

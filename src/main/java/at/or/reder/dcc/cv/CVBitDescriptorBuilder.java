@@ -15,7 +15,7 @@
  */
 package at.or.reder.dcc.cv;
 
-import at.or.reder.zcan20.util.ResourceDescription;
+import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -54,6 +54,14 @@ public interface CVBitDescriptorBuilder
   public CVBitDescriptorBuilder removeDescription(Locale locale);
 
   public CVBitDescriptorBuilder clearDescriptions();
+
+  public CVBitDescriptorBuilder addFlag(CVFlag flag);
+
+  public CVBitDescriptorBuilder addFlags(Collection<CVFlag> flags);
+
+  public CVBitDescriptorBuilder removeFlag(CVFlag flag);
+
+  public CVBitDescriptorBuilder clearFlags();
 
   public CVBitDescriptor build();
 

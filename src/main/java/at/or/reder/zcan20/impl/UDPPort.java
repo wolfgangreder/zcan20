@@ -16,8 +16,8 @@
 package at.or.reder.zcan20.impl;
 
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.util.BufferPool;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.BufferPool;
+import at.or.reder.dcc.util.Utils;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

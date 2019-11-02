@@ -16,8 +16,8 @@
 package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.EnumeratedValue;
-import at.or.reder.zcan20.util.AbstractDescripted;
-import at.or.reder.zcan20.util.ResourceDescription;
+import at.or.reder.dcc.util.AbstractDescripted;
+import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Locale;
 import java.util.Map;
 

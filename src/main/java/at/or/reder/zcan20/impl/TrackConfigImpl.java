@@ -22,7 +22,7 @@ import at.or.reder.zcan20.TrackConfig;
 import at.or.reder.zcan20.packet.CVInfoAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketBuilder;
-import at.or.reder.zcan20.util.CanIdMatcher;
+import at.or.reder.dcc.util.CanIdMatcher;
 import java.io.IOException;
 import java.util.function.Predicate;
 

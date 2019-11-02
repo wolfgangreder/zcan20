@@ -35,7 +35,7 @@ import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PacketBuilder;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Objects;

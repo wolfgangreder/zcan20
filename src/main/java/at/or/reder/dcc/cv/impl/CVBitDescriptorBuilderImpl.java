@@ -17,9 +17,12 @@ package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.CVBitDescriptor;
 import at.or.reder.dcc.cv.CVBitDescriptorBuilder;
+import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.EnumeratedValue;
-import at.or.reder.zcan20.util.AbstractDescriptedBuilder;
+import at.or.reder.dcc.util.AbstractDescriptedBuilder;
+import at.or.reder.dcc.util.Predicates;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -35,8 +38,9 @@ public final class CVBitDescriptorBuilderImpl extends AbstractDescriptedBuilder<
   private int bitMask = 0xff;
   private int defaultValue;
   private int minValue;
-  private int maxValue;
+  private int maxValue = 0xff;
   private final Set<EnumeratedValue> validValues = new HashSet<>();
+  private final Set<CVFlag> flags = EnumSet.noneOf(CVFlag.class);
 
   @SuppressWarnings("LeakingThisInConstructor")
   public CVBitDescriptorBuilderImpl()
@@ -55,6 +59,7 @@ public final class CVBitDescriptorBuilderImpl extends AbstractDescriptedBuilder<
     this.minValue = descriptor.getMinValue();
     this.validValues.clear();
     addAllowedValues(descriptor.getAllowedValues());
+    descriptor.getFlags().stream().filter(Predicates::isNotNull).forEach(flags::add);
     return this;
   }
 
@@ -119,6 +124,40 @@ public final class CVBitDescriptorBuilderImpl extends AbstractDescriptedBuilder<
   }
 
   @Override
+  public CVBitDescriptorBuilder addFlag(CVFlag flag)
+  {
+    if (flag != null) {
+      flags.add(flag);
+    }
+    return this;
+  }
+
+  @Override
+  public CVBitDescriptorBuilder addFlags(Collection<CVFlag> flags)
+  {
+    if (flags != null) {
+      flags.stream().filter(Predicates::isNotNull).forEach(this.flags::add);
+    }
+    return this;
+  }
+
+  @Override
+  public CVBitDescriptorBuilder removeFlag(CVFlag flag)
+  {
+    if (flag != null) {
+      flags.remove(flag);
+    }
+    return this;
+  }
+
+  @Override
+  public CVBitDescriptorBuilder clearFlags()
+  {
+    flags.clear();
+    return this;
+  }
+
+  @Override
   public CVBitDescriptor build()
   {
     return new CVBitDescriptorImpl(bitMask,
@@ -126,6 +165,7 @@ public final class CVBitDescriptorBuilderImpl extends AbstractDescriptedBuilder<
                                    minValue,
                                    maxValue,
                                    validValues,
+                                   flags,
                                    descriptions);
   }
 

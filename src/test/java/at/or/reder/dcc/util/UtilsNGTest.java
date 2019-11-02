@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package at.or.reder.zcan20.util;
+package at.or.reder.dcc.util;
 
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.text.ParseException;

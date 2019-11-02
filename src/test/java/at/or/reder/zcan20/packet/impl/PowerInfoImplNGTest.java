@@ -19,7 +19,7 @@ import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.impl.UDPMarshaller;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PowerInfo;
-import at.or.reder.zcan20.util.HexStringInputStream;
+import at.or.reder.dcc.util.HexStringInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import static org.testng.AssertJUnit.*;

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2019 Wolfgang Reder.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<cv-set id="9d5db84e-5385-4992-a9f2-c9debcebd430">
+  <descriptor name="Test alowed-value"/>
+  <entry address="155" type="NUMERIC" defaultvalue="0">
+    <descriptor name="Erweiterte Auswahl einer Funktionstaste für Halbgeschwindigkeit"><![CDATA[<html><p>In Erweiterung der Einstellungen der CV #124, wenn eine andere Taste (Halbgeschwindigkeit auf F3 oder F7) gewünscht ist:<br>CV #155: Funktions-Taste, mit welcher die Halbgeschwindigkeit (= höchste Fahrstufe = halbe Geschwindigkeit) eingeschaltet wird. Wenn CV #155 = 0, dann gilt CV # 124, wenn > 0 = Zuordnung in CV #124 unwirksam.<br>Zusätzlich kann man die Halbgeschwindigkeit über Bit 7-5 in 1/8-Schritten einstellen. Bit 7-5 = 000 = 0,625 der Vmax; Bit 7-5 = 001 = 0,125; ... Bit7-5 = 100 = 0,5; ...Bit7-5 = 111 = 0,875 der Vmax. „Halbgeschwindigkeit“ = 0,625 der Vmax.</p>]]></descriptor>
+    <bit-descriptor bitmask="0x1f" range-min="0" range-max="19">
+      <descriptor name="Funktiontaste"/>
+    </bit-descriptor>
+    <bit-descriptor bitmask="0xe0">
+      <allowed-value value="0">
+        <descriptor name="0,625 vmax"/>
+      </allowed-value>
+      <allowed-value value="0x20">
+        <descriptor name="0,125 vmax"/>
+      </allowed-value>
+      <allowed-value value="0x40">
+        <descriptor name="0,250 vmax"/>
+      </allowed-value>
+      <allowed-value value="0x60">
+        <descriptor name="0,375 vmax"/>
+      </allowed-value>
+      <allowed-value value="0x80">
+        <descriptor name="0,5 vmax"/>
+      </allowed-value>
+      <allowed-value value="0xa0">
+        <descriptor name="0,625 vmax"/>
+      </allowed-value>
+      <allowed-value value="0xc0">
+        <descriptor name="0,750 vmax"/>
+      </allowed-value>
+      <allowed-value value="0xe0">
+        <descriptor name="0,875 vmax"/>
+      </allowed-value>
+    </bit-descriptor>
+  </entry>
+
+</cv-set>

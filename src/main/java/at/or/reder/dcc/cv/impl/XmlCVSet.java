@@ -18,7 +18,7 @@ package at.or.reder.dcc.cv.impl;
 import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVSet;
 import at.or.reder.dcc.cv.CVSetBuilder;
-import at.or.reder.zcan20.util.XmlDescripted;
+import at.or.reder.dcc.util.XmlDescripted;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

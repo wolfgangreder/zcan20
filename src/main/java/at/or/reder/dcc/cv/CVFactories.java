@@ -24,7 +24,6 @@ import at.or.reder.dcc.cv.impl.XmlCVSet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -71,8 +70,6 @@ public final class CVFactories
       Marshaller m = ctx.createMarshaller();
       m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,
                     true);
-      m.setProperty(Marshaller.JAXB_ENCODING,
-                    StandardCharsets.UTF_8.name());
       m.marshal(xs,
                 out);
     } catch (JAXBException ex) {

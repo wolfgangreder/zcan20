@@ -26,7 +26,7 @@ import at.or.reder.zcan20.SpeedlimitMode;
 import at.or.reder.zcan20.ZCANFactory;
 import at.or.reder.zcan20.impl.UDPMarshaller;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collections;

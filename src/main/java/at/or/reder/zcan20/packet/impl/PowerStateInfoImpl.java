@@ -24,7 +24,7 @@ import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PowerStateInfo;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;

@@ -18,7 +18,7 @@ package at.or.reder.zcan20;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CanId;
-import at.or.reder.zcan20.util.CanIdMatcher;
+import at.or.reder.dcc.util.CanIdMatcher;
 import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.Test;
 

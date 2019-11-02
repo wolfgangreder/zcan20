@@ -17,7 +17,7 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.packet.LocoFuncPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 
 /**
  *

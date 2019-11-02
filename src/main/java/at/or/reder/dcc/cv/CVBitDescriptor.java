@@ -15,8 +15,9 @@
  */
 package at.or.reder.dcc.cv;
 
-import at.or.reder.zcan20.util.Descripted;
+import at.or.reder.dcc.util.Descripted;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -55,5 +56,7 @@ public interface CVBitDescriptor extends Descripted
   {
     return (value & getBitMask()) >> getOffset();
   }
+
+  public Set<CVFlag> getFlags();
 
 }

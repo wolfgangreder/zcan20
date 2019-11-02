@@ -21,7 +21,7 @@ import at.or.reder.zcan20.packet.ModuleInfoPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import org.openide.util.lookup.ServiceProvider;
 
 /**

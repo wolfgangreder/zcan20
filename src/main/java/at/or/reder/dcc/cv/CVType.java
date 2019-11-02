@@ -28,17 +28,17 @@ public enum CVType
   /**
    * Niederwertigstes Bankregister.
    */
-  BANKREGISTER_0,
+  INDEX_0,
   /**
    * Bankregister. Wenn es nur zwei Bankregister gibt, ist dieses Register das höherwertige.
    */
-  BANKREGISTER_1,
+  INDEX_1,
   /**
    * Bankregister.
    */
-  BANKREGISTER_2,
+  INDEX_2,
   /**
    * Höherwertiges Bankregisters.
    */
-  BANKREGISTER_3;
+  INDEX_3;
 }

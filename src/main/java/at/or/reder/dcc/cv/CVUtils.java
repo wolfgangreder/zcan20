@@ -32,7 +32,7 @@ public final class CVUtils
 
   public static boolean isBankAddress(CVType type)
   {
-    return type == CVType.BANKREGISTER_0 || type == CVType.BANKREGISTER_1 || type == CVType.BANKREGISTER_2 || type == CVType.BANKREGISTER_3;
+    return type == CVType.INDEX_0 || type == CVType.INDEX_1 || type == CVType.INDEX_2 || type == CVType.INDEX_3;
   }
 
   private static final ConcurrentMap<Locale, List<Locale>> localeLists = new ConcurrentHashMap<>();

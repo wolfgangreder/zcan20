@@ -15,10 +15,12 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.dcc.util.SimpleCVAddress;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import static org.testng.AssertJUnit.assertNotNull;
+import java.util.List;
+import static org.testng.AssertJUnit.*;
 import org.testng.annotations.Test;
 
 /**
@@ -32,7 +34,7 @@ public class CVFactoriesTest
   public void testLoadBasic() throws Exception
   {
     CVSet set = null;
-    try (InputStream is = getClass().getResourceAsStream("/at/or/reder/dcc/cv/impl/basic.xml")) {
+    try (InputStream is = getClass().getResourceAsStream("/at/or/reder/dcc/cv/impl/zimo.xml")) {
       set = CVFactories.loadCVSetFromXML(is);
       assertNotNull(set);
     }
@@ -42,6 +44,22 @@ public class CVFactoriesTest
     String tmp = new String(os.toByteArray(),
                             StandardCharsets.UTF_8);
     System.err.println(tmp);
+  }
+
+  @Test
+  public void testLoadAllowedValues() throws Exception
+  {
+    CVSet set;
+    try (InputStream is = getClass().getResourceAsStream("/at/or/reder/dcc/cv/impl/test_allowed_value.xml")) {
+      set = CVFactories.loadCVSetFromXML(is);
+      assertNotNull(set);
+    }
+    CVEntry entry = set.getEntry(new SimpleCVAddress(155));
+    assertNotNull(entry);
+    List<CVBitDescriptor> bitDescriptors = entry.getBitDescriptors();
+    assertNotNull(bitDescriptors);
+    assertEquals(2,
+                 bitDescriptors.size());
   }
 
 }

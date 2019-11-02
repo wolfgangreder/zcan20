@@ -39,4 +39,10 @@ public interface CVSetProvider extends Lookup.Provider
 
   public Decoder findMatchingDecoder(Map<CVAddress, CVValue> values);
 
+  public default CVEditor findCVEditor(CVSet set,
+                                       CVEntry entry)
+  {
+    return null;
+  }
+
 }

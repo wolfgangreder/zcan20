@@ -17,7 +17,7 @@ package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.EnumeratedValue;
 import at.or.reder.dcc.cv.EnumeratedValueBuilder;
-import at.or.reder.zcan20.util.AbstractDescriptedBuilder;
+import at.or.reder.dcc.util.AbstractDescriptedBuilder;
 
 /**
  *

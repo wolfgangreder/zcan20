@@ -15,23 +15,32 @@
  */
 package at.or.reder.dcc.cv;
 
-import at.or.reder.dcc.util.Descripted;
-import at.or.reder.dcc.util.ResourceDescription;
+import java.beans.PropertyChangeListener;
+import javax.swing.JComponent;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface EnumeratedValue extends Descripted
+public interface CVEditor
 {
 
-  public int getValue();
+  public static final String PROP_VALUE = "value";
 
-  @Override
-  public default ResourceDescription getFallbackDescription()
-  {
-    return new ResourceDescription(Integer.toString(getValue()),
-                                   "");
-  }
+  public JComponent getComponent();
+
+  public void setValue(CVValue value);
+
+  public CVValue getValue();
+
+  public void addPropertyChangeListener(PropertyChangeListener listener);
+
+  public void addPropertyChangeListener(String prop,
+                                        PropertyChangeListener listener);
+
+  public void removePropertyChangeListener(PropertyChangeListener listener);
+
+  public void removePropertyChangeListener(String prop,
+                                           PropertyChangeListener listener);
 
 }

@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.impl;
 
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import gnu.io.PortInUseException;
 import gnu.io.RXTXPort;
 import java.io.IOException;

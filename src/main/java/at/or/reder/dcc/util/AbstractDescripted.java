@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.util;
+package at.or.reder.dcc.util;
 
+import at.or.reder.dcc.util.ResourceDescription;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,11 +35,12 @@ public abstract class AbstractDescripted implements Descripted
                                ResourceDescription defaultDescription)
   {
     this.defaultDescription = defaultDescription;
-    this.descriptions = descriptions.entrySet().
+    // da null keys erlaubt sind, geht Collectors.toUnmodifiableMap nicht
+    this.descriptions = Collections.unmodifiableMap(descriptions.entrySet().
             stream().
             filter((e) -> e.getValue() != null).
-            collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
-                                                 Map.Entry::getValue));
+            collect(Collectors.toMap(Map.Entry::getKey,
+                                     Map.Entry::getValue)));
   }
 
   @Override

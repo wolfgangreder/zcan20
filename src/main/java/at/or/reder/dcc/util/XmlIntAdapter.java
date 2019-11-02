@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.util;
+package at.or.reder.dcc.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,7 +55,7 @@ public final class XmlIntAdapter extends XmlAdapter<String, Integer>
   public String marshal(Integer v)
   {
     if (v != null) {
-      return "0x" + Integer.toHexString(v);
+      return Integer.toString(v);
     }
     return null;
   }

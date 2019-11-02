@@ -21,8 +21,8 @@ import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
-import at.or.reder.zcan20.util.AbstractDescripted;
-import at.or.reder.zcan20.util.ResourceDescription;
+import at.or.reder.dcc.util.AbstractDescripted;
+import at.or.reder.dcc.util.ResourceDescription;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -132,22 +132,22 @@ final class CVEntryImpl extends AbstractDescripted implements CVEntry
   private long buildFlatAddress()
   {
     long result = 0;
-    int b = getBankAddress(CVType.BANKREGISTER_3);
+    int b = getBankAddress(CVType.INDEX_3);
     if (b != -1) {
       result += b & 0xff;
     }
     result <<= 8;
-    b = getBankAddress(CVType.BANKREGISTER_2);
+    b = getBankAddress(CVType.INDEX_2);
     if (b != -1) {
       result += b & 0xff;
     }
     result <<= 8;
-    b = getBankAddress(CVType.BANKREGISTER_1);
+    b = getBankAddress(CVType.INDEX_1);
     if (b != -1) {
       result += b & 0xff;
     }
     result <<= 8;
-    b = getBankAddress(CVType.BANKREGISTER_0);
+    b = getBankAddress(CVType.INDEX_0);
     if (b != -1) {
       result += b & 0xff;
     }

@@ -34,7 +34,7 @@ public final class JAXBHelper
     static {
       JAXBContext tmp = null;
       try {
-        tmp = JAXBContext.newInstance("at.or.reder.dcc.cv.impl:" + "at.or.reder.zcan20.util");
+        tmp = JAXBContext.newInstance("at.or.reder.dcc.cv.impl:" + "at.or.reder.dcc.util");
       } catch (JAXBException ex) {
         Exceptions.printStackTrace(ex);
       }

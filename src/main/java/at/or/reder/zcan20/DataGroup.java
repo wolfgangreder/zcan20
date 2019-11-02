@@ -15,8 +15,8 @@
  */
 package at.or.reder.zcan20;
 
-import at.or.reder.zcan20.util.MockEnum;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.MockEnum;
+import at.or.reder.dcc.util.Utils;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

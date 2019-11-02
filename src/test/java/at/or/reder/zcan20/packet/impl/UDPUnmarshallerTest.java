@@ -21,7 +21,7 @@ import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.impl.UDPMarshaller;
 import at.or.reder.zcan20.packet.CVInfoAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.util.Utils;
+import at.or.reder.dcc.util.Utils;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.ParseException;

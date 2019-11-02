@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.util;
+package at.or.reder.dcc.util;
 
+import at.or.reder.dcc.util.HexStringInputStream;
 import java.io.IOException;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.BeforeClass;

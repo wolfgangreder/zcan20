@@ -20,8 +20,8 @@ import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVEntryBuilder;
 import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
-import at.or.reder.zcan20.util.AbstractDescriptedBuilder;
-import at.or.reder.zcan20.util.ResourceDescription;
+import at.or.reder.dcc.util.AbstractDescriptedBuilder;
+import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -83,16 +83,16 @@ public final class CVEntryBuilderImpl extends AbstractDescriptedBuilder<CVEntryB
   {
     bankAddresses.clear();
     if (bank0 > 0) {
-      bankAddresses.put(CVType.BANKREGISTER_0,
+      bankAddresses.put(CVType.INDEX_0,
                         bank0);
       if (bank1 > 0) {
-        bankAddresses.put(CVType.BANKREGISTER_1,
+        bankAddresses.put(CVType.INDEX_1,
                           bank1);
         if (bank2 > 0) {
-          bankAddresses.put(CVType.BANKREGISTER_2,
+          bankAddresses.put(CVType.INDEX_2,
                             bank2);
           if (bank3 > 0) {
-            bankAddresses.put(CVType.BANKREGISTER_3,
+            bankAddresses.put(CVType.INDEX_3,
                               bank3);
           }
         }

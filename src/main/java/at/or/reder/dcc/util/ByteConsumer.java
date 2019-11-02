@@ -13,27 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.util;
+package at.or.reder.dcc.util;
 
-/**
- *
- * @author Wolfgang Reder
- */
-public final class Predicates
+@FunctionalInterface
+public interface ByteConsumer
 {
 
-  public static boolean isNull(Object o)
-  {
-    return o != null;
-  }
-
-  public static boolean isNotNull(Object o)
-  {
-    return o == null;
-  }
-
-  private Predicates()
-  {
-  }
+  public void consumeByte(byte b);
 
 }

@@ -17,12 +17,17 @@ package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.CVBitDescriptor;
 import at.or.reder.dcc.cv.CVBitDescriptorBuilder;
-import at.or.reder.zcan20.util.XmlDescripted;
-import at.or.reder.zcan20.util.XmlIntAdapter;
+import at.or.reder.dcc.cv.CVFlag;
+import at.or.reder.dcc.util.Predicates;
+import at.or.reder.dcc.util.XmlDescripted;
+import at.or.reder.dcc.util.XmlIntAdapter;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlList;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -59,7 +64,8 @@ public final class XmlCVBitDescriptor extends XmlDescripted
   private int bitMask = 0xff;
   private int defaultValue;
   private int min;
-  private int max;
+  private int max = 0xff;
+  private final Set<CVFlag> flags = EnumSet.noneOf(CVFlag.class);
   private final List<XmlEnumeratedValue> allowedValues = new ArrayList<>();
 
   public XmlCVBitDescriptor()
@@ -71,9 +77,10 @@ public final class XmlCVBitDescriptor extends XmlDescripted
     super(d.getAllResourceDescriptions());
     bitMask = d.getBitMask() & 0xff;
     defaultValue = d.getDefaultValue() & bitMask;
-    d.getAllowedValues().stream().filter((f) -> f != null).map(XmlEnumeratedValue::new).forEach(allowedValues::add);
+    d.getAllowedValues().stream().filter(Predicates::isNotNull).map(XmlEnumeratedValue::new).forEach(allowedValues::add);
     min = d.getMinValue();
     max = d.getMaxValue();
+    d.getFlags().stream().filter(Predicates::isNotNull).forEach(flags::add);
   }
 
   public CVBitDescriptor toBitDescriptor()
@@ -85,6 +92,7 @@ public final class XmlCVBitDescriptor extends XmlDescripted
     builder.minValue(min);
     builder.maxValue(max);
     builder.addDescriptions(toMap());
+    flags.stream().filter(Predicates::isNotNull).forEach(builder::addFlag);
     return builder.build();
   }
 
@@ -136,10 +144,17 @@ public final class XmlCVBitDescriptor extends XmlDescripted
     this.max = (max != null ? max : 0xff) & bitMask;
   }
 
-  @XmlElement(name = "allowed-values")
+  @XmlElement(name = "allowed-value")
   public List<XmlEnumeratedValue> getAllowedValues()
   {
     return allowedValues;
+  }
+
+  @XmlElement(name = "flags")
+  @XmlList
+  public Set<CVFlag> getFlags()
+  {
+    return flags;
   }
 
 }

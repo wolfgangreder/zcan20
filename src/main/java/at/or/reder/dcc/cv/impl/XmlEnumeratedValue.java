@@ -16,8 +16,8 @@
 package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.EnumeratedValue;
-import at.or.reder.zcan20.util.XmlDescripted;
-import at.or.reder.zcan20.util.XmlIntAdapter;
+import at.or.reder.dcc.util.XmlDescripted;
+import at.or.reder.dcc.util.XmlIntAdapter;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
