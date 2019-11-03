@@ -16,147 +16,15 @@
 package at.or.reder.zcan20;
 
 import at.or.reder.zcan20.packet.Packet;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class PacketSelector implements Predicate<Packet>
+public interface PacketSelector extends Predicate<PacketSelector>
 {
 
-  private final CommandGroup group;
-  private final byte command;
-  private final CommandMode mode;
-  private final int dlc;
-
-  public PacketSelector(CommandGroup group,
-                        byte command,
-                        CommandMode mode,
-                        int dlc)
-  {
-    this.group = group;
-    this.command = command;
-    this.mode = mode;
-    this.dlc = dlc;
-  }
-
-  @Override
-  public boolean test(Packet t)
-  {
-    if (t == null) {
-      return false;
-    }
-    if (group != null && t.getCommandGroup() != group) {
-      return false;
-    }
-    if (mode != null && t.getCommandMode() != mode) {
-      return false;
-    }
-    if (dlc >= 0 && t.getDLC() != dlc) {
-      return false;
-    }
-    return command == t.getCommand();
-  }
-
-  public boolean matches(PacketSelector t)
-  {
-    if (t == null) {
-      return false;
-    }
-    if (group != null && t.getCommandGroup() != group) {
-      return false;
-    }
-    if (mode != null && t.getCommandMode() != mode) {
-      return false;
-    }
-    if (dlc >= 0 && t.getDLC() != dlc) {
-      return false;
-    }
-    return command == t.getCommand();
-  }
-
-  public CommandGroup getCommandGroup()
-  {
-    return group;
-  }
-
-  public byte getCommand()
-  {
-    return command;
-  }
-
-  public CommandMode getCommandMode()
-  {
-    return mode;
-  }
-
-  public int getDLC()
-  {
-    return dlc;
-  }
-
-  @Override
-  public int hashCode()
-  {
-    int hash = 3;
-    hash = 61 * hash + Objects.hashCode(this.group);
-    hash = 61 * hash + this.command;
-    hash = 61 * hash + Objects.hashCode(this.mode);
-    hash = 61 * hash + this.dlc;
-    return hash;
-  }
-
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    final PacketSelector other = (PacketSelector) obj;
-    if (this.command != other.command) {
-      return false;
-    }
-    if (this.dlc != other.dlc) {
-      return false;
-    }
-    if (!Objects.equals(this.group,
-                        other.group)) {
-      return false;
-    }
-    return this.mode == other.mode;
-  }
-
-  @Override
-  public String toString()
-  {
-    StringBuilder builder = new StringBuilder("PacketSelector{group=");
-    builder.append(group);
-    builder.append(", command=");
-    builder.append(command);
-    builder.append(", mode=");
-    if (mode != null) {
-      builder.append(mode);
-      builder.append(" 0b");
-      String tmp = Integer.toBinaryString(mode.getMagic() & 0x3);
-      if (tmp.length() == 1) {
-        builder.append('0');
-      }
-      builder.append(tmp);
-    } else {
-      builder.append("null");
-    }
-    builder.append(", dlc=");
-    builder.append(dlc);
-    builder.append('}');
-    return builder.toString();
-  }
+  public boolean matches(Packet packet);
 
 }

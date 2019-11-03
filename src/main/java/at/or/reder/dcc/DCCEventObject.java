@@ -15,11 +15,13 @@
  */
 package at.or.reder.dcc;
 
+import org.openide.util.Lookup;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public interface DCCEventObject
+public interface DCCEventObject extends Lookup.Provider
 {
 
   public Controller getController();

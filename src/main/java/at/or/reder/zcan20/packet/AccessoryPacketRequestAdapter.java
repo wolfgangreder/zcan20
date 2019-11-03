@@ -15,12 +15,22 @@
  */
 package at.or.reder.zcan20.packet;
 
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+
 /**
  *
  * @author Wolfgang Reder
  */
 public interface AccessoryPacketRequestAdapter extends PacketAdapter
 {
+
+  public static final PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.ACCESSORY,
+                                                                       CommandGroup.ACCESSORY_PORT4,
+                                                                       CommandMode.REQUEST,
+                                                                       3);
 
   /**
    * Address without prefix 0x3000.

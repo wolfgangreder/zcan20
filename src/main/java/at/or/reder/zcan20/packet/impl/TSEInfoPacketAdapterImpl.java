@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,19 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.PowerPort;
 import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.packet.ModulePowerInfoRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
+import at.or.reder.zcan20.packet.TSEInfoPacketAdapter;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements ModulePowerInfoRequestAdapter
+public final class TSEInfoPacketAdapterImpl extends AbstractPacketAdapter implements TSEInfoPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -42,54 +41,73 @@ final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter impl
     }
 
     @Override
-    public ModulePowerInfoRequestAdapter convert(Packet packet)
+    public PacketAdapter convert(Packet obj)
     {
-      return new ModulePowerInfoRequestAdapterImpl(packet);
+      return new TSEInfoPacketAdapterImpl(obj);
     }
 
     @Override
     public Class<? extends PacketAdapter> type(Packet obj)
     {
-      return ModulePowerInfoRequestAdapter.class;
+      return TSEInfoPacketAdapter.class;
     }
 
   }
 
-  private ModulePowerInfoRequestAdapterImpl(Packet packet)
+  public TSEInfoPacketAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public short getTargetNID()
+  public short getSenderNID()
   {
     return buffer.getShort(0);
   }
 
   @Override
-  public PowerPort getOutput()
+  public short getDecoderID()
   {
-    switch (buffer.get(2)) {
-      case 0:
-        return PowerPort.OUT_1;
-      case 1:
-        return PowerPort.OUT_2;
-      case 2:
-        return PowerPort.BOOSTER;
-      default:
-        return PowerPort.UNKNOWN;
-    }
+    return buffer.getShort(2);
+  }
+
+  @Override
+  public int getCVIndex()
+  {
+    return buffer.getInt(4);
+  }
+
+  @Override
+  public byte getState()
+  {
+    return buffer.get(8);
+  }
+
+  @Override
+  public byte getCode()
+  {
+    return buffer.get(9);
   }
 
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("MODULE_POWER_INFO(0x");
-    Utils.appendHexString(getTargetNID() & 0xffff,
+    StringBuilder builder = new StringBuilder("TSE_INFO_MODE(SystemNID: 0x");
+    Utils.appendHexString(getSenderNID(),
                           builder,
                           4);
-    builder.append(", ");
-    builder.append(getOutput());
+    builder.append(", Decoder: ");
+    builder.append(getDecoderID());
+    builder.append(", CVIndex: ");
+    builder.append(getCVIndex());
+    builder.append(", State: 0x");
+    Utils.appendHexString(getState(),
+                          builder,
+                          2);
+    builder.append(", Code: 0x");
+    Utils.appendHexString(getCode(),
+                          builder,
+                          2);
     return builder.append(')').toString();
   }
 

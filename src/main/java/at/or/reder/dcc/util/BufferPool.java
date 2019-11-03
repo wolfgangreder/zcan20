@@ -49,6 +49,7 @@ public final class BufferPool
     public void close()
     {
       buffer.rewind();
+      buffer.limit(buffer.capacity());
       putBack(this);
     }
 

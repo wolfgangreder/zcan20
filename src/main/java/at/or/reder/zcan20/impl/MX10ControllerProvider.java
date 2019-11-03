@@ -15,6 +15,7 @@
  */
 package at.or.reder.zcan20.impl;
 
+import at.or.reder.zcan20.MX10PropertiesSet;
 import at.or.reder.dcc.Controller;
 import at.or.reder.dcc.ControllerProvider;
 import at.or.reder.dcc.PropertySet;

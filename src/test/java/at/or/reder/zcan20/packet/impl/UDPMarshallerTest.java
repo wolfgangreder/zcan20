@@ -15,10 +15,11 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.PowerPort;
+import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.ModuleInfoType;
-import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedFlags;
 import at.or.reder.zcan20.SpeedSteps;
@@ -26,7 +27,6 @@ import at.or.reder.zcan20.SpeedlimitMode;
 import at.or.reder.zcan20.ZCANFactory;
 import at.or.reder.zcan20.impl.UDPMarshaller;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collections;
@@ -735,7 +735,7 @@ public class UDPMarshallerTest
                                         0,
                                         0,
                                         0,
-                                        0x16,
+                                        0x016,
                                         0x21,
                                         Utils.byte1(nid),
                                         Utils.byte2(nid),
@@ -774,7 +774,7 @@ public class UDPMarshallerTest
                                         0,
                                         0,
                                         0,
-                                        0x16,
+                                        0x06,
                                         0x25,
                                         Utils.byte1(nid),
                                         Utils.byte2(nid),

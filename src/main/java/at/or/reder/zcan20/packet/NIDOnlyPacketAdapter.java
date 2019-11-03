@@ -15,12 +15,22 @@
  */
 package at.or.reder.zcan20.packet;
 
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+
 /**
  *
  * @author Wolfgang Reder
  */
 public interface NIDOnlyPacketAdapter extends PacketAdapter
 {
+
+  public final PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.NETWORK,
+                                                                CommandGroup.NETWORK_PORT_CLOSE,
+                                                                CommandMode.COMMAND,
+                                                                0);
 
   public short getMasterNID();
 

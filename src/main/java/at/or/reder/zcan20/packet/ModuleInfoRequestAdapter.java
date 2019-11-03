@@ -15,7 +15,11 @@
  */
 package at.or.reder.zcan20.packet;
 
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.ModuleInfoType;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
 
 /**
  *
@@ -23,6 +27,11 @@ import at.or.reder.zcan20.ModuleInfoType;
  */
 public interface ModuleInfoRequestAdapter extends PacketAdapter
 {
+
+  public static final PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.CONFIG,
+                                                                       CommandGroup.CONFIG_MODULE_INFO,
+                                                                       CommandMode.REQUEST,
+                                                                       4);
 
   public short getModuleNID();
 

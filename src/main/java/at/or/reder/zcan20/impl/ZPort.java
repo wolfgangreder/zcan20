@@ -16,7 +16,10 @@
 package at.or.reder.zcan20.impl;
 
 import at.or.reder.zcan20.packet.Packet;
+import at.or.reder.zcan20.packet.Ping;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.concurrent.Future;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -35,6 +38,10 @@ public interface ZPort extends AutoCloseable
 
   public void sendPacket(@NotNull Packet packet) throws IOException;
 
+  public void sendRaw(@NotNull ByteBuffer buffer) throws IOException;
+
   public Packet readPacket() throws IOException;
+
+  public Future<Ping> sendInitPacket(ZCANImpl zcan) throws IOException;
 
 }

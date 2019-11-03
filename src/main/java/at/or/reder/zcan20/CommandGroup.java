@@ -38,7 +38,8 @@ public final class CommandGroup implements Serializable
   private static final byte MAGIC_COMMAND_DISABLE = (byte) 0xff;
 
   public static final byte SYSTEM_POWER = 0x00;
-  public static final CommandGroup SYSTEM = valueOf((byte) 0x00,
+  public static final byte SYSTEM_MAGIC = 0;
+  public static final CommandGroup SYSTEM = valueOf(SYSTEM_MAGIC,
                                                     "SYSTEM",
                                                     SYSTEM_POWER);
   public static final byte ACCESSORY_STATE = 0x00;
@@ -80,7 +81,8 @@ public final class CommandGroup implements Serializable
   public static final CommandGroup FREE_2 = valueOf((byte) 0x05,
                                                     "FREE 2",
                                                     MAGIC_COMMAND_DISABLE);
-  public static final CommandGroup TRACK_CONFIG_PRIVATE = valueOf((byte) 0x06,
+  public static final byte TRACK_CONFIG_PRIVATE_MAGIC = (byte) 0x06;
+  public static final CommandGroup TRACK_CONFIG_PRIVATE = valueOf(TRACK_CONFIG_PRIVATE_MAGIC,
                                                                   "TRACK CONFIG PRIVATE",
                                                                   MAGIC_COMMAND_DISABLE);
   public static final byte DATA_GROUP_COUNT = 0x00;
@@ -117,7 +119,8 @@ public final class CommandGroup implements Serializable
   public static final byte CONFIG_MODULE_INFO = 0x08;
   public static final byte CONFIG_UNKNOWN_A = 0x0a; // Wird gesendet, wenn man auf Sammelstop geht.
   public static final byte CONFIG_MODULE_POWER_INFO = 0x20;
-  public static final CommandGroup CONFIG = valueOf((byte) 0x18,
+  public static final byte CONFIG_MAGIC = 0x18;
+  public static final CommandGroup CONFIG = valueOf(CONFIG_MAGIC,
                                                     "CONFIG",
                                                     CONFIG_POWER_INFO,
                                                     CONFIG_UNKNOWN_5,
@@ -146,10 +149,12 @@ public final class CommandGroup implements Serializable
   public static final CommandGroup FILE_TRANSFER = valueOf((byte) 0x0f,
                                                            "FILE TRANSFER",
                                                            MAGIC_COMMAND_DISABLE);
+  public static final byte TRACK_CONFIG_PUBLIC_MAGIC = 0x16;
+  public static final byte TSE_PROG_MODE = 0x00;
   public static final byte TSE_PROG_BUSY = 0x02; // not documented !
   public static final byte TSE_PROG_READ = 0x08;
   public static final byte TSE_PROG_WRITE = 0x09;
-  public static final CommandGroup TRACK_CONFIG_PUBLIC = valueOf((byte) 0x16,
+  public static final CommandGroup TRACK_CONFIG_PUBLIC = valueOf(TRACK_CONFIG_PUBLIC_MAGIC,
                                                                  "TRACK CONFIG PUBLIC",
                                                                  TSE_PROG_BUSY,
                                                                  TSE_PROG_READ,

@@ -15,19 +15,19 @@
  */
 package at.or.reder.zcan20.packet;
 
+import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.LocoActive;
 import at.or.reder.zcan20.ModuleInfoType;
-import at.or.reder.zcan20.PowerMode;
-import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedFlags;
 import at.or.reder.zcan20.SpeedSteps;
 import at.or.reder.zcan20.SpeedlimitMode;
+import at.or.reder.zcan20.ZimoPowerMode;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Set;
@@ -110,6 +110,13 @@ public interface PacketBuilder
   public Packet buildLocoActivePacket(@Min(0) @Max(0x27ff) short locoID,
                                       @NotNull LocoActive mode);
 
+  public Packet buildQueryTSEPortModePacket(short systemID,
+                                            PowerPort port);
+
+  public Packet buildSetTSEPowerModePacket(short systemID,
+                                           PowerPort port,
+                                           byte mode);
+
   public Packet buildReadCVPacket(short systemID,
                                   short locoID,
                                   int cvNumber);
@@ -150,7 +157,7 @@ public interface PacketBuilder
 
   public Packet buildSystemPowerInfoPacket(short nid,
                                            @NotNull Collection<PowerPort> output,
-                                           PowerMode mode);
+                                           ZimoPowerMode mode);
 
   public Packet builderModulePowerInfoPacket(short nid,
                                              @NotNull PowerPort output,

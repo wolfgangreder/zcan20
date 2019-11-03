@@ -16,7 +16,12 @@
 package at.or.reder.zcan20.packet;
 
 import at.or.reder.dcc.PowerPort;
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.PowerState;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+import at.or.reder.zcan20.util.ProxyPacketSelector;
 import java.util.Set;
 
 /**
@@ -25,6 +30,15 @@ import java.util.Set;
  */
 public interface PowerInfo extends PacketAdapter
 {
+
+  public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.CONFIG,
+                                                                                               CommandGroup.CONFIG_POWER_INFO,
+                                                                                               CommandMode.EVENT,
+                                                                                               22),
+                                                                        new PacketSelectorImpl(CommandGroup.CONFIG,
+                                                                                               CommandGroup.CONFIG_POWER_INFO,
+                                                                                               CommandMode.ACK,
+                                                                                               22));
 
   public Set<PowerState> getState();
 

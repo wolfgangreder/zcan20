@@ -15,11 +15,15 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.CVReadState;
 import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.CVInfoAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.zcan20.packet.PacketAdapter;
+import at.or.reder.zcan20.packet.PacketAdapterFactory;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -28,26 +32,29 @@ import at.or.reder.dcc.util.Utils;
 final class CVInfoPacketAdpaterImpl extends AbstractPacketAdapter implements CVInfoAdapter
 {
 
-//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-//  public static final class Factory implements PacketAdapterFactory
-//  {
-//
-//    @Override
-//    public boolean isValid(CommandGroup group,
-//                           int command,
-//                           CommandMode mode,
-//                           int dlc)
-//    {
-//      return group == CommandGroup.TRACK_CONFIG_PUBLIC && mode != CommandMode.EVENT;
-//    }
-//
-//    @Override
-//    public CVInfoAdapter createAdapter(Packet packet)
-//    {
-//      return new CVInfoPacketAdpaterImpl(packet);
-//    }
-//
-//  }
+  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+  public static final class Factory implements PacketAdapterFactory
+  {
+
+    @Override
+    public boolean isValid(PacketSelector selector)
+    {
+      return SELECTOR.test(selector);
+    }
+
+    @Override
+    public PacketAdapter convert(Packet obj)
+    {
+      return new CVInfoPacketAdpaterImpl(obj);
+    }
+
+    @Override
+    public Class<? extends PacketAdapter> type(Packet obj)
+    {
+      return CVInfoAdapter.class;
+    }
+
+  }
   private final CVReadState state;
 
   private CVInfoPacketAdpaterImpl(Packet packet)

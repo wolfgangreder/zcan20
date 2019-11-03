@@ -15,7 +15,6 @@
  */
 package at.or.reder.zcan20.packet;
 
-import at.or.reder.zcan20.CVReadState;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
@@ -26,34 +25,34 @@ import at.or.reder.zcan20.util.ProxyPacketSelector;
  *
  * @author Wolfgang Reder
  */
-public interface CVInfoAdapter extends PacketAdapter
+public interface TSEInfoPacketAdapter extends PacketAdapter
 {
 
   public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.TRACK_CONFIG_PUBLIC,
-                                                                                               CommandGroup.TSE_PROG_READ,
-                                                                                               CommandMode.EVENT,
+                                                                                               CommandGroup.TSE_PROG_BUSY,
+                                                                                               CommandMode.ACK,
                                                                                                10),
                                                                         new PacketSelectorImpl(CommandGroup.TRACK_CONFIG_PUBLIC,
-                                                                                               CommandGroup.TSE_PROG_READ,
-                                                                                               CommandMode.ACK,
-                                                                                               10),
-                                                                        new PacketSelectorImpl(CommandGroup.TRACK_CONFIG_PRIVATE,
-                                                                                               CommandGroup.TSE_PROG_READ,
+                                                                                               CommandGroup.TSE_PROG_BUSY,
                                                                                                CommandMode.EVENT,
                                                                                                10),
                                                                         new PacketSelectorImpl(CommandGroup.TRACK_CONFIG_PRIVATE,
-                                                                                               CommandGroup.TSE_PROG_READ,
+                                                                                               CommandGroup.TSE_PROG_BUSY,
                                                                                                CommandMode.ACK,
+                                                                                               10),
+                                                                        new PacketSelectorImpl(CommandGroup.TRACK_CONFIG_PRIVATE,
+                                                                                               CommandGroup.TSE_PROG_BUSY,
+                                                                                               CommandMode.EVENT,
                                                                                                10));
 
-  public short getSystemID();
+  public short getSenderNID();
 
   public short getDecoderID();
 
-  public int getNumber();
+  public int getCVIndex();
 
-  public short getValue();
+  public byte getState();
 
-  public CVReadState getReadState();
+  public byte getCode();
 
 }

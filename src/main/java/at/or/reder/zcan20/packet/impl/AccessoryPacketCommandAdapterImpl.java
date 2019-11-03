@@ -15,18 +15,12 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
+import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.AccessoryPacketCommandAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
-import at.or.reder.dcc.util.Utils;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -40,24 +34,10 @@ final class AccessoryPacketCommandAdapterImpl extends AbstractPacketAdapter impl
   public static final class Factory implements PacketAdapterFactory
   {
 
-    private static final Set<PacketSelector> SELECTOR = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            new PacketSelector(CommandGroup.ACCESSORY,
-                               CommandGroup.ACCESSORY_PORT4,
-                               CommandMode.ACK,
-                               4),
-            new PacketSelector(CommandGroup.ACCESSORY,
-                               CommandGroup.ACCESSORY_PORT4,
-                               CommandMode.COMMAND,
-                               4),
-            new PacketSelector(CommandGroup.ACCESSORY,
-                               CommandGroup.ACCESSORY_PORT4,
-                               CommandMode.EVENT,
-                               4))));
-
     @Override
     public boolean isValid(PacketSelector selector)
     {
-      return SELECTOR.stream().filter((s) -> s.matches(selector)).findAny().isPresent();
+      return SELECTOR.test(selector);
     }
 
     @Override

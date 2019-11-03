@@ -16,6 +16,10 @@
 package at.or.reder.zcan20.packet;
 
 import at.or.reder.dcc.PowerPort;
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
 
 /**
  *
@@ -23,6 +27,11 @@ import at.or.reder.dcc.PowerPort;
  */
 public interface ModulePowerInfoRequestAdapter extends PacketAdapter
 {
+
+  public static final PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.CONFIG,
+                                                                       CommandGroup.CONFIG_POWER_INFO,
+                                                                       CommandMode.REQUEST,
+                                                                       3);
 
   public short getTargetNID();
 

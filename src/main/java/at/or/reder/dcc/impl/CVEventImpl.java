@@ -16,6 +16,11 @@
 package at.or.reder.dcc.impl;
 
 import at.or.reder.dcc.*;
+import at.or.reder.dcc.util.Predicates;
+import java.util.Collection;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
 
 /**
  *
@@ -30,20 +35,29 @@ public final class CVEventImpl implements CVEvent
   private final int decoderAddress;
   private final int cvIndex;
   private final int value;
+  private final Lookup lookup;
 
   public CVEventImpl(Controller controller,
-                     int senderAddress,
+                     short senderAddress,
                      DecoderType decoderType,
-                     int decoderAddress,
+                     short decoderAddress,
                      int cvIndex,
-                     int value)
+                     int value,
+                     Collection<? extends Object> lookupContent)
   {
     this.controller = controller;
-    this.senderAddress = senderAddress;
+    this.senderAddress = senderAddress & 0xffff;
     this.decoderType = decoderType;
-    this.decoderAddress = decoderAddress;
+    this.decoderAddress = decoderAddress & 0xffff;
     this.cvIndex = cvIndex;
     this.value = value;
+    if (lookupContent != null && !lookupContent.isEmpty()) {
+      InstanceContent ic = new InstanceContent();
+      lookupContent.stream().filter(Predicates::isNotNull).forEach(ic::add);
+      lookup = new AbstractLookup(ic);
+    } else {
+      lookup = Lookup.EMPTY;
+    }
   }
 
   @Override
@@ -80,6 +94,12 @@ public final class CVEventImpl implements CVEvent
   public int getValue()
   {
     return value;
+  }
+
+  @Override
+  public Lookup getLookup()
+  {
+    return lookup;
   }
 
 }

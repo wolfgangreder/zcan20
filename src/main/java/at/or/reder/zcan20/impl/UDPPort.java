@@ -15,9 +15,14 @@
  */
 package at.or.reder.zcan20.impl;
 
-import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.dcc.util.BufferPool;
+import at.or.reder.dcc.util.CanIdMatcher;
 import at.or.reder.dcc.util.Utils;
+import at.or.reder.zcan20.CanId;
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.packet.Packet;
+import at.or.reder.zcan20.packet.Ping;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -30,6 +35,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -125,6 +132,8 @@ public final class UDPPort implements ZPort
   @Override
   public void sendPacket(Packet packet) throws IOException
   {
+    Objects.requireNonNull(packet,
+                           "packet is null");
     WRITE_LOGGER.log(Level.FINEST,
                      "Sending {0}",
                      packet.toString());
@@ -140,6 +149,28 @@ public final class UDPPort implements ZPort
                                 numBytes,
                                 outAddress));
     }
+  }
+
+  @Override
+  public void sendRaw(ByteBuffer buffer) throws IOException
+  {
+    Objects.requireNonNull(buffer,
+                           "buffer is null");
+    WRITE_LOGGER.log(Level.FINEST,
+                     () -> {
+                       StringBuilder builder = new StringBuilder("Sending raw ");
+                       Utils.byteBuffer2HexString(buffer,
+                                                  builder,
+                                                  ' ');
+                       return builder.toString();
+                     });
+    DatagramSocket s;
+    synchronized (this) {
+      s = socket;
+    }
+    s.send(new DatagramPacket(buffer.array(),
+                              buffer.remaining(),
+                              outAddress));
   }
 
   @Override
@@ -170,6 +201,19 @@ public final class UDPPort implements ZPort
                       result.toString());
       return result;
     }
+  }
+
+  @Override
+  public Future<Ping> sendInitPacket(ZCANImpl device) throws IOException
+  {
+    return device.doSendPacket(device.createPacketBuilder().buildLoginPacket(),
+                               new CanIdMatcher(CanId.valueOf(
+                                       CommandGroup.NETWORK,
+                                       CommandGroup.NETWORK_PING,
+                                       CommandMode.EVENT,
+                                       (short) 0),
+                                                CanIdMatcher.MASK_NO_ADDRESS),
+                               Ping.class);
   }
 
   @Override

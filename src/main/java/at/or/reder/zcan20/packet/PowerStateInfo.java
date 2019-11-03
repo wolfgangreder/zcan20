@@ -15,8 +15,13 @@
  */
 package at.or.reder.zcan20.packet;
 
-import at.or.reder.zcan20.PowerMode;
 import at.or.reder.dcc.PowerPort;
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.ZimoPowerMode;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+import at.or.reder.zcan20.util.ProxyPacketSelector;
 
 /**
  *
@@ -25,10 +30,23 @@ import at.or.reder.dcc.PowerPort;
 public interface PowerStateInfo extends PacketAdapter
 {
 
+  public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.SYSTEM,
+                                                                                               CommandGroup.SYSTEM_POWER,
+                                                                                               CommandMode.COMMAND,
+                                                                                               4),
+                                                                        new PacketSelectorImpl(CommandGroup.SYSTEM,
+                                                                                               CommandGroup.SYSTEM_POWER,
+                                                                                               CommandMode.EVENT,
+                                                                                               4),
+                                                                        new PacketSelectorImpl(CommandGroup.SYSTEM,
+                                                                                               CommandGroup.SYSTEM_POWER,
+                                                                                               CommandMode.ACK,
+                                                                                               4));
+
   public int getSystemNID();
 
   public PowerPort getOutput();
 
-  public PowerMode getMode();
+  public ZimoPowerMode getMode();
 
 }

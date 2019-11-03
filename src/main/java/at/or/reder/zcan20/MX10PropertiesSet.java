@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20.impl;
+package at.or.reder.zcan20;
 
 import at.or.reder.dcc.PropertySet;
 import at.or.reder.dcc.util.Utils;

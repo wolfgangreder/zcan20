@@ -15,13 +15,13 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.ModuleInfoPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
-import at.or.reder.dcc.util.Utils;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -38,7 +38,7 @@ final class ModuleInfoPacketAdapterImpl extends AbstractPacketAdapter implements
     @Override
     public boolean isValid(PacketSelector selector)
     {
-      return SELECTOR.matches(selector);
+      return SELECTOR.test(selector);
     }
 
     @Override

@@ -19,6 +19,7 @@ import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
 
 /**
  *
@@ -27,10 +28,10 @@ import at.or.reder.zcan20.PacketSelector;
 public interface ModuleInfoPacketAdapter extends PacketAdapter
 {
 
-  public static final PacketSelector SELECTOR = new PacketSelector(CommandGroup.CONFIG_0,
-                                                                   CommandGroup.CONFIG_0_UNKNOWN_2,
-                                                                   CommandMode.ACK,
-                                                                   8);
+  public static final PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.CONFIG_0,
+                                                                       CommandGroup.CONFIG_0_UNKNOWN_2,
+                                                                       CommandMode.ACK,
+                                                                       8);
 
   public Class<?> getValueClass();
 

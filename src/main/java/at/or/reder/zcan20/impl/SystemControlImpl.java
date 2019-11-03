@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.impl;
 
-import at.or.reder.zcan20.PowerMode;
+import at.or.reder.zcan20.ZimoPowerMode;
 import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.SystemControl;
 import at.or.reder.zcan20.packet.Packet;
@@ -63,7 +63,7 @@ final class SystemControlImpl implements SystemControl
 
   @Override
   public void setPowerModeInfo(PowerPort output,
-                               PowerMode state) throws IOException
+                               ZimoPowerMode state) throws IOException
   {
     Objects.requireNonNull(output,
                            "output is null");

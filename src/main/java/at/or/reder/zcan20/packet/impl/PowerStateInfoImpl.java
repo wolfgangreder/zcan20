@@ -15,20 +15,14 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
-import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.PowerMode;
 import at.or.reder.dcc.PowerPort;
+import at.or.reder.dcc.util.Utils;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.ZimoPowerMode;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PowerStateInfo;
-import at.or.reder.dcc.util.Utils;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -42,24 +36,10 @@ final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerSta
   public static final class Factory implements PacketAdapterFactory
   {
 
-    private static final Set<PacketSelector> SELECTOR = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            new PacketSelector(CommandGroup.SYSTEM,
-                               CommandGroup.SYSTEM_POWER,
-                               CommandMode.COMMAND,
-                               4),
-            new PacketSelector(CommandGroup.SYSTEM,
-                               CommandGroup.SYSTEM_POWER,
-                               CommandMode.EVENT,
-                               4),
-            new PacketSelector(CommandGroup.SYSTEM,
-                               CommandGroup.SYSTEM_POWER,
-                               CommandMode.ACK,
-                               4))));
-
     @Override
     public boolean isValid(PacketSelector selector)
     {
-      return SELECTOR.stream().filter((s) -> s.matches(selector)).findAny().isPresent();
+      return SELECTOR.test(selector);
     }
 
     @Override
@@ -103,9 +83,9 @@ final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerSta
   }
 
   @Override
-  public PowerMode getMode()
+  public ZimoPowerMode getMode()
   {
-    return PowerMode.valueOfMagic(buffer.get(offset + 3) & 0xff);
+    return ZimoPowerMode.valueOfMagic(buffer.get(offset + 3) & 0xff);
   }
 
   @Override

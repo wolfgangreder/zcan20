@@ -27,13 +27,16 @@ public interface POMControl extends BaseControl
 {
 
   public int getCV(DecoderType decoderType,
-                   int address) throws IOException, TimeoutException;
+                   int address,
+                   int cvIndex) throws IOException, TimeoutException;
 
   public void postCVRequest(DecoderType decoderType,
-                            int address) throws IOException;
+                            int address,
+                            int cvIndex) throws IOException;
 
   public void setCV(DecoderType decoderType,
                     int address,
+                    int cvIndex,
                     int value) throws IOException;
 
   public void addCVEventListener(CVEventListener listener);

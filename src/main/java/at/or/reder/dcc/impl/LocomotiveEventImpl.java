@@ -17,6 +17,7 @@ package at.or.reder.dcc.impl;
 
 import at.or.reder.dcc.*;
 import java.util.BitSet;
+import org.openide.util.Lookup;
 
 /**
  *
@@ -72,6 +73,12 @@ public final class LocomotiveEventImpl implements LocomotiveEvent
   public BitSet getFunctions()
   {
     return locomotive.getFunctions();
+  }
+
+  @Override
+  public Lookup getLookup()
+  {
+    return Lookup.EMPTY;
   }
 
 }

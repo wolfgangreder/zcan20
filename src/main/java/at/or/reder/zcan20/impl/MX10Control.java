@@ -15,6 +15,7 @@
  */
 package at.or.reder.zcan20.impl;
 
+import at.or.reder.dcc.CVEvent;
 import at.or.reder.dcc.CVEventListener;
 import at.or.reder.dcc.Controller;
 import at.or.reder.dcc.DecoderType;
@@ -23,23 +24,39 @@ import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.LinkStateListener;
 import at.or.reder.dcc.Locomotive;
 import at.or.reder.dcc.LocomotiveEventListener;
+import at.or.reder.dcc.PowerEvent;
 import at.or.reder.dcc.PowerEventListener;
 import at.or.reder.dcc.PowerMode;
 import at.or.reder.dcc.PowerPort;
+import at.or.reder.dcc.impl.CVEventImpl;
+import at.or.reder.dcc.util.Utils;
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.MX10PropertiesSet;
 import at.or.reder.zcan20.PacketListener;
+import at.or.reder.zcan20.SystemControl;
+import at.or.reder.zcan20.TrackConfig;
 import at.or.reder.zcan20.ZCAN;
+import at.or.reder.zcan20.ZimoPowerMode;
+import at.or.reder.zcan20.packet.CVInfoAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
+import at.or.reder.zcan20.packet.PowerInfo;
+import at.or.reder.zcan20.packet.PowerStateInfo;
+import at.or.reder.zcan20.packet.TSETrackModePacketAdapter;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.AbstractLookup;
@@ -64,17 +81,10 @@ final class MX10Control implements Controller
   private final Object lock = new Object();
   private final Map<String, String> connectionProperties;
   private final MX10PropertiesSet propertySet = new MX10PropertiesSet();
+  private int ioTimeout;
 
   public MX10Control(Map<String, String> connectionProperties) throws IllegalArgumentException
   {
-    Optional<Map.Entry<String, String>> invalidEntry = connectionProperties.entrySet().stream().filter((e) -> {
-      return propertySet.isValueValid(e.getKey(),
-                                      e.getValue());
-    }).findAny();
-    if (invalidEntry.isPresent()) {
-      Map.Entry<String, String> e = invalidEntry.get();
-      throw new IllegalArgumentException("Invalid value for property " + e.getKey() + ": " + e.getValue());
-    }
     this.connectionProperties = new HashMap<>(connectionProperties);
     List<Map.Entry<String, String>> props = connectionProperties.entrySet().stream().
             filter((e) -> e.getKey().equals(MX10PropertiesSet.PROP_HOST) || e.getKey().equals(MX10PropertiesSet.PROP_PORT)).
@@ -149,8 +159,13 @@ final class MX10Control implements Controller
         device = new ZCANImpl(openZPort(),
                               connectionProperties,
                               lock);
+        ioTimeout = propertySet.getIntValue(connectionProperties,
+                                            MX10PropertiesSet.PROP_IOTIMEOUT);
+        ic.add(device);
         device.addLinkStateListener(myLinkStateListener);
         device.addPacketListener(packetListener);
+        device.open(ioTimeout,
+                    TimeUnit.SECONDS);
       }
     }
   }
@@ -163,6 +178,7 @@ final class MX10Control implements Controller
         device.close();
         device.removePacketListener(packetListener);
         device.removeLinkStateListener(myLinkStateListener);
+        ic.remove(device);
         device = null;
       }
     }
@@ -171,8 +187,19 @@ final class MX10Control implements Controller
   private void onPacket(ZCAN zcan,
                         Packet packet)
   {
-    PacketAdapter adapter = packet.getAdapter(PacketAdapter.class);
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    switch (packet.getCommandGroup().getMagic()) {
+      case CommandGroup.CONFIG_MAGIC:
+        dispatchConfig(packet);
+        break;
+      case CommandGroup.SYSTEM_MAGIC:
+        dispatchConfig(packet);
+        break;
+      case CommandGroup.TRACK_CONFIG_PUBLIC_MAGIC:
+      case 0x06:
+        dispatchPOM(packet);
+        break;
+      default:
+    }
   }
 
   private void onLinkStateChanged(Controller controller,
@@ -286,23 +313,61 @@ final class MX10Control implements Controller
     return lookup;
   }
 
+  private boolean dispatchPOM(Packet packet)
+  {
+    System.out.println(Utils.packetToString(packet));
+    CVInfoAdapter cvInfo = packet.getAdapter(CVInfoAdapter.class);
+    if (cvInfo != null) {
+      CVEvent event = new CVEventImpl(this,
+                                      packet.getSenderNID(),
+                                      DecoderType.LOCO,
+                                      cvInfo.getDecoderID(),
+                                      cvInfo.getNumber(),
+                                      cvInfo.getValue(),
+                                      Collections.singleton(cvInfo));
+      for (CVEventListener l : cvEventListener) {
+        l.onCVEvent(event);
+      }
+      return true;
+    }
+    TSETrackModePacketAdapter mode = packet.getAdapter(TSETrackModePacketAdapter.class);
+    if (mode != null) {
+      System.out.println(mode);
+    }
+
+    return false;
+  }
+
   @Override
   public int getCV(DecoderType decoderType,
-                   int address) throws IOException, TimeoutException
+                   int address,
+                   int cvIndex) throws IOException, TimeoutException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    TrackConfig cfg = device.getLookup().lookup(TrackConfig.class);
+    CVInfoAdapter result = cfg.readCV((short) address,
+                                      cvIndex,
+                                      ioTimeout * 1000);
+    if (result != null) {
+      return result.getValue();
+    } else {
+      return -1;
+    }
   }
 
   @Override
   public void postCVRequest(DecoderType decoderType,
-                            int address) throws IOException
+                            int address,
+                            int cvIndex) throws IOException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    TrackConfig cfg = device.getLookup().lookup(TrackConfig.class);
+    cfg.readCV((short) address,
+               cvIndex);
   }
 
   @Override
   public void setCV(DecoderType decoderType,
                     int address,
+                    int cvIndex,
                     int value) throws IOException
   {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -338,7 +403,12 @@ final class MX10Control implements Controller
   public void setPowerMode(PowerPort port,
                            PowerMode mode) throws IOException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    ZCANImpl d = getDevice();
+    SystemControl sysControl = d.getLookup().lookup(SystemControl.class);
+    if (sysControl != null) {
+      sysControl.setPowerModeInfo(port,
+                                  ZimoPowerMode.valueOf(mode));
+    }
   }
 
   @Override
@@ -353,6 +423,54 @@ final class MX10Control implements Controller
   public void removePowerEventListener(PowerEventListener listener)
   {
     powerEventListener.remove(listener);
+  }
+
+  private final ConcurrentMap<PowerPort, PowerStateInfo> lastPowerState = new ConcurrentHashMap<>();
+  private final AtomicReference<PowerInfo> powerInfo = new AtomicReference<>();
+
+  private boolean dispatchConfig(Packet packet)
+  {
+    List<PowerEvent> events = new ArrayList<>();
+    PowerInfo power = packet.getAdapter(PowerInfo.class);
+    if (power != null) {
+      powerInfo.set(power);
+      PowerStateInfo state1 = lastPowerState.get(PowerPort.OUT_1);
+      PowerStateInfo state2 = lastPowerState.get(PowerPort.OUT_2);
+      PowerMode mode = state1 != null ? state1.getMode().getSysteMode() : PowerMode.PENDING;
+      events.add(new MX10PowerEvent(PowerPort.OUT_1,
+                                    mode,
+                                    this,
+                                    packet.getSenderNID() & 0xffff,
+                                    power,
+                                    state1));
+      mode = state2 != null ? state2.getMode().getSysteMode() : PowerMode.PENDING;
+      events.add(new MX10PowerEvent(PowerPort.OUT_2,
+                                    mode,
+                                    this,
+                                    packet.getSenderNID() & 0xffff,
+                                    power,
+                                    state2));
+    } else {
+      PowerStateInfo powerState = packet.getAdapter(PowerStateInfo.class);
+      if (powerState != null) {
+        lastPowerState.put(powerState.getOutput(),
+                           powerState);
+        PowerInfo info = powerInfo.get();
+        PowerMode mode = powerState.getMode().getSysteMode();
+        events.add(new MX10PowerEvent(powerState.getOutput(),
+                                      mode,
+                                      this,
+                                      packet.getSenderNID() & 0xffff,
+                                      info,
+                                      powerState));
+      }
+    }
+    for (PowerEvent evt : events) {
+      for (PowerEventListener l : powerEventListener) {
+        l.onPowerEvent(evt);
+      }
+    }
+    return !events.isEmpty();
   }
 
 }

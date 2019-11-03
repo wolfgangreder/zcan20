@@ -28,7 +28,7 @@ public interface SystemControl
   public void getPowerStateInfo(@NotNull Collection<PowerPort> outputs) throws IOException;
 
   public void setPowerModeInfo(@NotNull PowerPort output,
-                               @NotNull PowerMode mode) throws IOException;
+                               @NotNull ZimoPowerMode mode) throws IOException;
 
   public String getHardwareVersion() throws IOException;
 

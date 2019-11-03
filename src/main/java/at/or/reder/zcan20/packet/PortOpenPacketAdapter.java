@@ -15,6 +15,11 @@
  */
 package at.or.reder.zcan20.packet;
 
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+
 /**
  *
  * @author Wolfgang Reder
@@ -22,4 +27,8 @@ package at.or.reder.zcan20.packet;
 public interface PortOpenPacketAdapter extends PacketAdapter
 {
 
+  public final PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.NETWORK,
+                                                                CommandGroup.NETWORK_PORT_OPEN,
+                                                                CommandMode.COMMAND,
+                                                                0);
 }

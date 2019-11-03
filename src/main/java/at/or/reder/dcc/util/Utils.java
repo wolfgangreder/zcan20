@@ -671,6 +671,25 @@ public final class Utils
     return getOSType() == OSType.LINUX;
   }
 
+  public static short crc16(ByteBuffer bufferIn)
+  {
+    short crc = 0;
+    ByteBuffer buffer = bufferIn.flip();
+    while (buffer.hasRemaining()) {
+      byte b = buffer.get();
+      for (int n = 0; n < 8; ++n) {
+        int s = b & 0x01;
+        if ((crc & 0x8000) != 0) {
+          crc = (short) ((crc * 2 + s) ^ 0x1021);
+        } else {
+          crc = (short) (crc * 2 + s);
+        }
+        b = (byte) (b >> 1);
+      }
+    }
+    return crc;
+  }
+
   private Utils()
   {
   }

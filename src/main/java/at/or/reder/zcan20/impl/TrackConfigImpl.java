@@ -15,6 +15,8 @@
  */
 package at.or.reder.zcan20.impl;
 
+import at.or.reder.dcc.PowerPort;
+import at.or.reder.dcc.util.CanIdMatcher;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
@@ -22,8 +24,9 @@ import at.or.reder.zcan20.TrackConfig;
 import at.or.reder.zcan20.packet.CVInfoAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketBuilder;
-import at.or.reder.dcc.util.CanIdMatcher;
+import at.or.reder.zcan20.packet.TSETrackModePacketAdapter;
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 /**
@@ -38,6 +41,41 @@ final class TrackConfigImpl implements TrackConfig
   public TrackConfigImpl(ZCANImpl zcan)
   {
     this.zcan = zcan;
+  }
+
+  @Override
+  public void requestPowerPortMode(PowerPort port) throws IOException
+  {
+    Packet packet = zcan.createPacketBuilder().buildQueryTSEPortModePacket(zcan.getMasterNID(),
+                                                                           port);
+    zcan.doSendPacket(packet);
+  }
+
+  @Override
+  public TSETrackModePacketAdapter getPowerPortMode(PowerPort port,
+                                                    long timeout) throws IOException, TimeoutException
+  {
+    Packet packet = zcan.createPacketBuilder().buildQueryTSEPortModePacket(zcan.getMasterNID(),
+                                                                           port);
+    return zcan.sendReceive(packet,
+                            TSETrackModePacketAdapter.SELECTOR::matches,
+                            TSETrackModePacketAdapter.class,
+                            timeout);
+  }
+
+  @Override
+  public TSETrackModePacketAdapter enterPowerMode(PowerPort port,
+                                                  byte mode,
+                                                  long timeout) throws IOException, TimeoutException
+  {
+    PacketBuilder builder = zcan.createPacketBuilder();
+    Packet packet = builder.buildSetTSEPowerModePacket(zcan.getMasterNID(),
+                                                       port,
+                                                       mode);
+    return zcan.sendReceive(packet,
+                            TSETrackModePacketAdapter.SELECTOR::matches,
+                            TSETrackModePacketAdapter.class,
+                            timeout);
   }
 
   @Override
@@ -63,11 +101,7 @@ final class TrackConfigImpl implements TrackConfig
                               address,
                               cv);
     return zcan.sendReceive(packet,
-                            new CanIdMatcher(CanId.valueOf(CommandGroup.TRACK_CONFIG_PRIVATE,
-                                                           CommandGroup.TSE_PROG_READ,
-                                                           CommandMode.ACK,
-                                                           masterNID),
-                                             CanIdMatcher.MASK_NO_ADDRESS & (~CanIdMatcher.MASK_COMMAND)).and(packetMatcher),
+                            CVInfoAdapter.SELECTOR::matches,
                             CVInfoAdapter.class,
                             timeout);
   }

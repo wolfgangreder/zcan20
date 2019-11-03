@@ -17,6 +17,7 @@ package at.or.reder.zcan20.impl;
 
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.LinkStateListener;
+import at.or.reder.dcc.util.CanIdMatcher;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
@@ -28,8 +29,8 @@ import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketBuilder;
 import at.or.reder.zcan20.packet.Ping;
-import at.or.reder.dcc.util.CanIdMatcher;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -256,6 +257,27 @@ public final class ZCANImpl implements ZCAN
                                        + listenerThreadCounter.incrementAndGet());
     result.setDaemon(true);
     return result;
+  }
+
+  <T extends PacketAdapter> Future<T> doSendRaw(@NotNull ByteBuffer buffer,
+                                                Predicate<? super Packet> matcher,
+                                                Class<? extends T> resultData) throws IOException
+  {
+    if (!isOpen()) {
+      throw new IOException("Port is not open");
+    }
+    CompletableFuture<T> future = null;
+    if (matcher != null && resultData != null) {
+      future = new CompletableFuture<>();
+      FutureListener<T> lf = new FutureListener<>(future,
+                                                  matcher,
+                                                  resultData);
+      lf.start();
+    }
+    port.sendRaw(buffer);
+    // Wir habe etwas gesendet, also kann der ping warten...
+    networkControl.schedulePing();
+    return future;
   }
 
   void doSendPacket(@NotNull Packet p) throws IOException

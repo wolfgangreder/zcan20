@@ -15,12 +15,31 @@
  */
 package at.or.reder.zcan20.packet;
 
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+import at.or.reder.zcan20.util.ProxyPacketSelector;
+
 /**
  *
  * @author Wolfgang Reder
  */
 public interface AccessoryPacketCommandAdapter extends PacketAdapter
 {
+
+  public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.ACCESSORY,
+                                                                                               CommandGroup.ACCESSORY_PORT4,
+                                                                                               CommandMode.ACK,
+                                                                                               4),
+                                                                        new PacketSelectorImpl(CommandGroup.ACCESSORY,
+                                                                                               CommandGroup.ACCESSORY_PORT4,
+                                                                                               CommandMode.COMMAND,
+                                                                                               4),
+                                                                        new PacketSelectorImpl(CommandGroup.ACCESSORY,
+                                                                                               CommandGroup.ACCESSORY_PORT4,
+                                                                                               CommandMode.EVENT,
+                                                                                               4));
 
   public short getNID();
 

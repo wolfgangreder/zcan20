@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2019 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,17 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.dcc.PowerPort;
 import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.packet.ModulePowerInfoRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
+import at.or.reder.zcan20.packet.TSETrackModePacketAdapter;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter implements ModulePowerInfoRequestAdapter
+public final class TSETrackModePacketAdapterImpl extends AbstractPacketAdapter implements TSETrackModePacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -42,54 +42,69 @@ final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter impl
     }
 
     @Override
-    public ModulePowerInfoRequestAdapter convert(Packet packet)
+    public PacketAdapter convert(Packet obj)
     {
-      return new ModulePowerInfoRequestAdapterImpl(packet);
+      return new TSETrackModePacketAdapterImpl(obj);
     }
 
     @Override
     public Class<? extends PacketAdapter> type(Packet obj)
     {
-      return ModulePowerInfoRequestAdapter.class;
+      return TSETrackModePacketAdapter.class;
     }
 
   }
 
-  private ModulePowerInfoRequestAdapterImpl(Packet packet)
+  public TSETrackModePacketAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public short getTargetNID()
+  public short getSenderNID()
   {
     return buffer.getShort(0);
   }
 
   @Override
-  public PowerPort getOutput()
+  public PowerPort getPort()
   {
-    switch (buffer.get(2)) {
-      case 0:
-        return PowerPort.OUT_1;
-      case 1:
-        return PowerPort.OUT_2;
-      case 2:
-        return PowerPort.BOOSTER;
-      default:
-        return PowerPort.UNKNOWN;
-    }
+    return PowerPort.valueOfMagic(buffer.get(2));
+  }
+
+  @Override
+  public byte getMode()
+  {
+    return buffer.get(3);
+  }
+
+  @Override
+  public float getVoltage()
+  {
+    return buffer.getShort(4) / 1000f;
+  }
+
+  @Override
+  public float getCurrent()
+  {
+    return buffer.getShort(6) / 1000f;
   }
 
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("MODULE_POWER_INFO(0x");
-    Utils.appendHexString(getTargetNID() & 0xffff,
+    StringBuilder builder = new StringBuilder("TSE_TRACK_MODE(SystemNID: 0x");
+    Utils.appendHexString(getSenderNID(),
                           builder,
                           4);
-    builder.append(", ");
-    builder.append(getOutput());
+    builder.append(", Port: ");
+    builder.append(getPort());
+    builder.append(", Mode: ");
+    builder.append(getMode());
+    builder.append(", Voltage: ");
+    builder.append(getVoltage());
+    builder.append(", Current: ");
+    builder.append(getCurrent());
     return builder.append(')').toString();
   }
 

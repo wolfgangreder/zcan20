@@ -15,6 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
@@ -22,7 +23,6 @@ import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PingRequest;
-import at.or.reder.dcc.util.Utils;
 import javax.validation.constraints.NotNull;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -37,15 +37,10 @@ final class PingRequestImpl extends AbstractPacketAdapter implements PingRequest
   public static final class Factory implements PacketAdapterFactory
   {
 
-    private static final PacketSelector SELECTOR = new PacketSelector(CommandGroup.NETWORK,
-                                                                      CommandGroup.NETWORK_PING,
-                                                                      CommandMode.REQUEST,
-                                                                      2);
-
     @Override
     public boolean isValid(PacketSelector selector)
     {
-      return SELECTOR.matches(selector);
+      return SELECTOR.test(selector);
     }
 
     @Override

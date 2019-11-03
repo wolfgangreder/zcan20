@@ -15,6 +15,8 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.PowerPort;
+import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.DataGroup;
@@ -22,20 +24,18 @@ import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.LocoActive;
 import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.PowerMode;
-import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedFlags;
 import at.or.reder.zcan20.SpeedSteps;
 import at.or.reder.zcan20.SpeedlimitMode;
-import at.or.reder.zcan20.ZCAN;
 import at.or.reder.zcan20.ZCANFactory;
+import at.or.reder.zcan20.ZimoPowerMode;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PacketBuilder;
-import at.or.reder.dcc.util.Utils;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Objects;
@@ -43,7 +43,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
-import java.util.logging.Level;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -201,10 +200,10 @@ public final class DefaultPacketBuilder implements PacketBuilder
 
   private InstanceContent.Convertor<Packet, PacketAdapter> createAdapterFactory()
   {
-    PacketSelector selector = new PacketSelector(commandGroup,
-                                                 command,
-                                                 commandMode,
-                                                 data != null ? data.limit() : 0);
+    PacketSelector selector = new PacketSelectorImpl(commandGroup,
+                                                     command,
+                                                     commandMode,
+                                                     data != null ? data.limit() : 0);
     return factoryCache.computeIfAbsent(selector,
                                         (s) -> {
                                           for (PacketAdapterFactory ef : Lookups.forPath(Packet.LOOKUPPATH).lookupAll(
@@ -213,8 +212,8 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                               return ef;
                                             }
                                           }
-                                          ZCAN.LOGGER.log(Level.WARNING,
-                                                          () -> "Found no packetadapter for " + s.toString());
+//                                          ZCAN.LOGGER.log(Level.WARNING,
+//                                                          () -> "Found no packetadapter for " + s.toString());
                                           return null;
                                         });
   }
@@ -525,6 +524,40 @@ public final class DefaultPacketBuilder implements PacketBuilder
   }
 
   @Override
+  public Packet buildQueryTSEPortModePacket(short systemID,
+                                            PowerPort port)
+  {
+    commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.TSE_PROG_MODE);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(3);
+    buffer.putShort(systemID);
+    buffer.put(port.getMagic());
+    buffer.clear();
+    data(buffer);
+    return build();
+  }
+
+  @Override
+  public Packet buildSetTSEPowerModePacket(short systemID,
+                                           PowerPort port,
+                                           byte mode)
+  {
+    commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
+    commandMode(CommandMode.COMMAND);
+    command(CommandGroup.TSE_PROG_MODE);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    buffer.putShort(systemID);
+    buffer.put(port.getMagic());
+    buffer.put(mode);
+    buffer.clear();
+    data(buffer);
+    return build();
+  }
+
+  @Override
   public Packet buildReadCVPacket(short systemID,
                                   short locoID,
                                   int cvNumber)
@@ -548,7 +581,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                    int cvNumber,
                                    short value)
   {
-    commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
+    commandGroup(CommandGroup.TRACK_CONFIG_PRIVATE);
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.TSE_PROG_WRITE);
     adapterFactory(null);
@@ -660,7 +693,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
   @Override
   public Packet buildSystemPowerInfoPacket(short nid,
                                            Collection<PowerPort> output,
-                                           PowerMode mode)
+                                           ZimoPowerMode mode)
   {
     Objects.requireNonNull(output,
                            "output is null");

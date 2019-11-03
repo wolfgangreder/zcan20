@@ -14,13 +14,25 @@
  * limitations under the License.
  */package at.or.reder.zcan20;
 
+import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.packet.CVInfoAdapter;
 import at.or.reder.zcan20.packet.Packet;
+import at.or.reder.zcan20.packet.TSETrackModePacketAdapter;
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 public interface TrackConfig
 {
+
+  public void requestPowerPortMode(PowerPort port) throws IOException;
+
+  public TSETrackModePacketAdapter getPowerPortMode(PowerPort port,
+                                                    long timeout) throws IOException, TimeoutException;
+
+  public TSETrackModePacketAdapter enterPowerMode(PowerPort port,
+                                                  byte mode,
+                                                  long timeout) throws IOException, TimeoutException;
 
   public void readCV(short address,
                      int cv) throws IOException;

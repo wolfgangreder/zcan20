@@ -15,8 +15,6 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
@@ -35,15 +33,10 @@ final class PortOpenPacketAdapterImpl extends AbstractPacketAdapter implements P
   public static final class Factory implements PacketAdapterFactory
   {
 
-    private final PacketSelector SELECTOR = new PacketSelector(CommandGroup.NETWORK,
-                                                               CommandGroup.NETWORK_PORT_OPEN,
-                                                               CommandMode.COMMAND,
-                                                               0);
-
     @Override
     public boolean isValid(PacketSelector selector)
     {
-      return SELECTOR.matches(selector);
+      return SELECTOR.test(selector);
     }
 
     @Override
