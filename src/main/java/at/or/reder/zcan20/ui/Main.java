@@ -15,31 +15,16 @@
  */
 package at.or.reder.zcan20.ui;
 
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.ZCAN;
-import at.or.reder.zcan20.ZCANFactory;
-import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
-import at.or.reder.zcan20.packet.Ping;
-import at.or.reder.dcc.util.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
 import javax.swing.SwingUtilities;
-import javax.validation.constraints.NotNull;
 
-/**
- *
- * @author Wolfgang Reder
- */
-public class Main implements AutoCloseable
+public class Main
 {
 
   private final String[] args;
-  private ZCAN device;
 
   private Main(String[] args)
   {
@@ -47,74 +32,11 @@ public class Main implements AutoCloseable
                               args.length);
   }
 
-  private void open() throws IOException
+  public void run()
   {
-    device = ZCANFactory.open("192.168.1.145",
-                              14520,
-                              14521,
-                              null,
-                              5,
-                              TimeUnit.SECONDS);
-//    device.setAutopingEnabled(true);
-  }
-
-  private void checkOpen() throws IOException
-  {
-    if (device == null) {
-      open();
-    }
-  }
-
-  public void run() throws IOException
-  {
-    checkOpen();
-//    device.addPacketListener(CommandGroup.DATA,
-//                             this::toConsolePacketListener);
-    device.addPacketListener(CommandGroup.SYSTEM,
-                             this::toConsolePacketListener);
-    Runtime.getRuntime().addShutdownHook(new Thread()
-    {
-      @Override
-      public void run()
-      {
-        try {
-          close();
-        } catch (IOException ex) {
-          Utils.LOGGER.log(Level.SEVERE,
-                           null,
-                           ex);
-        }
-      }
-
-    });
     SwingUtilities.invokeLater(() -> {
-      new MiniControl(device).setVisible(true);
+      new CANBuilder(Arrays.asList(args)).setVisible(true);
     });
-  }
-
-  @Override
-  public void close() throws IOException
-  {
-    if (device != null) {
-      device.close();
-    }
-    device = null;
-  }
-
-  private void toConsolePacketListener(@NotNull ZCAN connection,
-                                       @NotNull Packet packet)
-  {
-    PacketAdapter a = packet.getLookup().lookup(PacketAdapter.class);
-    if (a != null) {
-      if (!(a instanceof Ping)) {
-        System.out.println(a.toString());
-      }
-    } else {
-      //if (packet.getCommand() == CommandGroup.NETWORK_PING && packet.getCommandGroup() == CommandGroup.NETWORK) {
-      System.out.println(packet.toString());
-      //System.out.println(Utils.packetToString(packet));
-      // }
-    }
   }
 
   public static void main(String[] args) throws IOException
@@ -125,13 +47,7 @@ public class Main implements AutoCloseable
                 readConfiguration(is);
       }
     }
-    try (Main main = new Main(args)) {
-      main.run();
-      int ch;
-      while ((ch = System.in.read()) != 10) {
-        System.out.println(ch);
-      }
-    }
+    new Main(args).run();
   }
 
 }

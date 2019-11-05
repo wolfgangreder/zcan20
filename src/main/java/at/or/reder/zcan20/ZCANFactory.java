@@ -126,6 +126,14 @@ public final class ZCANFactory
     return new DefaultPacketBuilder(myNID);
   }
 
+  public static PacketBuilder createPacketBuilder(CanId canId)
+  {
+    return new DefaultPacketBuilder(canId.getSenderNid()).
+            command(canId.getCommand()).
+            commandGroup(canId.getCommandGroup()).
+            commandMode(canId.getCommandMode());
+  }
+
   public static short toLongAddress(short cv17,
                                     short cv18)
   {
