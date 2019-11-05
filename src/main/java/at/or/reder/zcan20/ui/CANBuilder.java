@@ -369,7 +369,7 @@ public final class CANBuilder extends JFrame
                     .addComponent(jLabel5)
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addComponent(spDLC, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 177, Short.MAX_VALUE))
+                .addGap(0, 73, Short.MAX_VALUE))
               .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                   .addComponent(jLabel7)
