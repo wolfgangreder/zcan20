@@ -15,9 +15,6 @@
  */
 package at.or.reder.zcan20;
 
-import at.or.reder.zcan20.CommandMode;
-import at.or.reder.zcan20.CommandGroup;
-import at.or.reder.zcan20.CanId;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.Test;
 
@@ -57,7 +54,7 @@ public class CanIdNGTest
     CommandGroup grp = CommandGroup.TRACK_CONFIG_PRIVATE;
     CommandMode mode = CommandMode.EVENT;
     byte command = CommandGroup.DATA_ITEM_IMAGE;
-    short sendNid = (short) 0xcafe;
+    short sendNid = (short) 0xfeca;
     CanId result = CanId.valueOf(grp,
                                  command,
                                  mode,
@@ -88,7 +85,7 @@ public class CanIdNGTest
                group);
     assertSame(CommandMode.REQUEST,
                mode);
-    assertEquals((short) 0xc9c3,
+    assertEquals((short) 0xc3c9,
                  senderNid);
   }
 

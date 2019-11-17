@@ -25,7 +25,7 @@ import at.or.reder.zcan20.util.ProxyPacketSelector;
  *
  * @author Wolfgang Reder
  */
-public interface AccessoryPacketCommandAdapter extends PacketAdapter
+public interface AccessoryPacketAdapter extends PacketAdapter
 {
 
   public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.ACCESSORY,
@@ -41,6 +41,11 @@ public interface AccessoryPacketCommandAdapter extends PacketAdapter
                                                                                                CommandMode.EVENT,
                                                                                                4));
 
+  /**
+   * Address without prefix 0x3000.
+   *
+   * @return address
+   */
   public short getNID();
 
   public byte getPort();

@@ -69,9 +69,6 @@ final class PingRequestImpl extends AbstractPacketAdapter implements PingRequest
     if (packet.getCommandMode() != CommandMode.REQUEST) {
       throw new IllegalArgumentException("illegal commandMode");
     }
-    if (buffer.capacity() < 8) {
-      throw new IllegalArgumentException("illegal datasize");
-    }
   }
 
   @Override

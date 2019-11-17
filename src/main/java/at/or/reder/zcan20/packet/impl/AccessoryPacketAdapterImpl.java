@@ -17,7 +17,7 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.PacketSelector;
-import at.or.reder.zcan20.packet.AccessoryPacketCommandAdapter;
+import at.or.reder.zcan20.packet.AccessoryPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
@@ -27,7 +27,7 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Wolfgang Reder
  */
-final class AccessoryPacketCommandAdapterImpl extends AbstractPacketAdapter implements AccessoryPacketCommandAdapter
+final class AccessoryPacketAdapterImpl extends AbstractPacketAdapter implements AccessoryPacketAdapter
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
@@ -43,18 +43,18 @@ final class AccessoryPacketCommandAdapterImpl extends AbstractPacketAdapter impl
     @Override
     public PacketAdapter convert(Packet obj)
     {
-      return new AccessoryPacketCommandAdapterImpl(obj);
+      return new AccessoryPacketAdapterImpl(obj);
     }
 
     @Override
     public Class<? extends PacketAdapter> type(Packet obj)
     {
-      return AccessoryPacketCommandAdapter.class;
+      return AccessoryPacketAdapter.class;
     }
 
   }
 
-  public AccessoryPacketCommandAdapterImpl(Packet packet)
+  public AccessoryPacketAdapterImpl(Packet packet)
   {
     super(packet);
   }
@@ -80,7 +80,7 @@ final class AccessoryPacketCommandAdapterImpl extends AbstractPacketAdapter impl
   @Override
   public String toString()
   {
-    StringBuilder builder = new StringBuilder("AccessoryPacketRequest(");
+    StringBuilder builder = new StringBuilder("AccessoryPacket(");
     builder.append(getPacket().getCommandMode());
     builder.append(", nid=0x");
     Utils.appendHexString(getNID() & 0xffff,

@@ -15,12 +15,15 @@
  */
 package at.or.reder.dcc;
 
+import java.util.EventListener;
+
 /**
- * Stellt Funktionen zur Kontrolle von Zubehöhrdekodern zur Verfügung.
  *
  * @author Wolfgang Reder
  */
-public interface SwitchControl extends BaseControl
+public interface AccessoryEventListener extends EventListener
 {
+
+  public void onAccessoryEvent(AccessoryEvent evt);
 
 }

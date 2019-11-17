@@ -15,12 +15,16 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.util.Utils;
+import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedSteps;
 import at.or.reder.zcan20.SpeedlimitMode;
 import at.or.reder.zcan20.packet.LocoModePacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.zcan20.packet.PacketAdapter;
+import at.or.reder.zcan20.packet.PacketAdapterFactory;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -29,69 +33,70 @@ import at.or.reder.dcc.util.Utils;
 final class LocoModePacketAdapterImpl extends AbstractPacketAdapter implements LocoModePacketAdapter
 {
 
-//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-//  public static final class Factory implements PacketAdapterFactory
-//  {
-//
-//    @Override
-//    public boolean isValid(CommandGroup group,
-//                           int command,
-//                           CommandMode mode,
-//                           int dlc)
-//    {
-//      if (group == CommandGroup.LOCO && command == CommandGroup.LOCO_MODE) {
-//        return mode == CommandMode.COMMAND || mode == CommandMode.ACK;
-//      }
-//      return false;
-//    }
-//
-//    @Override
-//    public LocoModePacketAdapter createAdapter(Packet packet)
-//    {
-//      return new LocoModePacketAdapterImpl(packet);
-//    }
-//
-//  }
+  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+  public static final class Factory implements PacketAdapterFactory
+  {
+
+    @Override
+    public boolean isValid(PacketSelector selector)
+    {
+      return SELECTOR.test(selector);
+    }
+
+    @Override
+    public PacketAdapter convert(Packet obj)
+    {
+      return new LocoActivePacketAdapterImpl(obj);
+    }
+
+    @Override
+    public Class<? extends PacketAdapter> type(Packet obj)
+    {
+      return LocoModePacketAdapter.class;
+    }
+
+  }
+
   private LocoModePacketAdapterImpl(Packet packet)
   {
     super(packet);
   }
 
   @Override
-  public short getLocoID()
+  public short getLocoAddress()
   {
     return buffer.getShort(0);
   }
 
   @Override
-  public SpeedSteps getSpeedsteps()
+  public SpeedSteps getSpeedSteps()
   {
-    byte tmp = (byte) (buffer.get(2) & 0x0f);
+    byte tmp = (byte) ((buffer.get(2) >> 4) & 0x0f);
     return SpeedSteps.valueOfMagic(tmp);
   }
 
   @Override
   public Protocol getProtocol()
   {
-    byte tmp = (byte) ((buffer.get(2) >> 4) & 0x0f);
+    byte tmp = (byte) (buffer.get(2) & 0x0f);
     return Protocol.valueOfMagic(tmp);
   }
 
   @Override
-  public int getNumFunctions()
+  public byte getFunctionCount()
   {
     return (byte) buffer.get(3);
   }
 
   @Override
-  public SpeedlimitMode getSpeedlimitMode()
+  public SpeedlimitMode getSpeedLimitMode()
   {
     int tmp = (buffer.get(4) & 0x0c) >> 2;
     return SpeedlimitMode.valueOf(tmp);
   }
 
   @Override
-  public boolean isPulseFx()
+  public boolean isPulsFx()
   {
     return (buffer.get(4) & 0x01) != 0;
   }
@@ -106,18 +111,18 @@ final class LocoModePacketAdapterImpl extends AbstractPacketAdapter implements L
   public String toString()
   {
     StringBuilder builder = new StringBuilder("LOCO_MODE(0x");
-    Utils.appendHexString(getLocoID(),
+    Utils.appendHexString(getLocoAddress(),
                           builder,
                           4);
     builder.append(", ");
-    builder.append(getSpeedsteps());
+    builder.append(getSpeedSteps());
     builder.append(", ");
     builder.append(getProtocol());
     builder.append(", ");
-    builder.append(getNumFunctions());
+    builder.append(getFunctionCount());
     builder.append(", ");
-    builder.append(getSpeedlimitMode());
-    if (isPulseFx()) {
+    builder.append(getSpeedLimitMode());
+    if (isPulsFx()) {
       builder.append(", pulseFX");
     }
     if (isAnalogFx()) {

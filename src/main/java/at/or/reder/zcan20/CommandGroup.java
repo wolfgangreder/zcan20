@@ -48,7 +48,8 @@ public final class CommandGroup implements Serializable
   public static final byte ACCESSORY_PORT4 = 0x04;
   public static final byte ACCESSORY_DATA = 0x05;
   public static final byte ACCESSORY_PORT6 = 0x06;
-  public static final CommandGroup ACCESSORY = valueOf((byte) 0x01,
+  public static final byte ACCESSORY_MAGIC = (byte) 0x01;
+  public static final CommandGroup ACCESSORY = valueOf(ACCESSORY_MAGIC,
                                                        "ACCESSORY",
                                                        ACCESSORY_STATE,
                                                        ACCESSORY_MODE,
@@ -81,10 +82,6 @@ public final class CommandGroup implements Serializable
   public static final CommandGroup FREE_2 = valueOf((byte) 0x05,
                                                     "FREE 2",
                                                     MAGIC_COMMAND_DISABLE);
-  public static final byte TRACK_CONFIG_PRIVATE_MAGIC = (byte) 0x06;
-  public static final CommandGroup TRACK_CONFIG_PRIVATE = valueOf(TRACK_CONFIG_PRIVATE_MAGIC,
-                                                                  "TRACK CONFIG PRIVATE",
-                                                                  MAGIC_COMMAND_DISABLE);
   public static final byte DATA_GROUP_COUNT = 0x00;
   public static final byte DATA_ITEMLIST_INDEX = 0x01;
   public static final byte DATA_ITEMLIST_NID = 0x02;
@@ -149,9 +146,14 @@ public final class CommandGroup implements Serializable
   public static final CommandGroup FILE_TRANSFER = valueOf((byte) 0x0f,
                                                            "FILE TRANSFER",
                                                            MAGIC_COMMAND_DISABLE);
+  public static final byte TRACK_CONFIG_PRIVATE_MAGIC = (byte) 0x06;
+  public static final CommandGroup TRACK_CONFIG_PRIVATE = valueOf(TRACK_CONFIG_PRIVATE_MAGIC,
+                                                                  "TRACK CONFIG PRIVATE",
+                                                                  MAGIC_COMMAND_DISABLE);
   public static final byte TRACK_CONFIG_PUBLIC_MAGIC = 0x16;
   public static final byte TSE_PROG_MODE = 0x00;
   public static final byte TSE_PROG_BUSY = 0x02; // not documented !
+  public static final byte TSE_PROG_CLEAR = 0x04;
   public static final byte TSE_PROG_READ = 0x08;
   public static final byte TSE_PROG_WRITE = 0x09;
   public static final CommandGroup TRACK_CONFIG_PUBLIC = valueOf(TRACK_CONFIG_PUBLIC_MAGIC,

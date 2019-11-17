@@ -19,7 +19,7 @@ package at.or.reder.dcc;
  *
  * @author Wolfgang Reder
  */
-public interface LocomotiveEvent extends DCCEventObject, Locomotive
+public interface LocomotiveEvent extends DCCEventObject
 {
 
 }

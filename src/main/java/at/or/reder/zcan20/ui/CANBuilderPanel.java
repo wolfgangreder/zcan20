@@ -31,21 +31,19 @@ import java.text.ParseException;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.apache.commons.cli.CommandLine;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
-public final class CANBuilder extends JFrame
+public final class CANBuilderPanel extends JPanel
 {
 
   private final DocumentListener docListener = new DocumentListener()
@@ -70,7 +68,7 @@ public final class CANBuilder extends JFrame
 
   };
 
-  public CANBuilder(CommandLine commandLine)
+  public CANBuilderPanel()
   {
     initComponents();
     edCommand.getDocument().addDocumentListener(docListener);
@@ -86,7 +84,7 @@ public final class CANBuilder extends JFrame
     try {
       return Utils.hexString2ByteBuffer(field.getText(),
                                         null,
-                                        ':').rewind();
+                                        ' ').rewind();
     } catch (ParseException ex) {
     }
     return null;
@@ -123,7 +121,7 @@ public final class CANBuilder extends JFrame
     StringBuilder builder = new StringBuilder();
     Utils.byteBuffer2HexString(buffer,
                                builder,
-                               ':');
+                               ' ');
     field.setText(builder.toString());
   }
 
@@ -270,36 +268,34 @@ public final class CANBuilder extends JFrame
     JLabel jLabel6 = new JLabel();
     JLabel jLabel7 = new JLabel();
 
-    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    setTitle(NbBundle.getMessage(CANBuilder.class, "CANBuilder.title")); // NOI18N
 
-    jLabel1.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.jLabel1.text")); // NOI18N
+    jLabel1.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.jLabel1.text")); // NOI18N
 
     edCommandGroup.setColumns(8);
 
-    jLabel2.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.jLabel2.text")); // NOI18N
+    jLabel2.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.jLabel2.text")); // NOI18N
 
     edCommand.setColumns(8);
 
     buttonGroup1.add(rdCommand);
-    rdCommand.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.rdCommand.text")); // NOI18N
+    rdCommand.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.rdCommand.text")); // NOI18N
 
     buttonGroup1.add(rdRequest);
-    rdRequest.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.rdRequest.text")); // NOI18N
+    rdRequest.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.rdRequest.text")); // NOI18N
 
     buttonGroup1.add(rdEvent);
-    rdEvent.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.rdEvent.text")); // NOI18N
+    rdEvent.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.rdEvent.text")); // NOI18N
 
     buttonGroup1.add(rdAck);
-    rdAck.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.rdAck.text")); // NOI18N
+    rdAck.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.rdAck.text")); // NOI18N
 
-    jLabel3.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.jLabel3.text")); // NOI18N
+    jLabel3.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.jLabel3.text")); // NOI18N
 
-    jLabel4.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.jLabel4.text")); // NOI18N
+    jLabel4.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.jLabel4.text")); // NOI18N
 
     edSender.setColumns(8);
 
-    btToPacket.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.btToPacket.text")); // NOI18N
+    btToPacket.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.btToPacket.text")); // NOI18N
     btToPacket.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent evt)
@@ -308,15 +304,15 @@ public final class CANBuilder extends JFrame
       }
     });
 
-    jLabel5.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.jLabel5.text")); // NOI18N
+    jLabel5.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.jLabel5.text")); // NOI18N
 
     spDLC.setModel(new SpinnerNumberModel(0, 0, 8, 1));
 
     edData.setColumns(25);
 
-    jLabel6.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.jLabel6.text")); // NOI18N
+    jLabel6.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.jLabel6.text")); // NOI18N
 
-    btToComponents.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.btToComponents.text")); // NOI18N
+    btToComponents.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.btToComponents.text")); // NOI18N
     btToComponents.addActionListener(new ActionListener()
     {
       public void actionPerformed(ActionEvent evt)
@@ -325,13 +321,13 @@ public final class CANBuilder extends JFrame
       }
     });
 
-    jLabel7.setText(NbBundle.getMessage(CANBuilder.class, "CANBuilder.jLabel7.text")); // NOI18N
+    jLabel7.setText(NbBundle.getMessage(CANBuilderPanel.class, "CANBuilderPanel.jLabel7.text")); // NOI18N
 
     edCanId.setEditable(false);
     edCanId.setColumns(8);
 
-    GroupLayout layout = new GroupLayout(getContentPane());
-    getContentPane().setLayout(layout);
+    GroupLayout layout = new GroupLayout(this);
+    setLayout(layout);
     layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
@@ -422,7 +418,6 @@ public final class CANBuilder extends JFrame
         .addContainerGap(81, Short.MAX_VALUE))
     );
 
-    pack();
   }// </editor-fold>//GEN-END:initComponents
 
   private void btToPacketActionPerformed(ActionEvent evt)//GEN-FIRST:event_btToPacketActionPerformed

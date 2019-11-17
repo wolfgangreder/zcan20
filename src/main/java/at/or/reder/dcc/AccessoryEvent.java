@@ -15,24 +15,17 @@
  */
 package at.or.reder.dcc;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-import org.openide.util.Lookup;
-
 /**
- * Basisobjekt zur Bibliothek.
  *
  * @author Wolfgang Reder
  */
-public interface Controller extends AccessoryControl, PowerControl, BaseControl, AutoCloseable,
-                                    Lookup.Provider
+public interface AccessoryEvent extends DCCEventObject
 {
 
-  public void open() throws IOException;
+  public short getDeocder();
 
-  @Override
-  public void close() throws IOException;
+  public byte getPort();
 
-  Locomotive getLocomotive(short locoAddress) throws IOException, TimeoutException;
+  public int getValue();
 
 }

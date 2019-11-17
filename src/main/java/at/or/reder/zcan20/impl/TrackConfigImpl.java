@@ -27,7 +27,6 @@ import at.or.reder.zcan20.packet.PacketBuilder;
 import at.or.reder.zcan20.packet.TSETrackModePacketAdapter;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Predicate;
 
 /**
  *
@@ -75,34 +74,6 @@ final class TrackConfigImpl implements TrackConfig
     return zcan.sendReceive(packet,
                             TSETrackModePacketAdapter.SELECTOR::matches,
                             TSETrackModePacketAdapter.class,
-                            timeout);
-  }
-
-  @Override
-  public void readCV(short address,
-                     int cv) throws IOException
-  {
-    PacketBuilder builder = zcan.createPacketBuilder();
-    Packet packet = builder.buildReadCVPacket(zcan.getMasterNID(),
-                                              address,
-                                              cv);
-    zcan.doSendPacket(packet);
-  }
-
-  @Override
-  public CVInfoAdapter readCV(short address,
-                              int cv,
-                              long timeout,
-                              Predicate<? super Packet> packetMatcher) throws IOException
-  {
-    short masterNID = zcan.getMasterNID();
-    Packet packet = zcan.createPacketBuilder().
-            buildReadCVPacket(masterNID,
-                              address,
-                              cv);
-    return zcan.sendReceive(packet,
-                            CVInfoAdapter.SELECTOR::matches,
-                            CVInfoAdapter.class,
                             timeout);
   }
 

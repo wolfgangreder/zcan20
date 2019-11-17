@@ -352,13 +352,13 @@ public final class DefaultPacketBuilder implements PacketBuilder
   }
 
   @Override
-  public Packet buildLocoModePacket(short locoID,
-                                    SpeedSteps steps,
-                                    Protocol protocol,
-                                    int numFunctions,
-                                    SpeedlimitMode limitMode,
-                                    boolean pulseFx,
-                                    boolean analogFx)
+  public PacketBuilder buildLocoModePacket(short locoID,
+                                           SpeedSteps steps,
+                                           Protocol protocol,
+                                           int numFunctions,
+                                           SpeedlimitMode limitMode,
+                                           boolean pulseFx,
+                                           boolean analogFx)
   {
     int li = Short.toUnsignedInt(locoID);
     if (li > ZCANFactory.LOCO_MAX) {
@@ -383,16 +383,16 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.LOCO_MODE);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(5);
+    ByteBuffer buffer = Utils.allocateLEBuffer(6);
     buffer.putShort(locoID);
     int m1 = (steps.getMagic() & 0x0f) + ((protocol.getMagic() & 0x0f) << 4);
     int m3 = (limitMode.getMagic() << 2) + (pulseFx ? 1 : 0) + (analogFx ? 2 : 0);
     buffer.put((byte) m1);
     buffer.put((byte) numFunctions);
     buffer.put((byte) m3);
-    buffer.clear();
-    data(buffer);
-    return build();
+    buffer.put((byte) 0); // unknown
+    data(buffer.flip());
+    return this;
   }
 
   @Override
@@ -513,14 +513,24 @@ public final class DefaultPacketBuilder implements PacketBuilder
   @Override
   public Packet buildLocoActivePacket(short locoID)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return buildLocoActivePacket(locoID,
+                                 LocoActive.ACTIVE).build();
   }
 
   @Override
-  public Packet buildLocoActivePacket(short locoID,
-                                      LocoActive mode)
+  public PacketBuilder buildLocoActivePacket(short locoID,
+                                             LocoActive mode)
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    commandGroup(CommandGroup.LOCO);
+    command(CommandGroup.LOCO_ACTIVE);
+    commandMode(CommandMode.COMMAND);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    buffer.putShort(locoID);
+    buffer.putShort((short) (mode.getMagic() & 0xff));
+    buffer.flip();
+    data(buffer);
+    return this;
   }
 
   @Override
@@ -562,7 +572,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                   short locoID,
                                   int cvNumber)
   {
-    commandGroup(CommandGroup.TRACK_CONFIG_PUBLIC);
+    commandGroup(CommandGroup.TRACK_CONFIG_PRIVATE);
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.TSE_PROG_READ);
     adapterFactory(null);
@@ -593,6 +603,19 @@ public final class DefaultPacketBuilder implements PacketBuilder
     buffer.clear();
     data(buffer);
     return build();
+  }
+
+  @Override
+  public PacketBuilder buildClearCVPacket(short systemID,
+                                          short locoID)
+  {
+    return commandGroup(CommandGroup.TRACK_CONFIG_PRIVATE).
+            command(CommandGroup.TSE_PROG_CLEAR).
+            commandMode(CommandMode.COMMAND).
+            data(Utils.allocateLEBuffer(2 * Short.BYTES).
+                    putShort(systemID).
+                    putShort(locoID)).
+            adapterFactory(null);
   }
 
   @Override

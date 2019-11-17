@@ -23,27 +23,27 @@ public enum LocoActive
 {
   UNKNOWN(0),
   ACTIVE(0x01),
-  FORECE_ACTIVE(0x10);
-  private final byte magic;
+  FORCE_ACTIVE(0x10);
+  private final short magic;
 
   private LocoActive(int magic)
   {
-    this.magic = (byte) magic;
+    this.magic = (short) magic;
   }
 
-  public byte getMagic()
+  public short getMagic()
   {
     return magic;
   }
 
-  public LocoActive valueOfMagic(byte magic)
+  public static LocoActive valueOfMagic(short magic)
   {
     for (LocoActive a : values()) {
       if (a.magic == magic) {
         return a;
       }
     }
-    throw new IllegalArgumentException("Invalid LocoActive magic " + magic);
+    return UNKNOWN;
   }
 
 }

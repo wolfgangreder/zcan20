@@ -41,8 +41,7 @@ public final class CanId extends Number
     result |= (group.getMagic() & 0xf) << 24;
     result |= (command & 0x3f) << 18;
     result |= (mode.getMagic() & 0x3) << 16;
-    result |= (senderNid & 0xff) << 8;
-    result |= (senderNid & 0xff00) >> 8;
+    result |= (senderNid & 0xffff);
     return new CanId(result);
   }
 
@@ -71,7 +70,7 @@ public final class CanId extends Number
 
   public short getSenderNid()
   {
-    return (short) (((value & 0xff) << 8) + ((value & 0xff00) >> 8));
+    return (short) value;
   }
 
   @Override

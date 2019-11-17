@@ -184,6 +184,8 @@ public final class ZCANImpl implements ZCAN
   private final NetworkControlImpl networkControl;
   private final SystemControlImpl systemControl;
   private final TrackConfig trackConfig;
+  private final LocoControlImpl locoControl;
+  private final ZAccessoryControlImpl accessoryImpl;
   private final Lookup myLookup;
   private final Object lock;
 
@@ -212,10 +214,15 @@ public final class ZCANImpl implements ZCAN
     networkControl = new NetworkControlImpl(this);
     systemControl = new SystemControlImpl(this);
     trackConfig = new TrackConfigImpl(this);
+    locoControl = new LocoControlImpl(this);
+    accessoryImpl = new ZAccessoryControlImpl(this);
     myLookup = Lookups.fixed(port,
                              networkControl,
                              systemControl,
-                             trackConfig);
+                             trackConfig,
+                             locoControl,
+                             requestProcessor,
+                             accessoryImpl);
   }
 
   @Override
@@ -320,8 +327,7 @@ public final class ZCANImpl implements ZCAN
       return future.get(timeout,
                         TimeUnit.MILLISECONDS);
     } catch (InterruptedException ex) {
-      Thread.currentThread().
-              interrupt();
+      Thread.currentThread().interrupt();
       return null;
     } catch (ExecutionException ex) {
       if (ex.getCause() instanceof IOException) {
@@ -358,8 +364,7 @@ public final class ZCANImpl implements ZCAN
                                              Ping.class);
           Ping ping = future.get(timeout,
                                  unit);
-          masterNID.set(ping.getPacket().
-                  getSenderNID());
+          masterNID.set(ping.getPacket().getSenderNID());
           session.set(ping.getSession());
           LOGGER.log(Level.INFO,
                      "Connected to 0x{0} Session 0x{1}",
@@ -590,8 +595,8 @@ public final class ZCANImpl implements ZCAN
     return masterNID.get();
   }
 
-  RequestProcessor.Task post(Runnable run,
-                             long timeout)
+  RequestProcessor.Task postTask(Runnable run,
+                                 long timeout)
   {
     return requestProcessor.post(run,
                                  linkTimeout);

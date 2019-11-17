@@ -1,0 +1,62 @@
+Id MX32 C3E8
+Id MX10 C0A6
+
+1241 C3E8 4 08 00 01 00             = 02:10:CMD Kontrolle über Adresse 8 übernehmen
+1621 C3E8 8 A6 C0 08 00 1D 00 00 00 = 06:08:CMD Config Read CV29
+1812 C0A6 8 08 00 00 00 00 00 00 00 = 08:04:EVT ???
+160B C0A6 8 E8 C3 1D 00 00 00 10 00 = 06:02:ACK TSE Info (Fahrzeug ID fehlt gg. Dok) POM Init State 0x10 Code 0x00
+1622 C0A6 8 A6 C0 08 00 1D 00 00 0A = 06:08:EVT TSE Read Fahrzeug 8 cv 29 wert 10
+1622 C0A6 8 A6 C0 08 00 1D 00 00 0A = 06:08:EVT
+1611 C3E8 4 A6 C0 08 00 00          = 06:04:CMD TSE Prog Clear
+1802 CA06 8 01 00 00 01 08 37 dd 00 = 08:00:EVT Module Power Info
+1816 C0A6 8 08 00 00 03 00 00 00 00 = 08:05:EVT
+1241 C3E8 4 08 00 01 00             = 02:10 CMD Kontroller über Adresse 8 übernehmen
+1621 C3E8 8 a6 c0 08 00 1d 00 00 00 = 06:08:CMD Config Read CV29
+1812 c0a6 8 08 00 00 00 00 00 00 00 = 08:04:EVT ???
+160B c0a6 8 e8 c3 1d 00 00 00 10 00 = 06:02:ACK TSE Info
+1622 c0a6 8 a6 c0 08 00 1d 00 00 0a = 06:08:EVT TSE Read Fahrzeug 8 cv29=10
+1241 c3e8 4 08 00 01 00             = 02:10:CMD Kontrolle über Adresse 8 übernehmen
+1621 c3e8 8 a6 c0 08 00 1d 00 00 00 = 06:08:CMD Config Read CV29
+1812 c0a6 8 08 00 00 00 00 00 00 00 = 08:04:EVT ???
+160b c0a6 8 e8 c3 1d 00 00 00 10 00 = 06:02:ACK TSE Info
+1622 c0a6 8 a6 c0 08 00 1d 00 00 0a = 06:08:EVT TSE Read Fahrzeug 8 cv29=10
+1622 c0a6 8 a6 c0 08 00 1d 00 00 0a = 06:08:EVT TSE Read Fahrzeug 8 cv29=10
+1240 c3e8 2 08 00                   = 02:10:REQ Fahrzeug 8 aktiv
+1200 c3e8 2 08 00                   = 02:00:REQ Status Fahrzeug 8 ?
+1203 c0a6 8 08 00 00 00 e8 c3 12 d7 = 02:00:ACK Status Fahrzeug 8
+1204 c3e8 2 08 00                   = 02:01:REQ Mode Fahrzeug 8 ?
+1207 c0a6 6 08 00 41 1c 04 00       = 02:01:ACK Mode Fahrzeug 8 (M0 nibble in Dok vertauscht) letztes byte nicht dokumentiert
+1208 c3e8 2 08 00                   = 02:02:REQ Fahrzeug 8 Speed ?
+120b c0a6 8 08 00 00 00 00 00 e8 c3 = 02:02:ACK Fahrzeug 8 Speed = .... letzten beiden bytes sind nicht dokumentiert (Control NID).
+120c c3e8 2 08 00                   = 02:03:REQ Fahrzeug 8 ???
+120f c0a6 8 08 00 01 00 00 00 e8 c3 = 02:03:ACK Fahrzeug 8 ???
+1214 c3e8 4 08 00 01 00             = 02:05:REQ Fahrzeug 8 ???
+1217 c0a6 6 08 00 01 00 00 00       = 02:05:ACK Fahrzeug 8 ???
+1214 c3e8 4 08 00 02 00             = 02:05:REQ Fahrzeug 8 ???
+1217 c0a6 6 08 00 02 00             = 02:05:ACK Fahrzeug 8 ???
+1241 c3e8 4 08 00 01 00             = 02:10:CMD Kontrolle über Adresse 8 übernehmen
+1621 c3e8 8 a6 c0 08 00 1c 00 00 00 = 06:08:CMD Config Read CV28
+1812 c0a6 8 08 00 00 00 00 00 00 00 = 08:04:EVT ???
+160b c0a6 8 e8 c3 1c 00 00 00 10 00 = 06:02:ACK TSE Info
+1622 c0a6 8 a6 c0 08 00 1c 00 00 03 = 06:08:EVT TSE Read Fahrzeug 8 cv28=3
+1241 c3e8 4 08 00 01 00             = 02:10:CMD Controlle über Fahrzeug 8 übernehmen
+1621 c3e8 8 a6 c0 08 00 1c 00 00 00 = 06:08:CMD Config Read CV28
+1812 c0a6 8 08 00 00 00 00 00 00 00 = 08:04:EVT ???
+160b c0a6 8 e8 c3 1c 00 00 00 10 00 = 06:02:ACK TSE Info
+1622 c0a6 8 a6 c0 08 00 1c 00 00 03 = 06:08:EVT TSE Read Fahrzeug 8 cv28=3
+1241 c3e8 4 08 00 01 00             = 02:10:CMD Kontrolle über Adresse 8 übernehmen
+1621 c3e8 8 a6 c0 08 00 08 00 00 00 = 06:08:CMD Config Read CV8
+1812
+160b
+1622 c0a6 8 a6 c0 08 00 08 00 00 91 = 06:08:EVT TSE Read Fahrzeug 8 cv8=145 (ZIMO)
+1816
+1241 c3e8 5 08 00 01 00             = 02:10:CMD Kontrolle über Adresse 8 übernehmen
+1621 c3e8 8 a6 c0 08 00 08 00 00 00
+1812
+160b
+1816
+1622 c0a6 8 a6 c0 08 00 08 00 00 91
+1241
+1621 c3e8 8 a6 c0 08 00 07 00 00 00 = 06:08:CMD Config Read CV7
+
+

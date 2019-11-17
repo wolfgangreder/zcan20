@@ -16,6 +16,7 @@
 package at.or.reder.zcan20.packet;
 
 import at.or.reder.dcc.PowerPort;
+import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.DataGroup;
@@ -82,13 +83,13 @@ public interface PacketBuilder
 
   public Packet buildLocoModePacket(@Min(0) @Max(0x27ff) short locoID);
 
-  public Packet buildLocoModePacket(@Min(0) @Max(0x27ff) short locoID,
-                                    @NotNull SpeedSteps steps,
-                                    @NotNull Protocol protocol,
-                                    @Min(0) @Max(32) int numFunctions,
-                                    @NotNull SpeedlimitMode limitMode,
-                                    boolean pulseFx,
-                                    boolean analogFx);
+  public PacketBuilder buildLocoModePacket(@Min(0) @Max(0x27ff) short locoID,
+                                           @NotNull SpeedSteps steps,
+                                           @NotNull Protocol protocol,
+                                           @Min(0) @Max(32) int numFunctions,
+                                           @NotNull SpeedlimitMode limitMode,
+                                           boolean pulseFx,
+                                           boolean analogFx);
 
   public Packet buildLocoSpeedPacket(@Min(0) @Max(0x27ff) short locoID);
 
@@ -107,8 +108,8 @@ public interface PacketBuilder
 
   public Packet buildLocoActivePacket(@Min(0) @Max(0x27ff) short locoID);
 
-  public Packet buildLocoActivePacket(@Min(0) @Max(0x27ff) short locoID,
-                                      @NotNull LocoActive mode);
+  public PacketBuilder buildLocoActivePacket(@Min(0) @Max(0x27ff) short locoID,
+                                             @NotNull LocoActive mode);
 
   public Packet buildQueryTSEPortModePacket(short systemID,
                                             PowerPort port);
@@ -125,6 +126,9 @@ public interface PacketBuilder
                                    short locoID,
                                    int cvNumber,
                                    short value);
+
+  public PacketBuilder buildClearCVPacket(short systemID,
+                                          short locoID);
 
   public Packet buildDataGroupCountPacket(short masterNID,
                                           @NotNull DataGroup dataGroup);
@@ -165,5 +169,33 @@ public interface PacketBuilder
 
   public Packet buildModuleInfoPacket(short nid,
                                       @NotNull ModuleInfoType type);
+
+  public default PacketBuilder buildAccessoryRequestPacket(short decoder,
+                                                           byte port)
+  {
+    ByteBuffer buffer = Utils.allocateLEBuffer(3);
+    buffer.putShort((short) (decoder | 0x3000));
+    buffer.put(port);
+    return commandGroup(CommandGroup.ACCESSORY).
+            command(CommandGroup.ACCESSORY_PORT4).
+            commandMode(CommandMode.REQUEST).
+            data(buffer.flip()).
+            adapterFactory(null);
+  }
+
+  public default PacketBuilder buildAccessoryCommandPacket(short decoder,
+                                                           byte port,
+                                                           byte mode)
+  {
+    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    buffer.putShort((short) (decoder | 0x3000));
+    buffer.put(port);
+    buffer.put(mode);
+    return commandGroup(CommandGroup.ACCESSORY).
+            command(CommandGroup.ACCESSORY_PORT4).
+            commandMode(CommandMode.COMMAND).
+            data(buffer.flip()).
+            adapterFactory(null);
+  }
 
 }

@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.dcc;
+package at.or.reder.zcan20.ui;
 
+import at.or.reder.zcan20.PacketListener;
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-import org.openide.util.Lookup;
 
 /**
- * Basisobjekt zur Bibliothek.
  *
  * @author Wolfgang Reder
  */
-public interface Controller extends AccessoryControl, PowerControl, BaseControl, AutoCloseable,
-                                    Lookup.Provider
+public interface PacketSource extends AutoCloseable
 {
 
-  public void open() throws IOException;
+  public void start() throws IOException;
 
   @Override
   public void close() throws IOException;
 
-  Locomotive getLocomotive(short locoAddress) throws IOException, TimeoutException;
+  public void addPacketListener(PacketListener packet);
+
+  public void removePacketListener(PacketListener packet);
 
 }

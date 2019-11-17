@@ -17,29 +17,69 @@ package at.or.reder.zcan20.ui;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.logging.LogManager;
 import javax.swing.SwingUtilities;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 public class Main
 {
 
-  private final String[] args;
-
-  private Main(String[] args)
+  private enum GUIMode
   {
-    this.args = Arrays.copyOf(args,
-                              args.length);
+    LOGGER, BUILDER;
+  }
+  private static final Options OPTIONS;
+
+  static {
+    OPTIONS = new Options();
+    OPTIONS.addOption(Option.builder("m").
+            argName("mode").
+            desc("GUI Mode [logger,builder]").
+            hasArg().
+            longOpt("mode").
+            numberOfArgs(1).required(
+            false).build());
+  }
+
+  private final CommandLine commandLine;
+  private final GUIMode mode;
+
+  private Main(String[] args) throws ParseException
+  {
+    DefaultParser parser = new DefaultParser();
+    this.commandLine = parser.parse(OPTIONS,
+                                    args);
+    GUIMode m = GUIMode.LOGGER;
+    if (commandLine.hasOption('m')) {
+      try {
+        m = GUIMode.valueOf(commandLine.getOptionValue('m',
+                                                       GUIMode.LOGGER.name()).toUpperCase());
+      } catch (Throwable th) {
+
+      }
+    }
+    this.mode = m;
   }
 
   public void run()
   {
     SwingUtilities.invokeLater(() -> {
-      new CANBuilder(Arrays.asList(args)).setVisible(true);
+      switch (mode) {
+        case BUILDER:
+          new CANBuilder(commandLine).setVisible(true);
+          break;
+        default:
+          new PacketLogger(commandLine).setVisible(true);
+          break;
+      }
     });
   }
 
-  public static void main(String[] args) throws IOException
+  public static void main(String[] args) throws IOException, ParseException
   {
     try (InputStream is = Main.class.getResourceAsStream("/logging.properties")) {
       if (is != null) {

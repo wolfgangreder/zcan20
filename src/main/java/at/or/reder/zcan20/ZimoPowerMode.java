@@ -59,7 +59,10 @@ public enum ZimoPowerMode
                PowerMode.UNDERVOLTAGE),
   SUPPLYVOLTAGE(0x40,
                 Bundle.ZimoPowerMode_SUPPLYVOLTAGE(),
-                PowerMode.SUPPLYVOLTAGE),;
+                PowerMode.SUPPLYVOLTAGE),
+  UNKNOWN(0xff,
+          "Unknown",
+          PowerMode.ERROR);
   private final int magic;
   private final String label;
   private final PowerMode sysMode;
@@ -91,7 +94,8 @@ public enum ZimoPowerMode
         return m;
       }
     }
-    throw new IllegalArgumentException("invalid magic 0x" + magic);
+    return UNKNOWN;
+    //throw new IllegalArgumentException("invalid magic 0x" + magic);
   }
 
   public static ZimoPowerMode valueOf(PowerMode mode)

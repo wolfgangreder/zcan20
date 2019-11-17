@@ -109,8 +109,8 @@ final class NetworkControlImpl implements NetworkControl, AutoCloseable
     if (e != isAutopingEnabled()) {
       if (e && zcan.isOpen()) {
         if (ownerPing == null) {
-          ownerPing = zcan.post(this::onAutomaticPing,
-                                getScheduleTime());
+          ownerPing = zcan.postTask(this::onAutomaticPing,
+                                    getScheduleTime());
         }
       } else if (ownerPing != null) {
         ownerPing.cancel();

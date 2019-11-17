@@ -15,11 +15,15 @@
  */
 package at.or.reder.zcan20;
 
+import java.io.IOException;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public interface LocoManagement
+public interface LocoControl
 {
+
+  Loco takeOwnership(short loco) throws IOException;
 
 }

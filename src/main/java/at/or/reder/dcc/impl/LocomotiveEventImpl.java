@@ -16,7 +16,6 @@
 package at.or.reder.dcc.impl;
 
 import at.or.reder.dcc.*;
-import java.util.BitSet;
 import org.openide.util.Lookup;
 
 /**
@@ -51,30 +50,37 @@ public final class LocomotiveEventImpl implements LocomotiveEvent
     return sender;
   }
 
-  @Override
-  public int getAddress()
-  {
-    return locomotive.getAddress();
-  }
-
-  @Override
-  public int getCurrentSpeed()
-  {
-    return locomotive.getCurrentSpeed();
-  }
-
-  @Override
-  public Direction getDirection()
-  {
-    return locomotive.getDirection();
-  }
-
-  @Override
-  public BitSet getFunctions()
-  {
-    return locomotive.getFunctions();
-  }
-
+//  @Override
+//  public int getAddress()
+//  {
+//    return locomotive.getAddress();
+//  }
+//
+//  @Override
+//  public int getCurrentSpeed()
+//  {
+//    return locomotive.getCurrentSpeed();
+//  }
+//
+//  @Override
+//  public Direction getDirection()
+//  {
+//    return locomotive.getDirection();
+//  }
+//
+//  @Override
+//  public BitSet getFunctions()
+//  {
+//    return locomotive.getFunctions();
+//  }
+//
+//  @Override
+//  public int readCV(int cvIndex,
+//                    int timeout) throws IOException, TimeoutException
+//  {
+//    return locomotive.readCV(cvIndex,
+//                             timeout);
+//  }
   @Override
   public Lookup getLookup()
   {

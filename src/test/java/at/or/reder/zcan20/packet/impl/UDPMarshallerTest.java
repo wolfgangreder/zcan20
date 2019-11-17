@@ -529,7 +529,7 @@ public class UDPMarshallerTest
     Protocol prot = Protocol.MFX;
     SpeedlimitMode limit = SpeedlimitMode.ZIMO;
     int numFunc = 4;
-    byte[] expected = Utils.toByteArray(5,
+    byte[] expected = Utils.toByteArray(6,
                                         0,
                                         0,
                                         0,
@@ -541,7 +541,8 @@ public class UDPMarshallerTest
                                         Utils.byte2(locoNid),
                                         0x44,
                                         4,
-                                        0x0b);
+                                        0x0b,
+                                        0);
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildLocoModePacket(locoNid,
                                                 steps,
@@ -549,7 +550,7 @@ public class UDPMarshallerTest
                                                 numFunc,
                                                 limit,
                                                 true,
-                                                true);
+                                                true).build();
     assertNotNull(packet);
     assertEquals(expected.length,
                  UDPMarshaller.getRequiredBufferSize(packet));
@@ -735,7 +736,7 @@ public class UDPMarshallerTest
                                         0,
                                         0,
                                         0,
-                                        0x016,
+                                        0x06,
                                         0x21,
                                         Utils.byte1(nid),
                                         Utils.byte2(nid),

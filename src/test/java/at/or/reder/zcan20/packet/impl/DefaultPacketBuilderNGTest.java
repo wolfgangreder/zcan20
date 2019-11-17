@@ -15,12 +15,12 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.ModuleInfoType;
-import at.or.reder.dcc.PowerPort;
 import at.or.reder.zcan20.Protocol;
 import at.or.reder.zcan20.SpeedFlags;
 import at.or.reder.zcan20.SpeedSteps;
@@ -648,7 +648,7 @@ public class DefaultPacketBuilderNGTest
                                                         numFunctions,
                                                         limitMode,
                                                         pulseFx,
-                                                        analogFx);
+                                                        analogFx).build();
             assertNotNull(packet);
             assertEquals(myNID,
                          packet.getSenderNID());
@@ -666,22 +666,22 @@ public class DefaultPacketBuilderNGTest
                        adapter.getPacket());
             assertEquals(as,
                          locoNid,
-                         adapter.getLocoID());
+                         adapter.getLocoAddress());
             assertSame(as,
                        steps,
-                       adapter.getSpeedsteps());
+                       adapter.getSpeedSteps());
             assertSame(as,
                        prot,
                        adapter.getProtocol());
             assertSame(as,
                        limitMode,
-                       adapter.getSpeedlimitMode());
+                       adapter.getSpeedLimitMode());
             assertEquals(as,
                          numFunctions,
-                         adapter.getNumFunctions());
+                         adapter.getFunctionCount());
             assertEquals(as,
                          pulseFx,
-                         adapter.isPulseFx());
+                         adapter.isPulsFx());
             assertEquals(as,
                          analogFx,
                          adapter.isAnalogFx());

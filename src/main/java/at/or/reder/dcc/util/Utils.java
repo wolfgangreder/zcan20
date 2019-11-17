@@ -116,6 +116,22 @@ public final class Utils
   }
 
   /**
+   * Converts {@code pValue} to hex and appends the result to {@code builder}.
+   *
+   * @param pValue The Integer to convert
+   * @param builder The Builder to append the result to.
+   * @return {@code builder}
+   * @see #appendHexString(int, java.lang.StringBuilder, int)
+   */
+  public static StringBuilder appendHexString(long pValue,
+                                              StringBuilder builder)
+  {
+    return appendHexString(pValue,
+                           builder,
+                           -1);
+  }
+
+  /**
    * Converts {@code pValue} to hex and appends the result to {@code builder}. If necessary leading zeros will be added to append
    * at least {@code minimumDigits} to {@code builder}.
    *
@@ -129,6 +145,17 @@ public final class Utils
                                               int minimumDigits)
   {
     String tmp = Integer.toHexString(pValue);
+    for (int i = tmp.length(); i < minimumDigits; ++i) {
+      builder.append('0');
+    }
+    return builder.append(tmp);
+  }
+
+  public static StringBuilder appendHexString(long pValue,
+                                              StringBuilder builder,
+                                              int minimumDigits)
+  {
+    String tmp = Long.toHexString(pValue);
     for (int i = tmp.length(); i < minimumDigits; ++i) {
       builder.append('0');
     }

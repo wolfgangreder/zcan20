@@ -15,10 +15,30 @@
  */
 package at.or.reder.zcan20;
 
+import at.or.reder.zcan20.packet.CVInfoAdapter;
+import java.io.IOException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public interface AccessoryControl
+public interface Loco extends AutoCloseable
 {
+
+  public LocoMode getMode();
+
+  public short getLoco();
+
+  @Override
+  public void close() throws IOException;
+
+  public byte readCV(int cv,
+                     int timeout) throws IOException, TimeoutException;
+
+  public Future<CVInfoAdapter> readCV(int cv) throws IOException;
+
+  public void clearCV() throws IOException;
+
 }

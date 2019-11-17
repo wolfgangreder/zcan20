@@ -15,29 +15,27 @@
  */
 package at.or.reder.zcan20.packet;
 
-import at.or.reder.zcan20.Protocol;
-import at.or.reder.zcan20.SpeedSteps;
-import at.or.reder.zcan20.SpeedlimitMode;
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.LocoMode;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+import at.or.reder.zcan20.util.ProxyPacketSelector;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface LocoModePacketAdapter extends PacketAdapter
+public interface LocoModePacketAdapter extends PacketAdapter, LocoMode
 {
 
-  public short getLocoID();
-
-  public SpeedSteps getSpeedsteps();
-
-  public Protocol getProtocol();
-
-  public int getNumFunctions();
-
-  public SpeedlimitMode getSpeedlimitMode();
-
-  public boolean isPulseFx();
-
-  public boolean isAnalogFx();
+  public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.LOCO,
+                                                                                               CommandGroup.LOCO_MODE,
+                                                                                               CommandMode.ACK,
+                                                                                               6),
+                                                                        new PacketSelectorImpl(CommandGroup.LOCO,
+                                                                                               CommandGroup.LOCO_MODE,
+                                                                                               CommandMode.COMMAND,
+                                                                                               6));
 
 }

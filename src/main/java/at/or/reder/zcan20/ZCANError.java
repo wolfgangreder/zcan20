@@ -51,11 +51,11 @@ public class ZCANError extends IOException
                          "ZCANError");
   }
 
-  protected ZCANError(int nid,
-                      CommandGroup commandGroup,
-                      int command,
-                      byte[] value,
-                      String message)
+  public ZCANError(int nid,
+                   CommandGroup commandGroup,
+                   int command,
+                   byte[] value,
+                   String message)
   {
     super(message);
     Objects.requireNonNull(value,
@@ -78,12 +78,15 @@ public class ZCANError extends IOException
 
   public ByteBuffer getValue()
   {
-    synchronized (value) {
-      if (buffer == null) {
-        buffer = ByteBuffer.wrap(value).asReadOnlyBuffer();
+    if (value != null) {
+      synchronized (value) {
+        if (buffer == null) {
+          buffer = ByteBuffer.wrap(value).asReadOnlyBuffer();
+        }
+        return buffer;
       }
-      return buffer;
     }
+    return null;
   }
 
   public int getCommand()

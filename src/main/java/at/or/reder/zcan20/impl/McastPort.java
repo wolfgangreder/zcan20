@@ -22,27 +22,19 @@ import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.Ping;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
-import java.net.SocketException;
+import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -50,7 +42,7 @@ import java.util.logging.Logger;
  * @author Wolfgang Reder
  */
 @SuppressWarnings("ClassWithMultipleLoggers")
-public final class UDPPort implements ZPort
+public final class McastPort implements ZPort
 {
 
   public static final Logger READ_LOGGER = Logger.getLogger("at.or.reder.zcan.zport.read");
@@ -58,80 +50,21 @@ public final class UDPPort implements ZPort
   public static final int SO_TIMEOUT = 5000;
   public static final int SO_TRAFFIC = 0x14; // IPTOS_RELIABILITY (0x04),IPTOS_LOWDELAY (0x10)
   private final String name;
-  private final SocketAddress outAddress;
-  private DatagramSocket socket;
-  private final int localPort;
-  private final InetAddress local2Bound;
+  private final InetSocketAddress outAddress;
+  private MulticastSocket socket;
   private final int mtu;
   private final BufferPool bufferPool;
-  private final Set<Byte> readGroupFilter;
-  private final Set<Byte> writeGroupFilter;
-  private long writeSequence = 0;
-  private long readSequence = 0;
 
-  public UDPPort(String address,
-                 int remotePort,
-                 int localPort) throws IOException
+  public McastPort(String address,
+                   int remotePort) throws IOException
   {
-    this.name = "UDPPeer to MX10@" + address + ":" + remotePort;
+    this.name = "McastPeer to MX10@" + address + ":" + remotePort;
     InetAddress inetAddress = InetAddress.getByName(address);
-    InetAddress l2b = getMatchingAddress(inetAddress);
-    if (l2b == null) {
-      l2b = InetAddress.getLocalHost();
-    }
-    local2Bound = l2b;
-    NetworkInterface intf = NetworkInterface.getByInetAddress(local2Bound);
-    mtu = intf != null ? intf.getMTU() : 1500; //assume ethernet
+    mtu = McastMarshaller.PREFIX_LEN + 8;
     outAddress = new InetSocketAddress(inetAddress,
                                        remotePort);
-    this.localPort = localPort;
     bufferPool = new BufferPool(mtu,
                                 Runtime.getRuntime().availableProcessors());
-    readGroupFilter = createFilter(getLoggerProp("at.or.reder.zcan.zport.read.filter"));
-    writeGroupFilter = createFilter(getLoggerProp("at.or.reder.zcan.zport.write.filter"));
-  }
-
-  private String getLoggerProp(String prop)
-  {
-    String result = LogManager.getLogManager().getProperty(prop);
-    if (result == null) {
-      return System.getProperty(prop);
-    }
-    return result;
-  }
-
-  private Set<Byte> createFilter(String prop)
-  {
-    if (prop == null || prop.isBlank()) {
-      return null;
-    }
-    Set<Byte> result = new HashSet<>();
-    String[] parts = prop.split(",");
-    for (String p : parts) {
-      try {
-        byte tmp = Byte.parseByte(p,
-                                  16);
-        result.add(tmp);
-      } catch (Throwable th) {
-      }
-    }
-    if (result.isEmpty()) {
-      return null;
-    }
-    return Collections.unmodifiableSet(result);
-  }
-
-  private InetAddress getMatchingAddress(InetAddress remoteAddress) throws SocketException
-  {
-    List<InterfaceAddress> addresses = Utils.getAllInterfaceAddresses();
-    for (InterfaceAddress a : addresses) {
-      if (Utils.matchesSubnet(remoteAddress,
-                              a.getAddress(),
-                              a.getNetworkPrefixLength())) {
-        return a.getAddress();
-      }
-    }
-    return null;
   }
 
   private boolean isOpen()
@@ -153,8 +86,8 @@ public final class UDPPort implements ZPort
     synchronized (this) {
       if (!isOpen()) {
         socket = null;
-        socket = new DatagramSocket(localPort,
-                                    local2Bound);
+        socket = new MulticastSocket(outAddress.getPort());
+        socket.joinGroup(outAddress.getAddress());
         socket.setSoTimeout(SO_TIMEOUT);
         socket.setTrafficClass(SO_TRAFFIC);
       }
@@ -170,59 +103,26 @@ public final class UDPPort implements ZPort
     }
   }
 
-  private void logPacket(Logger logger,
-                         Packet packet,
-                         long sequence,
-                         Set<Byte> filter,
-                         String action)
-  {
-    if ((filter == null || filter.contains(packet.getCommandGroup().getMagic())) && (logger.isLoggable(Level.FINER))) {
-      StringBuilder builder = Utils.appendHexString(sequence,
-                                                    new StringBuilder(),
-                                                    8);
-      builder.append(' ');
-      builder.append(action);
-      builder.append(" packet :");
-      builder.append(packet.toString());
-      logger.log(Level.FINER,
-                 builder.toString());
-      if (logger.isLoggable(Level.FINEST)) {
-        PacketAdapter adapter = packet.getAdapter(PacketAdapter.class);
-        if (adapter != null) {
-          builder.setLength(0);
-          Utils.appendHexString(sequence,
-                                builder,
-                                8);
-          builder.append(' ');
-          builder.append(action);
-          builder.append(" adapter:");
-          builder.append(adapter.toString());
-          logger.log(Level.FINEST,
-                     builder.toString());
-        }
-      }
-    }
-  }
-
   @Override
   public void sendPacket(Packet packet) throws IOException
   {
     Objects.requireNonNull(packet,
                            "packet is null");
-    logPacket(WRITE_LOGGER,
-              packet,
-              writeSequence++,
-              writeGroupFilter,
-              "send");
+    WRITE_LOGGER.log(Level.FINEST,
+                     "Sending {0}",
+                     packet.toString());
     try (BufferPool.BufferItem item = bufferPool.getBuffer()) {
       ByteBuffer buffer = item.getBuffer();
-      int numBytes = UDPMarshaller.marshalPacket(packet,
-                                                 buffer);
+      int numBytes = McastMarshaller.marshalPacket(packet,
+                                                   LocalDateTime.now(),
+                                                   3,
+                                                   buffer);
       DatagramSocket s;
       synchronized (this) {
         s = socket;
       }
       s.send(new DatagramPacket(buffer.array(),
+                                0,
                                 numBytes,
                                 outAddress));
     }
@@ -246,6 +146,7 @@ public final class UDPPort implements ZPort
       s = socket;
     }
     s.send(new DatagramPacket(buffer.array(),
+                              0,
                               buffer.remaining(),
                               outAddress));
   }
@@ -272,12 +173,10 @@ public final class UDPPort implements ZPort
       ByteBuffer packetBytes = ByteBuffer.wrap(packet.getData());
       packetBytes.limit(packet.getLength() + packet.getOffset());
       packetBytes.position(packet.getOffset());
-      Packet result = UDPMarshaller.unmarshalPacket(packetBytes);
-      logPacket(READ_LOGGER,
-                result,
-                readSequence++,
-                readGroupFilter,
-                "receive");
+      Packet result = McastMarshaller.unmarshalPacket(packetBytes);
+      READ_LOGGER.log(Level.FINEST,
+                      "Reading {0}",
+                      result.toString());
       return result;
     }
   }

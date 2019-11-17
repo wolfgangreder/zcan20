@@ -15,38 +15,36 @@
  */
 package at.or.reder.zcan20.impl;
 
-import at.or.reder.dcc.CVEvent;
-import at.or.reder.dcc.CVEventListener;
+import at.or.reder.dcc.AccessoryEvent;
+import at.or.reder.dcc.AccessoryEventListener;
 import at.or.reder.dcc.Controller;
-import at.or.reder.dcc.DecoderType;
-import at.or.reder.dcc.Direction;
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.LinkStateListener;
 import at.or.reder.dcc.Locomotive;
-import at.or.reder.dcc.LocomotiveEventListener;
 import at.or.reder.dcc.PowerEvent;
 import at.or.reder.dcc.PowerEventListener;
 import at.or.reder.dcc.PowerMode;
 import at.or.reder.dcc.PowerPort;
-import at.or.reder.dcc.impl.CVEventImpl;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.impl.LocomotiveImpl;
 import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.Loco;
+import at.or.reder.zcan20.LocoControl;
 import at.or.reder.zcan20.MX10PropertiesSet;
 import at.or.reder.zcan20.PacketListener;
 import at.or.reder.zcan20.SystemControl;
-import at.or.reder.zcan20.TrackConfig;
+import at.or.reder.zcan20.ZAccessoryControl;
 import at.or.reder.zcan20.ZCAN;
 import at.or.reder.zcan20.ZimoPowerMode;
-import at.or.reder.zcan20.packet.CVInfoAdapter;
+import at.or.reder.zcan20.packet.AccessoryPacketAdapter;
+import at.or.reder.zcan20.packet.AccessoryPacketRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PowerInfo;
 import at.or.reder.zcan20.packet.PowerStateInfo;
-import at.or.reder.zcan20.packet.TSETrackModePacketAdapter;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +52,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,8 +71,8 @@ final class MX10Control implements Controller
   private ZCANImpl device;
   private final Set<LinkStateListener> linkStateListener = new CopyOnWriteArraySet<>();
   private final LinkStateListener myLinkStateListener = this::onLinkStateChanged;
-  private final Set<CVEventListener> cvEventListener = new CopyOnWriteArraySet<>();
   private final Set<PowerEventListener> powerEventListener = new CopyOnWriteArraySet<>();
+  private final Set<AccessoryEventListener> accessoryEventListener = new CopyOnWriteArraySet<>();
   private final PacketListener packetListener = this::onPacket;
   private final PropertyChangeSupport propSupport = new PropertyChangeSupport(this);
   private final InstanceContent ic = new InstanceContent();
@@ -143,9 +142,15 @@ final class MX10Control implements Controller
                                             MX10PropertiesSet.PROP_OUTPORT);
       int inPort = propertySet.getIntValue(connectionProperties,
                                            MX10PropertiesSet.PROP_INPORT);
-      return new UDPPort(host,
-                         outPort,
-                         inPort);
+      InetAddress address = InetAddress.getByName(host);
+      if (address.isMulticastAddress()) {
+        return new McastPort(host,
+                             outPort);
+      } else {
+        return new UDPPort(host,
+                           outPort,
+                           inPort);
+      }
     } else {
       return new VCOMPort(connectionProperties.get(MX10PropertiesSet.PROP_PORT));
     }
@@ -198,6 +203,9 @@ final class MX10Control implements Controller
       case 0x06:
         dispatchPOM(packet);
         break;
+      case CommandGroup.ACCESSORY_MAGIC:
+        dispatchAccessory(packet);
+        break;
       default:
     }
   }
@@ -211,58 +219,6 @@ final class MX10Control implements Controller
                              linkState);
       }
     }
-  }
-
-  @Override
-  public Locomotive getLocomotive(int address) throws IOException, TimeoutException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void postLocomitiveInfoRequest(int address) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void setSpeed(int locomotive,
-                       int newSpeed) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void setDirection(int locomotive,
-                           Direction direction) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void emergencyStop(int locomotive) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void setFunction(int locomotive,
-                          int function,
-                          boolean state) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void addLocomotiveListener(LocomotiveEventListener listener)
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void removeLocomotiveListener(LocomotiveEventListener listener)
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
@@ -315,76 +271,27 @@ final class MX10Control implements Controller
 
   private boolean dispatchPOM(Packet packet)
   {
-    System.out.println(Utils.packetToString(packet));
-    CVInfoAdapter cvInfo = packet.getAdapter(CVInfoAdapter.class);
-    if (cvInfo != null) {
-      CVEvent event = new CVEventImpl(this,
-                                      packet.getSenderNID(),
-                                      DecoderType.LOCO,
-                                      cvInfo.getDecoderID(),
-                                      cvInfo.getNumber(),
-                                      cvInfo.getValue(),
-                                      Collections.singleton(cvInfo));
-      for (CVEventListener l : cvEventListener) {
-        l.onCVEvent(event);
-      }
-      return true;
-    }
-    TSETrackModePacketAdapter mode = packet.getAdapter(TSETrackModePacketAdapter.class);
-    if (mode != null) {
-      System.out.println(mode);
-    }
-
+//    System.out.println(Utils.packetToString(packet));
+//    CVInfoAdapter cvInfo = packet.getAdapter(CVInfoAdapter.class);
+//    if (cvInfo != null) {
+//      CVEvent event = new CVEventImpl(this,
+//                                      packet.getSenderNID(),
+//                                      DecoderType.LOCO,
+//                                      cvInfo.getDecoderID(),
+//                                      cvInfo.getNumber(),
+//                                      cvInfo.getValue(),
+//                                      Collections.singleton(cvInfo));
+//      for (CVEventListener l : cvEventListener) {
+//        l.onCVEvent(event);
+//      }
+//      return true;
+//    }
+//    TSETrackModePacketAdapter mode = packet.getAdapter(TSETrackModePacketAdapter.class);
+//    if (mode != null) {
+//      System.out.println(mode);
+//    }
+//
     return false;
-  }
-
-  @Override
-  public int getCV(DecoderType decoderType,
-                   int address,
-                   int cvIndex) throws IOException, TimeoutException
-  {
-    TrackConfig cfg = device.getLookup().lookup(TrackConfig.class);
-    CVInfoAdapter result = cfg.readCV((short) address,
-                                      cvIndex,
-                                      ioTimeout * 1000);
-    if (result != null) {
-      return result.getValue();
-    } else {
-      return -1;
-    }
-  }
-
-  @Override
-  public void postCVRequest(DecoderType decoderType,
-                            int address,
-                            int cvIndex) throws IOException
-  {
-    TrackConfig cfg = device.getLookup().lookup(TrackConfig.class);
-    cfg.readCV((short) address,
-               cvIndex);
-  }
-
-  @Override
-  public void setCV(DecoderType decoderType,
-                    int address,
-                    int cvIndex,
-                    int value) throws IOException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public void addCVEventListener(CVEventListener listener)
-  {
-    if (listener != null) {
-      cvEventListener.add(listener);
-    }
-  }
-
-  @Override
-  public void removeCVEventListener(CVEventListener listener)
-  {
-    cvEventListener.remove(listener);
   }
 
   @Override
@@ -471,6 +378,89 @@ final class MX10Control implements Controller
       }
     }
     return !events.isEmpty();
+  }
+
+  @Override
+  public Locomotive getLocomotive(short locoAddress) throws IOException, TimeoutException
+  {
+    LocoControl ctrl = getDevice().getLookup().lookup(LocoControl.class);
+    Loco loco = ctrl.takeOwnership(locoAddress);
+    if (loco != null) {
+      return new LocomotiveImpl(loco,
+                                this);
+    }
+    return null;
+  }
+
+  @Override
+  public Future<Byte> getAccessoryState(short decoder,
+                                        byte port) throws IOException
+  {
+    ZCANImpl zcan = getDevice();
+    ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
+    return zac.getAccessoryState(decoder,
+                                 port);
+  }
+
+  @Override
+  public void setAccessoryState(short decoder,
+                                byte port,
+                                byte state) throws IOException
+  {
+    ZCANImpl zcan = getDevice();
+    ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
+    zac.setAccessoryState(decoder,
+                          port,
+                          state);
+  }
+
+  @Override
+  public Future<Byte> setAccessoryStateChecked(short decoder,
+                                               byte port,
+                                               byte state) throws IOException
+  {
+    ZCANImpl zcan = getDevice();
+    ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
+    return zac.setAccessoryStateChecked(decoder,
+                                        port,
+                                        state);
+  }
+
+  private void dispatchAccessory(Packet packet)
+  {
+    if (!accessoryEventListener.isEmpty()) {
+      AccessoryEvent evt = null;
+      AccessoryPacketAdapter apa = packet.getAdapter(AccessoryPacketAdapter.class);
+      if (apa != null) {
+        evt = new MX10AccessoryEvent(this,
+                                     apa);
+      } else {
+        AccessoryPacketRequestAdapter apr = packet.getAdapter(AccessoryPacketRequestAdapter.class);
+        if (apr != null) {
+          evt = new MX10AccessoryEvent(this,
+                                       apr);
+        }
+      }
+      if (evt != null) {
+        for (AccessoryEventListener l : accessoryEventListener) {
+          l.onAccessoryEvent(evt);
+        }
+      }
+    }
+  }
+
+  @Override
+  public void addAccessoryEventListener(AccessoryEventListener l)
+  {
+    if (l != null) {
+      accessoryEventListener.add(l);
+    }
+  }
+
+  @Override
+  public void removeAccessoryEventListener(AccessoryEventListener l)
+  {
+    accessoryEventListener.remove(l);
   }
 
 }

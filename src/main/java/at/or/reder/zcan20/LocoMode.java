@@ -22,15 +22,13 @@ package at.or.reder.zcan20;
 public interface LocoMode
 {
 
-  public boolean isUsed();
-
-  public int getLocoAddress();
+  public short getLocoAddress();
 
   public SpeedSteps getSpeedSteps();
 
   public Protocol getProtocol();
 
-  public int getFunctionCount();
+  public byte getFunctionCount();
 
   public boolean isPulsFx();
 

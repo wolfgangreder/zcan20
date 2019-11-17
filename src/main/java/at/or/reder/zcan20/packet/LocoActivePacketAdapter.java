@@ -15,6 +15,12 @@
  */
 package at.or.reder.zcan20.packet;
 
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.LocoActive;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+
 /**
  *
  * @author Wolfgang Reder
@@ -22,8 +28,13 @@ package at.or.reder.zcan20.packet;
 public interface LocoActivePacketAdapter extends PacketAdapter
 {
 
+  public PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.LOCO,
+                                                          CommandGroup.LOCO_ACTIVE,
+                                                          CommandMode.COMMAND,
+                                                          4);
+
   public short getLocoID();
 
-  public short getMode();
+  public LocoActive getState();
 
 }

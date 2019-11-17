@@ -15,14 +15,19 @@
  */
 package at.or.reder.dcc;
 
+import java.io.IOException;
 import java.util.BitSet;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface Locomotive
+public interface Locomotive extends AutoCloseable
 {
+
+  @Override
+  public void close() throws IOException;
 
   public int getAddress();
 
@@ -31,5 +36,10 @@ public interface Locomotive
   public Direction getDirection();
 
   public BitSet getFunctions();
+
+  public byte readCV(int cvIndex,
+                     int timeout) throws IOException, TimeoutException;
+
+  public void clearCV() throws IOException;
 
 }

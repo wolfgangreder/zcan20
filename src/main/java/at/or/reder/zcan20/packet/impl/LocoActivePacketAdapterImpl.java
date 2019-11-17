@@ -15,8 +15,13 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.zcan20.LocoActive;
+import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.LocoActivePacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
+import at.or.reder.zcan20.packet.PacketAdapter;
+import at.or.reder.zcan20.packet.PacketAdapterFactory;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -25,26 +30,31 @@ import at.or.reder.zcan20.packet.Packet;
 final class LocoActivePacketAdapterImpl extends AbstractPacketAdapter implements LocoActivePacketAdapter
 {
 
-//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-//  public static final class Factory implements PacketAdapterFactory
-//  {
-//
-//    @Override
-//    public boolean isValid(CommandGroup group,
-//                           int command,
-//                           CommandMode mode,
-//                           int dlc)
-//    {
-//      return group == CommandGroup.LOCO && command == CommandGroup.LOCO_ACTIVE && mode == CommandMode.EVENT;
-//    }
-//
-//    @Override
-//    public LocoActivePacketAdapter createAdapter(Packet packet)
-//    {
-//      return new LocoActivePacketAdapterImpl(packet);
-//    }
-//
-//  }
+  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+  public static final class Factory implements PacketAdapterFactory
+
+  {
+
+    @Override
+    public boolean isValid(PacketSelector selector)
+    {
+      return SELECTOR.test(selector);
+    }
+
+    @Override
+    public PacketAdapter convert(Packet obj)
+    {
+      return new LocoActivePacketAdapterImpl(obj);
+    }
+
+    @Override
+    public Class<? extends PacketAdapter> type(Packet obj)
+    {
+      return LocoActivePacketAdapter.class;
+    }
+
+  }
+
   LocoActivePacketAdapterImpl(Packet packet)
   {
     super(packet);
@@ -57,9 +67,9 @@ final class LocoActivePacketAdapterImpl extends AbstractPacketAdapter implements
   }
 
   @Override
-  public short getMode()
+  public LocoActive getState()
   {
-    return buffer.getShort(2);
+    return LocoActive.valueOfMagic(buffer.getShort(2));
   }
 
   @Override
@@ -68,7 +78,7 @@ final class LocoActivePacketAdapterImpl extends AbstractPacketAdapter implements
     StringBuilder builder = new StringBuilder("LOCO_ACTIVE(");
     builder.append(getLocoID());
     builder.append(", ");
-    builder.append(getMode());
+    builder.append(getState());
     return builder.append(')').toString();
   }
 
