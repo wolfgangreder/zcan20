@@ -15,6 +15,7 @@
  */
 package at.or.reder.zcan20.impl;
 
+import at.or.reder.dcc.NotConnectedException;
 import at.or.reder.dcc.util.BufferPool;
 import at.or.reder.dcc.util.CanIdMatcher;
 import at.or.reder.dcc.util.Utils;
@@ -222,9 +223,13 @@ public final class UDPPort implements ZPort
       synchronized (this) {
         s = socket;
       }
-      s.send(new DatagramPacket(buffer.array(),
-                                numBytes,
-                                outAddress));
+      if (s != null) {
+        s.send(new DatagramPacket(buffer.array(),
+                                  numBytes,
+                                  outAddress));
+      } else {
+        throw new NotConnectedException();
+      }
     }
   }
 
@@ -245,9 +250,13 @@ public final class UDPPort implements ZPort
     synchronized (this) {
       s = socket;
     }
-    s.send(new DatagramPacket(buffer.array(),
-                              buffer.remaining(),
-                              outAddress));
+    if (s != null) {
+      s.send(new DatagramPacket(buffer.array(),
+                                buffer.remaining(),
+                                outAddress));
+    } else {
+      throw new NotConnectedException();
+    }
   }
 
   @Override

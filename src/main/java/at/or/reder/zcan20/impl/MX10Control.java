@@ -21,6 +21,7 @@ import at.or.reder.dcc.Controller;
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.LinkStateListener;
 import at.or.reder.dcc.Locomotive;
+import at.or.reder.dcc.NotConnectedException;
 import at.or.reder.dcc.PowerEvent;
 import at.or.reder.dcc.PowerEventListener;
 import at.or.reder.dcc.PowerMode;
@@ -109,7 +110,7 @@ final class MX10Control implements Controller
     }
     if (!propsValid) {
       throw new IllegalArgumentException("Either " + MX10PropertiesSet.PROP_HOST + " or " + MX10PropertiesSet.PROP_PORT
-                                                 + " must be set");
+                                         + " must be set");
     }
   }
 
@@ -180,11 +181,14 @@ final class MX10Control implements Controller
   {
     synchronized (lock) {
       if (device != null) {
-        device.close();
-        device.removePacketListener(packetListener);
-        device.removeLinkStateListener(myLinkStateListener);
-        ic.remove(device);
-        device = null;
+        try {
+          device.close();
+        } finally {
+          device.removePacketListener(packetListener);
+          device.removeLinkStateListener(myLinkStateListener);
+          ic.remove(device);
+          device = null;
+        }
       }
     }
   }
@@ -396,10 +400,14 @@ final class MX10Control implements Controller
   public Future<Byte> getAccessoryState(short decoder,
                                         byte port) throws IOException
   {
-    ZCANImpl zcan = getDevice();
-    ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
-    return zac.getAccessoryState(decoder,
-                                 port);
+    if (getLinkState() != LinkState.CONNECTED) {
+      ZCANImpl zcan = getDevice();
+      ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
+      return zac.getAccessoryState(decoder,
+                                   port);
+    } else {
+      throw new NotConnectedException();
+    }
   }
 
   @Override
@@ -407,11 +415,15 @@ final class MX10Control implements Controller
                                 byte port,
                                 byte state) throws IOException
   {
-    ZCANImpl zcan = getDevice();
-    ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
-    zac.setAccessoryState(decoder,
-                          port,
-                          state);
+    if (getLinkState() != LinkState.CONNECTED) {
+      ZCANImpl zcan = getDevice();
+      ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
+      zac.setAccessoryState(decoder,
+                            port,
+                            state);
+    } else {
+      throw new NotConnectedException();
+    }
   }
 
   @Override
@@ -419,11 +431,15 @@ final class MX10Control implements Controller
                                                byte port,
                                                byte state) throws IOException
   {
-    ZCANImpl zcan = getDevice();
-    ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
-    return zac.setAccessoryStateChecked(decoder,
-                                        port,
-                                        state);
+    if (getLinkState() != LinkState.CONNECTED) {
+      ZCANImpl zcan = getDevice();
+      ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
+      return zac.setAccessoryStateChecked(decoder,
+                                          port,
+                                          state);
+    } else {
+      throw new NotConnectedException();
+    }
   }
 
   private void dispatchAccessory(Packet packet)

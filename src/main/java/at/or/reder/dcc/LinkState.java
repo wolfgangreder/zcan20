@@ -21,7 +21,7 @@ package at.or.reder.dcc;
  */
 public enum LinkState
 {
-  OPEN,
+  CONNECTED,
   BROKEN,
   CLOSED
 }

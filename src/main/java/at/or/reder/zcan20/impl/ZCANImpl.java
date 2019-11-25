@@ -17,6 +17,7 @@ package at.or.reder.zcan20.impl;
 
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.LinkStateListener;
+import at.or.reder.dcc.NotConnectedException;
 import at.or.reder.dcc.util.CanIdMatcher;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
@@ -261,7 +262,7 @@ public final class ZCANImpl implements ZCAN
   {
     Thread result = new Thread(r,
                                port.getName() + "-listener-"
-                                       + listenerThreadCounter.incrementAndGet());
+                               + listenerThreadCounter.incrementAndGet());
     result.setDaemon(true);
     return result;
   }
@@ -271,7 +272,7 @@ public final class ZCANImpl implements ZCAN
                                                 Class<? extends T> resultData) throws IOException
   {
     if (!isOpen()) {
-      throw new IOException("Port is not open");
+      throw new NotConnectedException();
     }
     CompletableFuture<T> future = null;
     if (matcher != null && resultData != null) {
@@ -299,7 +300,7 @@ public final class ZCANImpl implements ZCAN
                                                    Class<? extends T> resultData) throws IOException
   {
     if (!isOpen()) {
-      throw new IOException("Port is not open");
+      throw new NotConnectedException();
     }
     CompletableFuture<T> future = null;
     if (matcher != null && resultData != null) {
@@ -370,7 +371,7 @@ public final class ZCANImpl implements ZCAN
                      "Connected to 0x{0} Session 0x{1}",
                      new Object[]{Integer.toHexString(masterNID.get() & 0xffff),
                                   Integer.toHexString(session.get() & 0xffff)});
-          setLinkState(LinkState.OPEN);
+          setLinkState(LinkState.CONNECTED);
           disconnectTimer.schedule(linkTimeout);
           networkControl.setAutopingEnabled(true);
         } catch (InterruptedException ex) {
@@ -487,6 +488,7 @@ public final class ZCANImpl implements ZCAN
           builder.command(CommandGroup.NETWORK_PORT_CLOSE);
           builder.senderNID(getNID());
           port.sendPacket(builder.build());
+        } finally {
           terminateResult = null;
           setLinkState(LinkState.CLOSED);
           disconnectTimer.cancel();
