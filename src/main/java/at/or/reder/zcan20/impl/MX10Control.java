@@ -110,7 +110,7 @@ final class MX10Control implements Controller
     }
     if (!propsValid) {
       throw new IllegalArgumentException("Either " + MX10PropertiesSet.PROP_HOST + " or " + MX10PropertiesSet.PROP_PORT
-                                         + " must be set");
+                                                 + " must be set");
     }
   }
 
@@ -400,7 +400,7 @@ final class MX10Control implements Controller
   public Future<Byte> getAccessoryState(short decoder,
                                         byte port) throws IOException
   {
-    if (getLinkState() != LinkState.CONNECTED) {
+    if (getLinkState() == LinkState.CONNECTED) {
       ZCANImpl zcan = getDevice();
       ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
       return zac.getAccessoryState(decoder,
@@ -415,7 +415,7 @@ final class MX10Control implements Controller
                                 byte port,
                                 byte state) throws IOException
   {
-    if (getLinkState() != LinkState.CONNECTED) {
+    if (getLinkState() == LinkState.CONNECTED) {
       ZCANImpl zcan = getDevice();
       ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
       zac.setAccessoryState(decoder,
@@ -431,7 +431,7 @@ final class MX10Control implements Controller
                                                byte port,
                                                byte state) throws IOException
   {
-    if (getLinkState() != LinkState.CONNECTED) {
+    if (getLinkState() == LinkState.CONNECTED) {
       ZCANImpl zcan = getDevice();
       ZAccessoryControl zac = zcan.getLookup().lookup(ZAccessoryControl.class);
       return zac.setAccessoryStateChecked(decoder,
