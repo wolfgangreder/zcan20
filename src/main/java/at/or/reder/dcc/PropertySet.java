@@ -15,8 +15,9 @@
  */
 package at.or.reder.dcc;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -25,7 +26,7 @@ import java.util.Map;
 public interface PropertySet
 {
 
-  public List<String> getPropertyNames();
+  public Set<String> getPropertyNames();
 
   public String getReadableName(String propertyName) throws IllegalArgumentException;
 
@@ -42,5 +43,14 @@ public interface PropertySet
    * @return das (veränderbare) Map
    */
   public Map<String, String> getDefaultProperties();
+
+  public boolean isKeyValueValid(Map<String, String> map,
+                                 String propertyName);
+
+  public String getStringValue(@NotNull Map<String, String> map,
+                               @NotNull String propName);
+
+  public int getIntValue(@NotNull Map<String, String> map,
+                         @NotNull String propName);
 
 }

@@ -15,17 +15,13 @@
  */
 package at.or.reder.zcan20;
 
+import at.or.reder.dcc.AbstractPropertySet;
 import at.or.reder.dcc.PropertySet;
-import at.or.reder.dcc.util.Utils;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import javax.validation.constraints.NotNull;
 import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
@@ -58,7 +54,7 @@ import org.openide.util.NbBundle.Messages;
            "MX10PropertySet_at.or.reder.zcan20.mx10.reconnecttimeout_name=Neuverbindungszeit",
            "MX10PropertySet_at.or.reder.zcan20.mx10.reconnecttimeout_desc=Nach welcher Zeitspanne soll nach einem Verbindungsabriss ein erneuter Verbindungsaufbau versucht werden.",
            "MX10PropertySet_at.or.reder.zcan20.mx10.reconnecttimeout_default=5"})
-public final class MX10PropertiesSet implements PropertySet
+public final class MX10PropertiesSet extends AbstractPropertySet implements PropertySet
 {
 
   public static final String PROP_PORT = "at.or.reder.zcan20.mx10.port";
@@ -83,9 +79,9 @@ public final class MX10PropertiesSet implements PropertySet
   }
 
   @Override
-  public List<String> getPropertyNames()
+  public Set<String> getPropertyNames()
   {
-    return new ArrayList<>(propertyNames);
+    return propertyNames;
   }
 
   @Override
@@ -116,39 +112,6 @@ public final class MX10PropertiesSet implements PropertySet
     }
     return NbBundle.getMessage(MX10PropertiesSet.class,
                                "MX10PropertySet_" + propertyName + "_default");
-  }
-
-  @SuppressWarnings("UseSpecificCatch")
-  private int testInteger(String value)
-  {
-    try {
-      return Integer.parseInt(value);
-    } catch (Throwable th) {
-    }
-    return -1;
-  }
-
-  private boolean testPortNum(String value)
-  {
-    int i = testInteger(value);
-    return i > 0 && i < 0x10000;
-  }
-
-  private boolean testSerialPort(String value)
-  {
-    switch (Utils.getOSType()) {
-      case LINUX: {
-        Pattern pattern = Pattern.compile("\\A/dev/(tty|ACM)/\\d+\\z",
-                                          Pattern.CASE_INSENSITIVE);
-        return pattern.matcher(value).matches();
-      }
-      case WINDOWS: {
-        Pattern pattern = Pattern.compile("\\ACOM\\d+:?\\z");
-        return pattern.matcher(value).matches();
-      }
-      default:
-        return false;
-    }
   }
 
   @Override
@@ -182,45 +145,15 @@ public final class MX10PropertiesSet implements PropertySet
     }
   }
 
-  public boolean isKeyValueValid(Map<String, String> map,
-                                 String propertyName)
-  {
-    return isValueValid(propertyName,
-                        getStringValue(map,
-                                       propertyName));
-  }
-
   @Override
-  public Map<String, String> getDefaultProperties()
-  {
-    Map<String, String> result = new HashMap<>();
-    for (String p : propertyNames) {
-      result.put(p,
-                 getDefaultValue(p));
-    }
-    return result;
-  }
-
-  public String getStringValue(@NotNull Map<String, String> map,
-                               @NotNull String propName)
-  {
-    String v = map.get(propName);
-    if (v != null) {
-      return v;
-    } else {
-      return getDefaultValue(propName);
-    }
-  }
-
   public int getIntValue(@NotNull Map<String, String> map,
                          @NotNull String propName)
   {
     if (PROP_HOST.equals(propName) || PROP_PORT.equals(propName)) {
       throw new IllegalArgumentException("Property " + propName + " is a non integer property");
     }
-    String strProp = getStringValue(map,
-                                    propName);
-    return testInteger(strProp);
+    return super.getIntValue(map,
+                             propName);
   }
 
 }
