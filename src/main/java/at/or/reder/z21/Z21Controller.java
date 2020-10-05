@@ -86,6 +86,7 @@ final class Z21Controller implements Controller
   public LinkState getLinkState()
   {
     synchronized (getLock()) {
+      return LinkState.CLOSED;
     }
   }
 
@@ -197,12 +198,14 @@ final class Z21Controller implements Controller
   @Override
   public Locomotive getLocomotive(short locoAddress) throws IOException, TimeoutException
   {
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Future<Byte> getAccessoryState(short decoder,
                                         byte port) throws IOException
   {
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -210,6 +213,7 @@ final class Z21Controller implements Controller
                                 byte port,
                                 byte state) throws IOException
   {
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -217,6 +221,7 @@ final class Z21Controller implements Controller
                                                byte port,
                                                byte state) throws IOException
   {
+    throw new UnsupportedOperationException();
   }
 
   @Override
