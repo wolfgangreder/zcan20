@@ -20,6 +20,8 @@ import at.or.reder.dcc.Controller;
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.LinkStateListener;
 import at.or.reder.dcc.Locomotive;
+import at.or.reder.dcc.LocomotiveFuncEventListener;
+import at.or.reder.dcc.LocomotiveSpeedEventListener;
 import at.or.reder.dcc.PowerEventListener;
 import at.or.reder.dcc.PowerMode;
 import at.or.reder.dcc.PowerPort;
@@ -196,12 +198,6 @@ final class Z21Controller implements Controller
   }
 
   @Override
-  public Locomotive getLocomotive(short locoAddress) throws IOException, TimeoutException
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public Future<Byte> getAccessoryState(short decoder,
                                         byte port) throws IOException
   {
@@ -236,6 +232,40 @@ final class Z21Controller implements Controller
   public void removeAccessoryEventListener(AccessoryEventListener l)
   {
     accessoryEventListener.remove(l);
+  }
+
+  @Override
+  public Locomotive getLocomotive(int locoAddress) throws IOException, TimeoutException
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void addLocomotiveSpeedEventListener(int loco,
+                                              LocomotiveSpeedEventListener listener)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void removeLocomotiveSpeedEventListener(int loco,
+                                                 LocomotiveSpeedEventListener listener)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void addLocomotiveFuncEventListener(int loco,
+                                             LocomotiveFuncEventListener listener)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void removeLocomotiveFuncEventListener(int loco,
+                                                LocomotiveFuncEventListener listener)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
 }
