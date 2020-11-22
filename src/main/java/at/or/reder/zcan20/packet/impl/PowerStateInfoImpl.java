@@ -20,7 +20,6 @@ import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.ZimoPowerMode;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PowerStateInfo;
 import org.openide.util.lookup.ServiceProvider;
@@ -33,7 +32,7 @@ final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerSta
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<PowerStateInfo>
   {
 
     @Override
@@ -49,7 +48,7 @@ final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerSta
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends PowerStateInfo> type(Packet obj)
     {
       return PowerStateInfo.class;
     }

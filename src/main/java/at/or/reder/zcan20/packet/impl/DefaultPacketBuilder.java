@@ -486,6 +486,30 @@ public final class DefaultPacketBuilder implements PacketBuilder
 
   @Override
   public Packet buildLocoFunctionPacket(short locoID,
+                                        short fxNumber)
+  {
+    int li = Short.toUnsignedInt(locoID);
+    if (li > ZCANFactory.LOCO_MAX) {
+      throw new IllegalArgumentException("locoID out of range");
+    }
+    li = Short.toUnsignedInt(fxNumber);
+    if (li > 255) {
+      throw new IllegalArgumentException("fxNumber out ofRange");
+    }
+    commandGroup(CommandGroup.LOCO);
+    commandMode(CommandMode.REQUEST);
+    command(CommandGroup.LOCO_FUNC_SWITCH);
+    adapterFactory(null);
+    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    buffer.putShort(locoID);
+    buffer.putShort(fxNumber);
+    buffer.clear();
+    data(buffer);
+    return build();
+  }
+
+  @Override
+  public Packet buildLocoFunctionPacket(short locoID,
                                         short fxNumber,
                                         short fxValue)
   {

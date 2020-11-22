@@ -20,7 +20,6 @@ import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.Ping;
 import javax.validation.constraints.NotNull;
@@ -34,7 +33,7 @@ final class PingImpl extends AbstractPacketAdapter implements Ping
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<Ping>
   {
 
     @Override
@@ -50,7 +49,7 @@ final class PingImpl extends AbstractPacketAdapter implements Ping
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends Ping> type(Packet obj)
     {
       return Ping.class;
     }

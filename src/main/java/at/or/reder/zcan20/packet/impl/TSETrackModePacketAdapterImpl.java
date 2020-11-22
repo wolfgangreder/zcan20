@@ -19,7 +19,6 @@ import at.or.reder.dcc.PowerPort;
 import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.TSETrackModePacketAdapter;
 import org.openide.util.lookup.ServiceProvider;
@@ -32,7 +31,7 @@ public final class TSETrackModePacketAdapterImpl extends AbstractPacketAdapter i
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<TSETrackModePacketAdapter>
   {
 
     @Override
@@ -42,13 +41,13 @@ public final class TSETrackModePacketAdapterImpl extends AbstractPacketAdapter i
     }
 
     @Override
-    public PacketAdapter convert(Packet obj)
+    public TSETrackModePacketAdapter convert(Packet obj)
     {
       return new TSETrackModePacketAdapterImpl(obj);
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends TSETrackModePacketAdapter> type(Packet obj)
     {
       return TSETrackModePacketAdapter.class;
     }

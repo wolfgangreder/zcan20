@@ -19,7 +19,6 @@ import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.AccessoryPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -31,7 +30,7 @@ final class AccessoryPacketAdapterImpl extends AbstractPacketAdapter implements 
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<AccessoryPacketAdapter>
   {
 
     @Override
@@ -41,13 +40,13 @@ final class AccessoryPacketAdapterImpl extends AbstractPacketAdapter implements 
     }
 
     @Override
-    public PacketAdapter convert(Packet obj)
+    public AccessoryPacketAdapter convert(Packet obj)
     {
       return new AccessoryPacketAdapterImpl(obj);
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends AccessoryPacketAdapter> type(Packet obj)
     {
       return AccessoryPacketAdapter.class;
     }

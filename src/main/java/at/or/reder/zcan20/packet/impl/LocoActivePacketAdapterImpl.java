@@ -19,7 +19,6 @@ import at.or.reder.zcan20.LocoActive;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.LocoActivePacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -31,7 +30,7 @@ final class LocoActivePacketAdapterImpl extends AbstractPacketAdapter implements
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<LocoActivePacketAdapter>
 
   {
 
@@ -42,13 +41,13 @@ final class LocoActivePacketAdapterImpl extends AbstractPacketAdapter implements
     }
 
     @Override
-    public PacketAdapter convert(Packet obj)
+    public LocoActivePacketAdapter convert(Packet obj)
     {
       return new LocoActivePacketAdapterImpl(obj);
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends LocoActivePacketAdapter> type(Packet obj)
     {
       return LocoActivePacketAdapter.class;
     }

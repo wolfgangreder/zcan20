@@ -15,8 +15,10 @@
  */
 package at.or.reder.zcan20;
 
+import at.or.reder.dcc.Direction;
 import at.or.reder.zcan20.packet.CVInfoAdapter;
 import java.io.IOException;
+import java.util.SortedMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
@@ -29,6 +31,12 @@ public interface Loco extends AutoCloseable
 
   public LocoMode getMode();
 
+  public boolean isOwner();
+
+  public void setOwner(boolean owner) throws IOException;
+
+  public void forcedTakeOwnership() throws IOException;
+
   public short getLoco();
 
   @Override
@@ -40,5 +48,21 @@ public interface Loco extends AutoCloseable
   public Future<CVInfoAdapter> readCV(int cv) throws IOException;
 
   public void clearCV() throws IOException;
+
+  public void control(Direction dir,
+                      int speed) throws IOException;
+
+  public Integer getSpeed();
+
+  public Direction getDirection();
+
+  public SortedMap<Integer, Integer> getAllFunctions();
+
+  public Integer getFunction(int iFunction);
+
+  public void setFunction(int iFunction,
+                          int iFuncValue) throws IOException;
+
+  public void scanFunctions() throws IOException;
 
 }

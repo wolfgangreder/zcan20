@@ -24,6 +24,7 @@ import java.io.IOException;
 public interface LocoControl
 {
 
-  Loco takeOwnership(short loco) throws IOException;
+  Loco getLoco(short loco,
+               boolean takeOwnership) throws IOException;
 
 }

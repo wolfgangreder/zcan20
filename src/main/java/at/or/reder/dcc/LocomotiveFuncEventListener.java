@@ -15,21 +15,16 @@
  */
 package at.or.reder.dcc;
 
-import java.io.IOException;
-import org.openide.util.Lookup;
+import java.util.EventListener;
 
 /**
- * Basisobjekt zur Bibliothek.
  *
  * @author Wolfgang Reder
  */
-public interface Controller extends LocoControl, AccessoryControl, PowerControl, BaseControl, AutoCloseable,
-                                    Lookup.Provider
+@FunctionalInterface
+public interface LocomotiveFuncEventListener extends EventListener
 {
 
-  public void open() throws IOException;
-
-  @Override
-  public void close() throws IOException;
+  public void onLocomotiveEvent(LocomotiveFuncEvent event);
 
 }

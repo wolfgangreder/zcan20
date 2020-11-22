@@ -32,10 +32,10 @@ public interface LocoModePacketAdapter extends PacketAdapter, LocoMode
   public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.LOCO,
                                                                                                CommandGroup.LOCO_MODE,
                                                                                                CommandMode.ACK,
-                                                                                               6),
+                                                                                               5),
                                                                         new PacketSelectorImpl(CommandGroup.LOCO,
                                                                                                CommandGroup.LOCO_MODE,
                                                                                                CommandMode.COMMAND,
-                                                                                               6));
+                                                                                               5));
 
 }

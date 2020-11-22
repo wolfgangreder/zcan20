@@ -15,21 +15,15 @@
  */
 package at.or.reder.dcc;
 
-import java.io.IOException;
-import org.openide.util.Lookup;
-
 /**
- * Basisobjekt zur Bibliothek.
  *
  * @author Wolfgang Reder
  */
-public interface Controller extends LocoControl, AccessoryControl, PowerControl, BaseControl, AutoCloseable,
-                                    Lookup.Provider
+public interface LocomotiveFuncEvent extends LocomotiveEvent
 {
 
-  public void open() throws IOException;
+  public short getFuncNr();
 
-  @Override
-  public void close() throws IOException;
+  public short getFuncValue();
 
 }

@@ -17,7 +17,6 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PortOpenPacketAdapter;
 import org.openide.util.lookup.ServiceProvider;
@@ -30,7 +29,7 @@ final class PortOpenPacketAdapterImpl extends AbstractPacketAdapter implements P
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<PortOpenPacketAdapter>
   {
 
     @Override
@@ -40,7 +39,7 @@ final class PortOpenPacketAdapterImpl extends AbstractPacketAdapter implements P
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends PortOpenPacketAdapter> type(Packet obj)
     {
       return PortOpenPacketAdapter.class;
     }

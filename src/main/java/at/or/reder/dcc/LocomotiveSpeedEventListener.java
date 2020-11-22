@@ -15,14 +15,16 @@
  */
 package at.or.reder.dcc;
 
+import java.util.EventListener;
+
 /**
  *
  * @author Wolfgang Reder
  */
 @FunctionalInterface
-public interface LocomotiveEventListener
+public interface LocomotiveSpeedEventListener extends EventListener
 {
 
-  public void onLocomotiveEvent(LocomotiveEvent event);
+  public void onLocomotiveEvent(LocomotiveSpeedEvent event);
 
 }

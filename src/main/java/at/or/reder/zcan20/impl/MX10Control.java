@@ -21,6 +21,10 @@ import at.or.reder.dcc.Controller;
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.LinkStateListener;
 import at.or.reder.dcc.Locomotive;
+import at.or.reder.dcc.LocomotiveFuncEvent;
+import at.or.reder.dcc.LocomotiveFuncEventListener;
+import at.or.reder.dcc.LocomotiveSpeedEvent;
+import at.or.reder.dcc.LocomotiveSpeedEventListener;
 import at.or.reder.dcc.NotConnectedException;
 import at.or.reder.dcc.PowerEvent;
 import at.or.reder.dcc.PowerEventListener;
@@ -38,9 +42,12 @@ import at.or.reder.zcan20.ZCAN;
 import at.or.reder.zcan20.ZimoPowerMode;
 import at.or.reder.zcan20.packet.AccessoryPacketAdapter;
 import at.or.reder.zcan20.packet.AccessoryPacketRequestAdapter;
+import at.or.reder.zcan20.packet.LocoFuncPacketAdapter;
+import at.or.reder.zcan20.packet.LocoSpeedPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PowerInfo;
 import at.or.reder.zcan20.packet.PowerStateInfo;
+import at.or.reder.zcan20.util.IndexedListenerSupport;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -74,6 +81,10 @@ final class MX10Control implements Controller
   private final LinkStateListener myLinkStateListener = this::onLinkStateChanged;
   private final Set<PowerEventListener> powerEventListener = new CopyOnWriteArraySet<>();
   private final Set<AccessoryEventListener> accessoryEventListener = new CopyOnWriteArraySet<>();
+  private final IndexedListenerSupport<Integer, LocomotiveSpeedEventListener> locoSpeedEventListener
+                                                                                      = new IndexedListenerSupport<>(0);
+  private final IndexedListenerSupport<Integer, LocomotiveFuncEventListener> locoFuncEventListener
+                                                                                     = new IndexedListenerSupport<>(0);
   private final PacketListener packetListener = this::onPacket;
   private final PropertyChangeSupport propSupport = new PropertyChangeSupport(this);
   private final InstanceContent ic = new InstanceContent();
@@ -112,6 +123,12 @@ final class MX10Control implements Controller
       throw new IllegalArgumentException("Either " + MX10PropertiesSet.PROP_HOST + " or " + MX10PropertiesSet.PROP_PORT
                                                  + " must be set");
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return "MX10Control{" + "device=" + device + '}';
   }
 
   Object getLock()
@@ -209,6 +226,9 @@ final class MX10Control implements Controller
         break;
       case CommandGroup.ACCESSORY_MAGIC:
         dispatchAccessory(packet);
+        break;
+      case CommandGroup.LOCO_SPEED:
+        dispatchLoco(packet);
         break;
       default:
     }
@@ -385,15 +405,14 @@ final class MX10Control implements Controller
   }
 
   @Override
-  public Locomotive getLocomotive(short locoAddress) throws IOException, TimeoutException
+  public Locomotive getLocomotive(int locoAddress) throws IOException, TimeoutException
   {
     LocoControl ctrl = getDevice().getLookup().lookup(LocoControl.class);
-    Loco loco = ctrl.takeOwnership(locoAddress);
-    if (loco != null) {
-      return new LocomotiveImpl(loco,
-                                this);
-    }
-    return null;
+    Loco loco = ctrl.getLoco((short) locoAddress,
+                             false);
+    Locomotive result = new LocomotiveImpl(loco,
+                                           this);
+    return result;
   }
 
   @Override
@@ -477,6 +496,84 @@ final class MX10Control implements Controller
   public void removeAccessoryEventListener(AccessoryEventListener l)
   {
     accessoryEventListener.remove(l);
+  }
+
+  @Override
+  public void addLocomotiveSpeedEventListener(int address,
+                                              LocomotiveSpeedEventListener listener)
+  {
+    locoSpeedEventListener.addEventListener(address,
+                                            listener);
+  }
+
+  @Override
+  public void removeLocomotiveSpeedEventListener(int address,
+                                                 LocomotiveSpeedEventListener listener)
+  {
+    locoSpeedEventListener.removeEventListener(address,
+                                               listener);
+  }
+
+  private void dispatchLoco(Packet packet)
+  {
+    switch (packet.getCommand()) {
+      case CommandGroup.LOCO_SPEED:
+        dispatchLocoSpeed(packet);
+        break;
+      case CommandGroup.LOCO_FUNC_SWITCH:
+        dispatchLocoFunc(packet);
+        break;
+    }
+  }
+
+  private void dispatchLocoSpeed(Packet packet)
+  {
+    LocoSpeedPacketAdapter apa = packet.getAdapter(LocoSpeedPacketAdapter.class);
+    if (apa != null) {
+      Set<LocomotiveSpeedEventListener> listener = locoSpeedEventListener.getListener(apa.getLocoID() & 0xffff);
+      if (!listener.isEmpty()) {
+        LocomotiveSpeedEvent evt = new MX10LocoSpeedEventImpl(this,
+                                                              null,
+                                                              packet.getSenderNID() & 0xff,
+                                                              apa);
+        for (LocomotiveSpeedEventListener l : listener) {
+          l.onLocomotiveEvent(evt);
+        }
+      }
+    }
+  }
+
+  @Override
+  public void addLocomotiveFuncEventListener(int address,
+                                             LocomotiveFuncEventListener listener)
+  {
+    locoFuncEventListener.addEventListener(address,
+                                           listener);
+  }
+
+  @Override
+  public void removeLocomotiveFuncEventListener(int address,
+                                                LocomotiveFuncEventListener listener)
+  {
+    locoFuncEventListener.removeEventListener(address,
+                                              listener);
+  }
+
+  private void dispatchLocoFunc(Packet packet)
+  {
+    LocoFuncPacketAdapter apa = packet.getAdapter(LocoFuncPacketAdapter.class);
+    if (apa != null) {
+      Set<LocomotiveFuncEventListener> listener = locoFuncEventListener.getListener(apa.getLocoID() & 0xffff);
+      if (!listener.isEmpty()) {
+        LocomotiveFuncEvent evt = new MX10LocoFuncEventImpl(this,
+                                                            null,
+                                                            packet.getSenderNID() & 0xff,
+                                                            apa);
+        for (LocomotiveFuncEventListener l : listener) {
+          l.onLocomotiveEvent(evt);
+        }
+      }
+    }
   }
 
 }

@@ -103,6 +103,9 @@ public interface PacketBuilder
   public Packet buildLocoFunctionPacket(@Min(0) @Max(0x27ff) short locoID);
 
   public Packet buildLocoFunctionPacket(@Min(0) @Max(0x27ff) short locoID,
+                                        @Min(0) @Max(255) short fxNumber);
+
+  public Packet buildLocoFunctionPacket(@Min(0) @Max(0x27ff) short locoID,
                                         @Min(0) @Max(255) short fxNumber,
                                         short fxValue);
 

@@ -21,7 +21,6 @@ import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.PowerState;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PowerInfo;
 import java.util.Collections;
@@ -37,7 +36,7 @@ final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<PowerInfo>
   {
 
     @Override
@@ -53,7 +52,7 @@ final class PowerInfoImpl extends AbstractPacketAdapter implements PowerInfo
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends PowerInfo> type(Packet obj)
     {
       return PowerInfo.class;
     }

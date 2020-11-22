@@ -22,7 +22,6 @@ import at.or.reder.zcan20.SpeedSteps;
 import at.or.reder.zcan20.SpeedlimitMode;
 import at.or.reder.zcan20.packet.LocoModePacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -34,7 +33,7 @@ final class LocoModePacketAdapterImpl extends AbstractPacketAdapter implements L
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<LocoModePacketAdapter>
   {
 
     @Override
@@ -44,13 +43,13 @@ final class LocoModePacketAdapterImpl extends AbstractPacketAdapter implements L
     }
 
     @Override
-    public PacketAdapter convert(Packet obj)
+    public LocoModePacketAdapter convert(Packet obj)
     {
-      return new LocoActivePacketAdapterImpl(obj);
+      return new LocoModePacketAdapterImpl(obj);
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends LocoModePacketAdapter> type(Packet obj)
     {
       return LocoModePacketAdapter.class;
     }
@@ -71,14 +70,14 @@ final class LocoModePacketAdapterImpl extends AbstractPacketAdapter implements L
   @Override
   public SpeedSteps getSpeedSteps()
   {
-    byte tmp = (byte) ((buffer.get(2) >> 4) & 0x0f);
+    byte tmp = (byte) (buffer.get(2) & 0x0f);
     return SpeedSteps.valueOfMagic(tmp);
   }
 
   @Override
   public Protocol getProtocol()
   {
-    byte tmp = (byte) (buffer.get(2) & 0x0f);
+    byte tmp = (byte) ((buffer.get(2) >> 4) & 0x0f);
     return Protocol.valueOfMagic(tmp);
   }
 

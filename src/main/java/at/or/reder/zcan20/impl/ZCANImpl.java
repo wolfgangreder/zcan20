@@ -163,7 +163,6 @@ public final class ZCANImpl implements ZCAN
     }
 
   }
-
   private final ZPort port;
   private final AtomicInteger threadCounter = new AtomicInteger();
   private final AtomicInteger listenerThreadCounter = new AtomicInteger();
@@ -262,7 +261,7 @@ public final class ZCANImpl implements ZCAN
   {
     Thread result = new Thread(r,
                                port.getName() + "-listener-"
-                               + listenerThreadCounter.incrementAndGet());
+                                       + listenerThreadCounter.incrementAndGet());
     result.setDaemon(true);
     return result;
   }
@@ -602,6 +601,12 @@ public final class ZCANImpl implements ZCAN
   {
     return requestProcessor.post(run,
                                  linkTimeout);
+  }
+
+  @Override
+  public String toString()
+  {
+    return port.getName();
   }
 
 }

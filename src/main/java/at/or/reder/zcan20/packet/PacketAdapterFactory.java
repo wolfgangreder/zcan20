@@ -18,11 +18,7 @@ package at.or.reder.zcan20.packet;
 import at.or.reder.zcan20.PacketSelector;
 import org.openide.util.lookup.InstanceContent;
 
-/**
- *
- * @author Wolfgang Reder
- */
-public interface PacketAdapterFactory extends InstanceContent.Convertor<Packet, PacketAdapter>
+public interface PacketAdapterFactory<A extends PacketAdapter> extends InstanceContent.Convertor<Packet, A>
 {
 
   public boolean isValid(PacketSelector selector);

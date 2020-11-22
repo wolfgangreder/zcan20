@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2017-2020 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.util.Utils;
+import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.SpeedFlags;
 import at.or.reder.zcan20.packet.LocoSpeedPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import java.util.Set;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -28,29 +31,30 @@ import java.util.Set;
 final class LocoSpeedPacketAdapterImpl extends AbstractPacketAdapter implements LocoSpeedPacketAdapter
 {
 
-//  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-//  public static final class Factory implements PacketAdapterFactory
-//  {
-//
-//    @Override
-//    public boolean isValid(CommandGroup group,
-//                           int command,
-//                           CommandMode mode,
-//                           int dlc)
-//    {
-//      if (group == CommandGroup.LOCO && command == CommandGroup.LOCO_SPEED) {
-//        return mode == CommandMode.COMMAND || mode == CommandMode.ACK;
-//      }
-//      return false;
-//    }
-//
-//    @Override
-//    public LocoSpeedPacketAdapter createAdapter(Packet packet)
-//    {
-//      return new LocoSpeedPacketAdapterImpl(packet);
-//    }
-//
-//  }
+  @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
+  public static final class Factory implements PacketAdapterFactory<LocoSpeedPacketAdapter>
+  {
+
+    @Override
+    public boolean isValid(PacketSelector selector)
+    {
+      return SELECTOR.test(selector);
+    }
+
+    @Override
+    public LocoSpeedPacketAdapter convert(Packet obj)
+    {
+      return new LocoSpeedPacketAdapterImpl(obj);
+    }
+
+    @Override
+    public Class<? extends LocoSpeedPacketAdapter> type(Packet obj)
+    {
+      return LocoSpeedPacketAdapter.class;
+    }
+
+  }
+
   private LocoSpeedPacketAdapterImpl(Packet packet)
   {
     super(packet);

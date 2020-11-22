@@ -20,7 +20,6 @@ import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.NIDOnlyPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -32,7 +31,7 @@ final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implements NI
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<NIDOnlyPacketAdapter>
   {
 
     @Override
@@ -68,7 +67,7 @@ final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implements NI
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends NIDOnlyPacketAdapter> type(Packet obj)
     {
       return NIDOnlyPacketAdapter.class;
     }

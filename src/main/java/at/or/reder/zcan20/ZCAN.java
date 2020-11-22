@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2017-2020 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.openide.util.Lookup;
 public interface ZCAN extends AutoCloseable, Lookup.Provider
 {
 
+  public static final int NUM_FUNCTION = 29;
   public static final Logger LOGGER = Logger.getLogger("at.or.reder.zcan20");
 
   public LinkState getLinkState();

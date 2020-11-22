@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Wolfgang Reder.
+ * Copyright 2020 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.dcc;
-
-import java.io.IOException;
-import org.openide.util.Lookup;
+package at.or.reder.zcan20;
 
 /**
- * Basisobjekt zur Bibliothek.
  *
  * @author Wolfgang Reder
  */
-public interface Controller extends LocoControl, AccessoryControl, PowerControl, BaseControl, AutoCloseable,
-                                    Lookup.Provider
+public interface LocoFunc
 {
 
-  public void open() throws IOException;
+  public short getLocoID();
 
-  @Override
-  public void close() throws IOException;
+  public short getFxNumber();
+
+  public short getFxValue();
 
 }

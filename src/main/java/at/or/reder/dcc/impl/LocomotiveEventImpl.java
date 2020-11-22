@@ -17,74 +17,65 @@ package at.or.reder.dcc.impl;
 
 import at.or.reder.dcc.*;
 import org.openide.util.Lookup;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
+import org.openide.util.lookup.Lookups;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public final class LocomotiveEventImpl implements LocomotiveEvent
+public abstract class LocomotiveEventImpl implements LocomotiveEvent
 {
 
   private final Controller controller;
-  private final Locomotive locomotive;
   private final int sender;
+  private final Lookup lookup;
+  private final short decoder;
 
-  public LocomotiveEventImpl(Controller controller,
-                             Locomotive locomotive,
-                             int sender)
+  protected LocomotiveEventImpl(Controller controller,
+                                Locomotive locomotive,
+                                int sender,
+                                short locoAddress,
+                                InstanceContent ic)
   {
     this.controller = controller;
-    this.locomotive = locomotive;
     this.sender = sender;
+    this.decoder = locoAddress;
+    if (ic != null) {
+      if (locomotive != null) {
+        ic.add(locomotive);
+      }
+      this.lookup = new AbstractLookup(ic);
+    } else if (locomotive != null) {
+      this.lookup = Lookups.singleton(locomotive);
+    } else {
+      this.lookup = Lookup.EMPTY;
+    }
   }
 
   @Override
-  public Controller getController()
+  public final Controller getController()
   {
     return controller;
   }
 
   @Override
-  public int getSenderAddress()
+  public final int getSenderAddress()
   {
     return sender;
   }
 
-//  @Override
-//  public int getAddress()
-//  {
-//    return locomotive.getAddress();
-//  }
-//
-//  @Override
-//  public int getCurrentSpeed()
-//  {
-//    return locomotive.getCurrentSpeed();
-//  }
-//
-//  @Override
-//  public Direction getDirection()
-//  {
-//    return locomotive.getDirection();
-//  }
-//
-//  @Override
-//  public BitSet getFunctions()
-//  {
-//    return locomotive.getFunctions();
-//  }
-//
-//  @Override
-//  public int readCV(int cvIndex,
-//                    int timeout) throws IOException, TimeoutException
-//  {
-//    return locomotive.readCV(cvIndex,
-//                             timeout);
-//  }
   @Override
-  public Lookup getLookup()
+  public short getDecoder()
   {
-    return Lookup.EMPTY;
+    return decoder;
+  }
+
+  @Override
+  public final Lookup getLookup()
+  {
+    return lookup;
   }
 
 }

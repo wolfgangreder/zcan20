@@ -19,8 +19,10 @@ import at.or.reder.dcc.Controller;
 import at.or.reder.dcc.Direction;
 import at.or.reder.dcc.Locomotive;
 import at.or.reder.zcan20.Loco;
+import at.or.reder.zcan20.ZCAN;
 import java.io.IOException;
-import java.util.BitSet;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -34,10 +36,17 @@ public final class LocomotiveImpl implements Locomotive
   private final Controller controller;
 
   public LocomotiveImpl(Loco loco,
-                        Controller controller)
+                        Controller controller) throws IOException
   {
     this.loco = loco;
     this.controller = controller;
+    loco.scanFunctions();
+  }
+
+  @Override
+  public Controller getController()
+  {
+    return controller;
   }
 
   @Override
@@ -47,27 +56,72 @@ public final class LocomotiveImpl implements Locomotive
   }
 
   @Override
-  public int getAddress()
+  public boolean isOwner()
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return loco.isOwner();
   }
 
   @Override
-  public int getCurrentSpeed()
+  public void takeOwnership() throws IOException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    loco.setOwner(true);
+  }
+
+  @Override
+  public int getAddress()
+  {
+    return loco.getLoco();
+  }
+
+  @Override
+  public Integer getCurrentSpeed()
+  {
+    return loco.getSpeed();
   }
 
   @Override
   public Direction getDirection()
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return loco.getDirection();
   }
 
   @Override
-  public BitSet getFunctions()
+  public void control(Direction dir,
+                      int speed) throws IOException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    short s = (short) (Math.min(1023,
+                                speed) & 0x3ff);
+    loco.control(dir,
+                 s);
+  }
+
+  @Override
+  public SortedMap<Integer, Integer> getFunctions()
+  {
+    return loco.getAllFunctions();
+  }
+
+  @Override
+  public void setFunctions(Map<Integer, Integer> functions) throws IOException
+  {
+    for (Map.Entry<Integer, Integer> e : functions.entrySet()) {
+      if (e.getValue() != null && e.getKey() != null && e.getKey() > 0 && e.getValue() < ZCAN.NUM_FUNCTION) {
+        loco.setFunction(e.getKey(),
+                         e.getValue());
+      }
+    }
+  }
+
+  @Override
+  public void toggleFunction(int iFunction) throws IOException
+  {
+    if (iFunction < 0 || iFunction >= ZCAN.NUM_FUNCTION) {
+      throw new IndexOutOfBoundsException();
+    }
+    Integer i = loco.getFunction(iFunction);
+    boolean val = !(i != null && i != 0);
+    loco.setFunction(iFunction,
+                     val ? 1 : 0);
   }
 
   @Override
@@ -82,6 +136,12 @@ public final class LocomotiveImpl implements Locomotive
   public void clearCV() throws IOException
   {
     loco.clearCV();
+  }
+
+  @Override
+  public String toString()
+  {
+    return "Decoder " + loco.getLoco() + "@" + controller;
   }
 
 }

@@ -18,7 +18,6 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.TSEInfoPacketAdapter;
 import org.openide.util.lookup.ServiceProvider;
@@ -31,7 +30,7 @@ public final class TSEInfoPacketAdapterImpl extends AbstractPacketAdapter implem
 {
 
   @ServiceProvider(service = PacketAdapterFactory.class, path = Packet.LOOKUPPATH)
-  public static final class Factory implements PacketAdapterFactory
+  public static final class Factory implements PacketAdapterFactory<TSEInfoPacketAdapter>
   {
 
     @Override
@@ -41,13 +40,13 @@ public final class TSEInfoPacketAdapterImpl extends AbstractPacketAdapter implem
     }
 
     @Override
-    public PacketAdapter convert(Packet obj)
+    public TSEInfoPacketAdapter convert(Packet obj)
     {
       return new TSEInfoPacketAdapterImpl(obj);
     }
 
     @Override
-    public Class<? extends PacketAdapter> type(Packet obj)
+    public Class<? extends TSEInfoPacketAdapter> type(Packet obj)
     {
       return TSEInfoPacketAdapter.class;
     }

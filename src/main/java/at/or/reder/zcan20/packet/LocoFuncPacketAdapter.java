@@ -15,17 +15,26 @@
  */
 package at.or.reder.zcan20.packet;
 
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.LocoFunc;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+import at.or.reder.zcan20.util.ProxyPacketSelector;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public interface LocoFuncPacketAdapter extends PacketAdapter
+public interface LocoFuncPacketAdapter extends PacketAdapter, LocoFunc
 {
 
-  public short getLocoID();
-
-  public short getFxNumber();
-
-  public short getFxValue();
-
+  public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.LOCO,
+                                                                                               CommandGroup.LOCO_FUNC_SWITCH,
+                                                                                               CommandMode.ACK,
+                                                                                               6),
+                                                                        new PacketSelectorImpl(CommandGroup.LOCO,
+                                                                                               CommandGroup.LOCO_FUNC_SWITCH,
+                                                                                               CommandMode.COMMAND,
+                                                                                               6));
 }

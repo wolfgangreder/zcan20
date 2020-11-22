@@ -15,22 +15,27 @@
  */
 package at.or.reder.zcan20.packet;
 
-import at.or.reder.zcan20.SpeedFlags;
-import java.util.Set;
+import at.or.reder.zcan20.CommandGroup;
+import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.LocoSpeed;
+import at.or.reder.zcan20.PacketSelector;
+import at.or.reder.zcan20.impl.PacketSelectorImpl;
+import at.or.reder.zcan20.util.ProxyPacketSelector;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface LocoSpeedPacketAdapter extends PacketAdapter
+public interface LocoSpeedPacketAdapter extends PacketAdapter, LocoSpeed
 {
 
-  public short getLocoID();
-
-  public short getSpeed();
-
-  public Set<SpeedFlags> getFlags();
-
-  public short getDivisor();
+  public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.LOCO,
+                                                                                               CommandGroup.LOCO_SPEED,
+                                                                                               CommandMode.ACK,
+                                                                                               6),
+                                                                        new PacketSelectorImpl(CommandGroup.LOCO,
+                                                                                               CommandGroup.LOCO_SPEED,
+                                                                                               CommandMode.EVENT,
+                                                                                               6));
 
 }
