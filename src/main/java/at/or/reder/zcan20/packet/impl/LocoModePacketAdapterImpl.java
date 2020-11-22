@@ -62,7 +62,7 @@ final class LocoModePacketAdapterImpl extends AbstractPacketAdapter implements L
   }
 
   @Override
-  public short getLocoAddress()
+  public short getDecoderId()
   {
     return buffer.getShort(0);
   }
@@ -110,7 +110,7 @@ final class LocoModePacketAdapterImpl extends AbstractPacketAdapter implements L
   public String toString()
   {
     StringBuilder builder = new StringBuilder("LOCO_MODE(0x");
-    Utils.appendHexString(getLocoAddress(),
+    Utils.appendHexString(getDecoderId(),
                           builder,
                           4);
     builder.append(", ");

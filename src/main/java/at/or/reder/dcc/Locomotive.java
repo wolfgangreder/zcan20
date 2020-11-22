@@ -95,4 +95,28 @@ public interface Locomotive extends AutoCloseable
 
   public void clearCV() throws IOException;
 
+  public default void addLocomotiveFuncEventListener(LocomotiveFuncEventListener l)
+  {
+    getController().addLocomotiveFuncEventListener(getAddress(),
+                                                   l);
+  }
+
+  public default void removeLocomotiveFuncEventListener(LocomotiveFuncEventListener l)
+  {
+    getController().removeLocomotiveFuncEventListener(getAddress(),
+                                                      l);
+  }
+
+  public default void addLocomotiveSpeedEventListener(LocomotiveSpeedEventListener l)
+  {
+    getController().addLocomotiveSpeedEventListener(getAddress(),
+                                                    l);
+  }
+
+  public default void removeLocomotiveSpeedEventListener(LocomotiveSpeedEventListener l)
+  {
+    getController().removeLocomotiveSpeedEventListener(getAddress(),
+                                                       l);
+  }
+
 }

@@ -25,7 +25,7 @@ import at.or.reder.zcan20.util.ProxyPacketSelector;
  *
  * @author Wolfgang Reder
  */
-public interface AccessoryPacketAdapter extends PacketAdapter
+public interface AccessoryPacketAdapter extends DecoderResponsePacketAdapter
 {
 
   public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.ACCESSORY,

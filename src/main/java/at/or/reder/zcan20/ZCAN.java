@@ -58,6 +58,10 @@ public interface ZCAN extends AutoCloseable, Lookup.Provider
   public void removePacketListener(Predicate<? super Packet> matcher,
                                    PacketListener packetListener);
 
+  public Predicate<Packet> getAccessoryDecoderPacketMatcher(int decoderAddress);
+
+  public Predicate<Packet> getLocoDecoderPacketMatcher(int decoderAddress);
+
   @Override
   public default Lookup getLookup()
   {

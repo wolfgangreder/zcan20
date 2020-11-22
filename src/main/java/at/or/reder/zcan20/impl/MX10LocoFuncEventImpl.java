@@ -40,7 +40,7 @@ public final class MX10LocoFuncEventImpl extends LocomotiveEventImpl implements 
     super(controller,
           locomotive,
           sender,
-          packet.getLocoID(),
+          packet.getDecoderId(),
           createInstanceContent(packet));
     nr = packet.getFxNumber();
     val = packet.getFxValue();

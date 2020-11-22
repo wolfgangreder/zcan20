@@ -281,7 +281,7 @@ final class LocoImpl implements Loco
   {
     if (packet.getCommandGroup() == CommandGroup.LOCO && packet.getCommand() == CommandGroup.LOCO_SPEED) {
       LocoSpeedPacketAdapter speed = packet.getAdapter(LocoSpeedPacketAdapter.class);
-      return speed != null && speed.getLocoID() == loco;
+      return speed != null && speed.getDecoderId() == loco;
     }
     return false;
   }
@@ -342,7 +342,7 @@ final class LocoImpl implements Loco
   {
     if (packet.getCommandGroup() == CommandGroup.LOCO && packet.getCommand() == CommandGroup.LOCO_FUNC_SWITCH) {
       LocoFuncPacketAdapter func = packet.getAdapter(LocoFuncPacketAdapter.class);
-      return func != null && func.getLocoID() == loco;
+      return func != null && func.getDecoderId() == loco;
     }
     return false;
   }

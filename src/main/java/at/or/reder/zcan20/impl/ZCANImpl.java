@@ -30,6 +30,7 @@ import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketBuilder;
 import at.or.reder.zcan20.packet.Ping;
+import at.or.reder.zcan20.packet.ZCANDecoderPacketMatcher;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -601,6 +602,18 @@ public final class ZCANImpl implements ZCAN
   {
     return requestProcessor.post(run,
                                  linkTimeout);
+  }
+
+  @Override
+  public Predicate<Packet> getAccessoryDecoderPacketMatcher(int decoderAddress)
+  {
+    return ZCANDecoderPacketMatcher.getAccessoryInstance(decoderAddress);
+  }
+
+  @Override
+  public Predicate<Packet> getLocoDecoderPacketMatcher(int decoderAddress)
+  {
+    return ZCANDecoderPacketMatcher.getLocomotiveInstance(decoderAddress);
   }
 
   @Override

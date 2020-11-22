@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20;
+package at.or.reder.zcan20.packet;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface LocoFunc
+public interface DecoderResponsePacketAdapter extends PacketAdapter
 {
 
   public short getDecoderId();
-
-  public short getFxNumber();
-
-  public short getFxValue();
 
 }

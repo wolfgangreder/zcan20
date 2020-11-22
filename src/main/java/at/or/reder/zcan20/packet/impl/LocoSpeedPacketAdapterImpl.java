@@ -61,7 +61,7 @@ final class LocoSpeedPacketAdapterImpl extends AbstractPacketAdapter implements 
   }
 
   @Override
-  public short getLocoID()
+  public short getDecoderId()
   {
     return buffer.getShort(0);
   }
@@ -88,7 +88,7 @@ final class LocoSpeedPacketAdapterImpl extends AbstractPacketAdapter implements 
   public String toString()
   {
     StringBuilder builder = new StringBuilder("LOCO_SPEED(0x");
-    Utils.appendHexString(getLocoID(),
+    Utils.appendHexString(getDecoderId(),
                           builder,
                           4);
     builder.append(", ");

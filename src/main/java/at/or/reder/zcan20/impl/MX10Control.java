@@ -530,7 +530,7 @@ final class MX10Control implements Controller
   {
     LocoSpeedPacketAdapter apa = packet.getAdapter(LocoSpeedPacketAdapter.class);
     if (apa != null) {
-      Set<LocomotiveSpeedEventListener> listener = locoSpeedEventListener.getListener(apa.getLocoID() & 0xffff);
+      Set<LocomotiveSpeedEventListener> listener = locoSpeedEventListener.getListener(apa.getDecoderId() & 0xffff);
       if (!listener.isEmpty()) {
         LocomotiveSpeedEvent evt = new MX10LocoSpeedEventImpl(this,
                                                               null,
@@ -563,7 +563,7 @@ final class MX10Control implements Controller
   {
     LocoFuncPacketAdapter apa = packet.getAdapter(LocoFuncPacketAdapter.class);
     if (apa != null) {
-      Set<LocomotiveFuncEventListener> listener = locoFuncEventListener.getListener(apa.getLocoID() & 0xffff);
+      Set<LocomotiveFuncEventListener> listener = locoFuncEventListener.getListener(apa.getDecoderId() & 0xffff);
       if (!listener.isEmpty()) {
         LocomotiveFuncEvent evt = new MX10LocoFuncEventImpl(this,
                                                             null,

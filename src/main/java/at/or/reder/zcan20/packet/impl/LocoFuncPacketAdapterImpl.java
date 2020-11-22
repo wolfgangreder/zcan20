@@ -59,7 +59,7 @@ final class LocoFuncPacketAdapterImpl extends AbstractPacketAdapter implements L
   }
 
   @Override
-  public short getLocoID()
+  public short getDecoderId()
   {
     return buffer.getShort(0);
   }
@@ -80,7 +80,7 @@ final class LocoFuncPacketAdapterImpl extends AbstractPacketAdapter implements L
   public String toString()
   {
     StringBuilder builder = new StringBuilder("LOCO_FUNC(0x");
-    Utils.appendHexString(getLocoID(),
+    Utils.appendHexString(getDecoderId(),
                           builder,
                           4);
     builder.append(", ");

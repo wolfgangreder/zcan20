@@ -24,7 +24,7 @@ import java.util.Set;
 public interface LocoSpeed
 {
 
-  public short getLocoID();
+  public short getDecoderId();
 
   public short getSpeed();
 

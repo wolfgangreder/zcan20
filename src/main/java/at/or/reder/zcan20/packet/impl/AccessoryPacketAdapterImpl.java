@@ -59,6 +59,12 @@ final class AccessoryPacketAdapterImpl extends AbstractPacketAdapter implements 
   }
 
   @Override
+  public short getDecoderId()
+  {
+    return buffer.getShort(0);
+  }
+
+  @Override
   public short getNID()
   {
     return (short) (buffer.getShort(0) & 0x1ff);

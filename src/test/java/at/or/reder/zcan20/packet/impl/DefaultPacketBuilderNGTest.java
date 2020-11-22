@@ -666,7 +666,7 @@ public class DefaultPacketBuilderNGTest
                        adapter.getPacket());
             assertEquals(as,
                          locoNid,
-                         adapter.getLocoAddress());
+                         adapter.getDecoderId());
             assertSame(as,
                        steps,
                        adapter.getSpeedSteps());
@@ -900,7 +900,7 @@ public class DefaultPacketBuilderNGTest
     assertEquals(packet,
                  adapter.getPacket());
     assertEquals(locoNid,
-                 adapter.getLocoID());
+                 adapter.getDecoderId());
     assertEquals(speed,
                  adapter.getSpeed());
     assertEquals(flags,
@@ -986,7 +986,7 @@ public class DefaultPacketBuilderNGTest
     assertSame(packet,
                adapter.getPacket());
     assertEquals(locoNid,
-                 adapter.getLocoID());
+                 adapter.getDecoderId());
     assertEquals(fxNum,
                  adapter.getFxNumber());
     assertEquals(fxVal,

@@ -25,15 +25,13 @@ import at.or.reder.zcan20.impl.PacketSelectorImpl;
  *
  * @author Wolfgang Reder
  */
-public interface LocoActivePacketAdapter extends PacketAdapter
+public interface LocoActivePacketAdapter extends DecoderResponsePacketAdapter
 {
 
   public PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.LOCO,
                                                           CommandGroup.LOCO_ACTIVE,
                                                           CommandMode.COMMAND,
                                                           4);
-
-  public short getLocoID();
 
   public LocoActive getState();
 

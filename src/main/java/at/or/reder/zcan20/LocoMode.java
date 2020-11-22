@@ -22,8 +22,6 @@ package at.or.reder.zcan20;
 public interface LocoMode
 {
 
-  public short getLocoAddress();
-
   public SpeedSteps getSpeedSteps();
 
   public Protocol getProtocol();

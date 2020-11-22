@@ -60,7 +60,7 @@ final class LocoActivePacketAdapterImpl extends AbstractPacketAdapter implements
   }
 
   @Override
-  public short getLocoID()
+  public short getDecoderId()
   {
     return buffer.getShort(0);
   }
@@ -75,7 +75,7 @@ final class LocoActivePacketAdapterImpl extends AbstractPacketAdapter implements
   public String toString()
   {
     StringBuilder builder = new StringBuilder("LOCO_ACTIVE(");
-    builder.append(getLocoID());
+    builder.append(getDecoderId());
     builder.append(", ");
     builder.append(getState());
     return builder.append(')').toString();

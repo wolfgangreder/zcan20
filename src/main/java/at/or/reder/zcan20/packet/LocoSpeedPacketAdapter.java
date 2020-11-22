@@ -26,7 +26,7 @@ import at.or.reder.zcan20.util.ProxyPacketSelector;
  *
  * @author Wolfgang Reder
  */
-public interface LocoSpeedPacketAdapter extends PacketAdapter, LocoSpeed
+public interface LocoSpeedPacketAdapter extends DecoderResponsePacketAdapter, LocoSpeed
 {
 
   public static final PacketSelector SELECTOR = new ProxyPacketSelector(new PacketSelectorImpl(CommandGroup.LOCO,

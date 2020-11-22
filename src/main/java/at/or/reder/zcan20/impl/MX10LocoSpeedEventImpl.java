@@ -43,7 +43,7 @@ public final class MX10LocoSpeedEventImpl extends LocomotiveEventImpl implements
     super(controller,
           locomotive,
           sender,
-          packet.getLocoID(),
+          packet.getDecoderId(),
           createInstanceContent(packet));
     speed = packet.getSpeed();
     Set<SpeedFlags> flags = packet.getFlags();
