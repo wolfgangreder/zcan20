@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.zcan20;
+package at.or.reder.dcc;
+
+import java.util.EventListener;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface LocoSpeed
+public interface LocomotiveTachoEventListener extends EventListener
 {
 
-  public short getDecoderId();
-
-  public short getSpeed();
-
-  public short getDivisor();
+  public void onTachoEvent(LocomotiveTachoEvent evt);
 
 }

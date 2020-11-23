@@ -22,6 +22,7 @@ import at.or.reder.dcc.LocomotiveSpeedEvent;
 import at.or.reder.dcc.impl.LocomotiveEventImpl;
 import at.or.reder.zcan20.LocoSpeed;
 import at.or.reder.zcan20.SpeedFlags;
+import at.or.reder.zcan20.packet.LocoSpeedPacketAdapter;
 import java.util.Set;
 import org.openide.util.lookup.InstanceContent;
 
@@ -38,7 +39,7 @@ public final class MX10LocoSpeedEventImpl extends LocomotiveEventImpl implements
   public MX10LocoSpeedEventImpl(Controller controller,
                                 Locomotive locomotive,
                                 int sender,
-                                LocoSpeed packet)
+                                LocoSpeedPacketAdapter packet)
   {
     super(controller,
           locomotive,

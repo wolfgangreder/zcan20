@@ -15,17 +15,17 @@
  */
 package at.or.reder.zcan20;
 
+import java.util.Set;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public interface LocoSpeed
+public interface LocoFlags
 {
 
   public short getDecoderId();
 
-  public short getSpeed();
-
-  public short getDivisor();
+  public Set<SpeedFlags> getFlags();
 
 }

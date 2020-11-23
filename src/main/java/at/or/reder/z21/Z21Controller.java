@@ -22,6 +22,7 @@ import at.or.reder.dcc.LinkStateListener;
 import at.or.reder.dcc.Locomotive;
 import at.or.reder.dcc.LocomotiveFuncEventListener;
 import at.or.reder.dcc.LocomotiveSpeedEventListener;
+import at.or.reder.dcc.LocomotiveTachoEventListener;
 import at.or.reder.dcc.PowerEventListener;
 import at.or.reder.dcc.PowerMode;
 import at.or.reder.dcc.PowerPort;
@@ -264,6 +265,20 @@ final class Z21Controller implements Controller
   @Override
   public void removeLocomotiveFuncEventListener(int loco,
                                                 LocomotiveFuncEventListener listener)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void addLocomotiveTachoEventListener(int loco,
+                                              LocomotiveTachoEventListener listener)
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void removeLocomotiveTachoEventListener(int loco,
+                                                 LocomotiveTachoEventListener listener)
   {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }

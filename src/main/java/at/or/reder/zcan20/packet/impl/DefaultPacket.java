@@ -15,12 +15,12 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
+import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
-import at.or.reder.dcc.util.Utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;

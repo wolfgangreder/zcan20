@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2017-2020 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
   private ByteBuffer data;
   private Function<Packet, PacketAdapter> givenAdapterFactory;
   private InstanceContent.Convertor<Packet, PacketAdapter> adapterFactory;
-  private final ConcurrentMap<PacketSelector, PacketAdapterFactory> factoryCache = new ConcurrentHashMap<>();
+  private final ConcurrentMap<PacketSelector, PacketAdapterFactory<PacketAdapter>> factoryCache = new ConcurrentHashMap<>();
 
   public DefaultPacketBuilder(short senderNID)
   {
@@ -198,6 +198,21 @@ public final class DefaultPacketBuilder implements PacketBuilder
     return this;
   }
 
+  private PacketAdapterFactory<PacketAdapter> lookupAdapterFactory(PacketSelector s)
+  {
+    @SuppressWarnings("unchecked")
+    Collection<? extends PacketAdapterFactory<PacketAdapter>> coll = Lookups.forPath(Packet.LOOKUPPATH).lookupAll(
+            PacketAdapterFactory.class);
+    for (PacketAdapterFactory<PacketAdapter> ef : coll) {
+      if (ef.isValid(s)) {
+        return ef;
+      }
+    }
+//    ZCAN.LOGGER.log(Level.WARNING,
+//                    () -> "Found no packetadapter for " + s.toString());
+    return null;
+  }
+
   private InstanceContent.Convertor<Packet, PacketAdapter> createAdapterFactory()
   {
     PacketSelector selector = new PacketSelectorImpl(commandGroup,
@@ -205,17 +220,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
                                                      commandMode,
                                                      data != null ? data.limit() : 0);
     return factoryCache.computeIfAbsent(selector,
-                                        (s) -> {
-                                          for (PacketAdapterFactory ef : Lookups.forPath(Packet.LOOKUPPATH).lookupAll(
-                                                  PacketAdapterFactory.class)) {
-                                            if (ef.isValid(s)) {
-                                              return ef;
-                                            }
-                                          }
-//                                          ZCAN.LOGGER.log(Level.WARNING,
-//                                                          () -> "Found no packetadapter for " + s.toString());
-                                          return null;
-                                        });
+                                        this::lookupAdapterFactory);
   }
 
   @Override

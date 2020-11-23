@@ -25,6 +25,8 @@ import at.or.reder.dcc.LocomotiveFuncEvent;
 import at.or.reder.dcc.LocomotiveFuncEventListener;
 import at.or.reder.dcc.LocomotiveSpeedEvent;
 import at.or.reder.dcc.LocomotiveSpeedEventListener;
+import at.or.reder.dcc.LocomotiveTachoEvent;
+import at.or.reder.dcc.LocomotiveTachoEventListener;
 import at.or.reder.dcc.NotConnectedException;
 import at.or.reder.dcc.PowerEvent;
 import at.or.reder.dcc.PowerEventListener;
@@ -44,6 +46,7 @@ import at.or.reder.zcan20.packet.AccessoryPacketAdapter;
 import at.or.reder.zcan20.packet.AccessoryPacketRequestAdapter;
 import at.or.reder.zcan20.packet.LocoFuncPacketAdapter;
 import at.or.reder.zcan20.packet.LocoSpeedPacketAdapter;
+import at.or.reder.zcan20.packet.LocoTachoPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PowerInfo;
 import at.or.reder.zcan20.packet.PowerStateInfo;
@@ -85,6 +88,8 @@ final class MX10Control implements Controller
                                                                                       = new IndexedListenerSupport<>(0);
   private final IndexedListenerSupport<Integer, LocomotiveFuncEventListener> locoFuncEventListener
                                                                                      = new IndexedListenerSupport<>(0);
+  private final IndexedListenerSupport<Integer, LocomotiveTachoEventListener> locoTachoEventListener
+                                                                                      = new IndexedListenerSupport<>(0);
   private final PacketListener packetListener = this::onPacket;
   private final PropertyChangeSupport propSupport = new PropertyChangeSupport(this);
   private final InstanceContent ic = new InstanceContent();
@@ -359,8 +364,13 @@ final class MX10Control implements Controller
   private final ConcurrentMap<PowerPort, PowerStateInfo> lastPowerState = new ConcurrentHashMap<>();
   private final AtomicReference<PowerInfo> powerInfo = new AtomicReference<>();
 
-  private boolean dispatchConfig(Packet packet)
+  private void dispatchConfig(Packet packet)
   {
+    LocoTachoPacketAdapter tachoPacket = packet.getAdapter(LocoTachoPacketAdapter.class);
+    if (tachoPacket != null) {
+      dispatchTachoPacket(tachoPacket);
+      return;
+    }
     List<PowerEvent> events = new ArrayList<>();
     PowerInfo power = packet.getAdapter(PowerInfo.class);
     if (power != null) {
@@ -401,7 +411,6 @@ final class MX10Control implements Controller
         l.onPowerEvent(evt);
       }
     }
-    return !events.isEmpty();
   }
 
   @Override
@@ -571,6 +580,38 @@ final class MX10Control implements Controller
                                                             apa);
         for (LocomotiveFuncEventListener l : listener) {
           l.onLocomotiveEvent(evt);
+        }
+      }
+    }
+  }
+
+  @Override
+  public void addLocomotiveTachoEventListener(int loco,
+                                              LocomotiveTachoEventListener listener)
+  {
+    locoTachoEventListener.addEventListener(loco,
+                                            listener);
+  }
+
+  @Override
+  public void removeLocomotiveTachoEventListener(int loco,
+                                                 LocomotiveTachoEventListener listener)
+  {
+    locoTachoEventListener.removeEventListener(loco,
+                                               listener);
+  }
+
+  private void dispatchTachoPacket(LocoTachoPacketAdapter tachoPacket)
+  {
+    if (tachoPacket != null) {
+      Set<LocomotiveTachoEventListener> listener = locoTachoEventListener.getListener(tachoPacket.getDecoderId() & 0xffff);
+      if (!listener.isEmpty()) {
+        LocomotiveTachoEvent evt = new MX10LocoTachoEventImpl(this,
+                                                              null,
+                                                              tachoPacket.getPacket().getSenderNID() & 0xff,
+                                                              tachoPacket);
+        for (LocomotiveTachoEventListener l : listener) {
+          l.onTachoEvent(evt);
         }
       }
     }

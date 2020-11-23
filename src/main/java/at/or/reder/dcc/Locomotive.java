@@ -119,4 +119,18 @@ public interface Locomotive extends AutoCloseable
                                                        l);
   }
 
+  public default void addLocomotiveTachoEventListener(int loco,
+                                                      LocomotiveTachoEventListener listener)
+  {
+    getController().addLocomotiveTachoEventListener(loco,
+                                                    listener);
+  }
+
+  public default void removeLocomotiveTachoEventListener(int loco,
+                                                         LocomotiveTachoEventListener listener)
+  {
+    getController().removeLocomotiveTachoEventListener(loco,
+                                                       listener);
+  }
+
 }

@@ -19,13 +19,11 @@ package at.or.reder.zcan20;
  *
  * @author Wolfgang Reder
  */
-public interface LocoSpeed
+public interface LocoVoltage
 {
 
   public short getDecoderId();
 
-  public short getSpeed();
-
-  public short getDivisor();
+  public float getVoltage();
 
 }

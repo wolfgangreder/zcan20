@@ -44,4 +44,10 @@ public interface LocoControl extends BaseControl
   public void removeLocomotiveFuncEventListener(int loco,
                                                 LocomotiveFuncEventListener listener);
 
+  public void addLocomotiveTachoEventListener(int loco,
+                                              LocomotiveTachoEventListener listener);
+
+  public void removeLocomotiveTachoEventListener(int loco,
+                                                 LocomotiveTachoEventListener listener);
+
 }

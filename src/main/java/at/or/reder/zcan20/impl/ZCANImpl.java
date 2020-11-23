@@ -389,6 +389,8 @@ public final class ZCANImpl implements ZCAN
 
   private void notfyPacketListener(Packet packet)
   {
+    LOGGER.log(Level.FINEST,
+               () -> "Dispatch packet " + packet + " to unfiltered listeners");
     for (PacketListener l : packetListener) {
       try {
         l.onPacket(this,
@@ -401,6 +403,8 @@ public final class ZCANImpl implements ZCAN
     }
     Set<PacketListener> filtered = filteredPacketListener.get(packet.getCommandGroup());
     if (filtered != null) {
+      LOGGER.log(Level.FINEST,
+                 () -> "Dispatch packet " + packet + " to filtered listeners");
       for (PacketListener l : filtered) {
         try {
           l.onPacket(this,

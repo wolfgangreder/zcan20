@@ -15,17 +15,17 @@
  */
 package at.or.reder.zcan20;
 
+import at.or.reder.dcc.Direction;
+
 /**
  *
  * @author Wolfgang Reder
  */
-public interface LocoSpeed
+public interface LocoDirection
 {
 
-  public short getDecoderId();
+  public Direction getDirection();
 
-  public short getSpeed();
-
-  public short getDivisor();
+  public boolean isDirectionPending();
 
 }

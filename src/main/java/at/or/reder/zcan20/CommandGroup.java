@@ -112,7 +112,12 @@ public final class CommandGroup implements Serializable
                                                   DATA_NAME_EXT,
                                                   DATA_LOCO_GUI_EXT);
   public static final byte CONFIG_POWER_INFO = 0x00;
-  public static final byte CONFIG_UNKNOWN_5 = 0x05;  // Irgendwas mit dem Fahrzeugstatus (Decoderadressen werden gesendet) Geschwindigkeitsinformation
+  public static final byte CONFIG_TACHO = 0x05;  // Irgendwas mit dem Fahrzeugstatus (Decoderadressen werden gesendet) Geschwindigkeitsinformation
+  /*
+  data[3]: 1 -> getShort(3): tachoAnzeige
+  data[3]: 3 -> ?????
+  data[3]: 8 -> getShort(3): 0x01 -> vorwärts, 0x02->rückwärts,0x8->dir Pending
+   */
   public static final byte CONFIG_MODULE_INFO = 0x08;
   public static final byte CONFIG_UNKNOWN_A = 0x0a; // Wird gesendet, wenn man auf Sammelstop geht.
   public static final byte CONFIG_MODULE_POWER_INFO = 0x20;
@@ -120,7 +125,7 @@ public final class CommandGroup implements Serializable
   public static final CommandGroup CONFIG = valueOf(CONFIG_MAGIC,
                                                     "CONFIG",
                                                     CONFIG_POWER_INFO,
-                                                    CONFIG_UNKNOWN_5,
+                                                    CONFIG_TACHO,
                                                     CONFIG_MODULE_INFO,
                                                     CONFIG_MODULE_POWER_INFO);
   public static final byte CONFIG_0_UNKNOWN_2 = 0x02; // wird bei einem modulestart als ACK mit dlc=8 gesendet
