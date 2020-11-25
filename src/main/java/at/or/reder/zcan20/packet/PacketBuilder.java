@@ -62,6 +62,8 @@ public interface PacketBuilder
 
   public Packet buildLoginPacket();
 
+  public Packet buildLoginPacket(String appName);
+
   public default Packet buildPingPacket(short senderNID)
   {
     return commandMode(CommandMode.REQUEST).

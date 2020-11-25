@@ -38,6 +38,8 @@ public interface ZCAN extends AutoCloseable, Lookup.Provider
 
   public short getNID();
 
+  public String getAppName();
+
   public void addLinkStateListener(LinkStateListener listener);
 
   public void removeLinkStateListener(LinkStateListener listener);

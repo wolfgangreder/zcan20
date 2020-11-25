@@ -277,6 +277,12 @@ final class LocoImpl implements Loco
     }
   }
 
+  @Override
+  public void scanSpeed() throws IOException
+  {
+    zcan.doSendPacket(zcan.createPacketBuilder().buildLocoSpeedPacket(loco));
+  }
+
   private boolean isSpeedPacket(Packet packet)
   {
     if (packet.getCommandGroup() == CommandGroup.LOCO && packet.getCommand() == CommandGroup.LOCO_SPEED) {

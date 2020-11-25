@@ -37,6 +37,7 @@ import at.or.reder.zcan20.packet.PacketAdapter;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
 import at.or.reder.zcan20.packet.PacketBuilder;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -261,6 +262,30 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     adapterFactory(null);
     data(null);
+    return build();
+  }
+
+  @Override
+  public Packet buildLoginPacket(String appName)
+  {
+    if (appName == null || appName.isBlank()) {
+      return buildLoginPacket();
+    }
+    commandGroup(CommandGroup.NETWORK);
+    command(CommandGroup.NETWORK_PORT_OPEN);
+    commandMode(CommandMode.COMMAND);
+    adapterFactory(null);
+    int dataLen = 8 + Math.min(appName.length(),
+                               24);
+    ByteBuffer buffer = Utils.allocateLEBuffer(dataLen);
+    buffer.putInt(0x100);
+    buffer.putInt(0x0);
+    String tmp = appName.substring(0,
+                                   Math.min(appName.length(),
+                                            24));
+    buffer.put(tmp.getBytes(StandardCharsets.ISO_8859_1));
+    buffer.clear();
+    data(buffer);
     return build();
   }
 

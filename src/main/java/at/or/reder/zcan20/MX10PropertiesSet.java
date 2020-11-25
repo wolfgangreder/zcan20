@@ -53,7 +53,10 @@ import org.openide.util.NbBundle.Messages;
            "MX10PropertySet_at.or.reder.zcan20.mx10.iotimeout_default=5",
            "MX10PropertySet_at.or.reder.zcan20.mx10.reconnecttimeout_name=Neuverbindungszeit",
            "MX10PropertySet_at.or.reder.zcan20.mx10.reconnecttimeout_desc=Nach welcher Zeitspanne soll nach einem Verbindungsabriss ein erneuter Verbindungsaufbau versucht werden.",
-           "MX10PropertySet_at.or.reder.zcan20.mx10.reconnecttimeout_default=5"})
+           "MX10PropertySet_at.or.reder.zcan20.mx10.reconnecttimeout_default=5",
+           "MX10PropertySet_at.or.reder.zcan20.mx10.appname_name=Anwendungsname",
+           "MX10PropertySet_at.or.reder.zcan20.mx10.appname_desc=Name der auf Fahrpulten angezeigt wird.",
+           "MX10PropertySet_at.or.reder.zcan20.mx10.appname_default="})
 public final class MX10PropertiesSet extends AbstractPropertySet implements PropertySet
 {
 
@@ -65,6 +68,7 @@ public final class MX10PropertiesSet extends AbstractPropertySet implements Prop
   public static final String PROP_PINGJITTER = "at.or.reder.zcan20.mx10.pingjitter";
   public static final String PROP_IOTIMEOUT = "at.or.reder.zcan20.mx10.iotimeout";
   public static final String PROP_RECONNECTTIMEOUT = "at.or.reder.zcan20.mx10.reconnecttimeout";
+  public static final String PROP_APPNAME = "at.or.reder.zcan20.mx10.appname";
   private static final Set<String> propertyNames;
 
   static {
@@ -75,7 +79,8 @@ public final class MX10PropertiesSet extends AbstractPropertySet implements Prop
                                                                             PROP_PINGINTERVALL,
                                                                             PROP_PINGJITTER,
                                                                             PROP_PORT,
-                                                                            PROP_RECONNECTTIMEOUT)));
+                                                                            PROP_RECONNECTTIMEOUT,
+                                                                            PROP_APPNAME)));
   }
 
   @Override

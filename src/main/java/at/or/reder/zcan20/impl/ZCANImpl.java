@@ -22,6 +22,7 @@ import at.or.reder.dcc.util.CanIdMatcher;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
+import at.or.reder.zcan20.MX10PropertiesSet;
 import at.or.reder.zcan20.PacketListener;
 import at.or.reder.zcan20.TrackConfig;
 import at.or.reder.zcan20.ZCAN;
@@ -189,6 +190,7 @@ public final class ZCANImpl implements ZCAN
   private final ZAccessoryControlImpl accessoryImpl;
   private final Lookup myLookup;
   private final Object lock;
+  private final String appName;
 
   public ZCANImpl(@NotNull ZPort port,
                   Map<String, String> properties,
@@ -204,6 +206,9 @@ public final class ZCANImpl implements ZCAN
     if (properties != null) {
       strNid = properties.getOrDefault(ZCANFactory.PROP_NID,
                                        ZCANFactory.DEFAULT_NID);
+      appName = properties.get(MX10PropertiesSet.PROP_APPNAME);
+    } else {
+      appName = null;
     }
     myNID = (short) Integer.parseInt(strNid,
                                      16);
@@ -224,6 +229,12 @@ public final class ZCANImpl implements ZCAN
                              locoControl,
                              requestProcessor,
                              accessoryImpl);
+  }
+
+  @Override
+  public String getAppName()
+  {
+    return appName;
   }
 
   @Override

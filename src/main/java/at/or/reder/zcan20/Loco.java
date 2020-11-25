@@ -52,6 +52,8 @@ public interface Loco extends AutoCloseable
   public void control(Direction dir,
                       int speed) throws IOException;
 
+  public void scanSpeed() throws IOException;
+
   public Integer getSpeed();
 
   public Direction getDirection();

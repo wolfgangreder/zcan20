@@ -43,6 +43,10 @@ public interface Locomotive extends AutoCloseable
   public void control(Direction dir,
                       int speed) throws IOException;
 
+  public void scanSpeed() throws IOException;
+
+  public void scanFunctions() throws IOException;
+
   public SortedMap<Integer, Integer> getFunctions();
 
   public default boolean isFunction(int iFunction)
@@ -119,17 +123,15 @@ public interface Locomotive extends AutoCloseable
                                                        l);
   }
 
-  public default void addLocomotiveTachoEventListener(int loco,
-                                                      LocomotiveTachoEventListener listener)
+  public default void addLocomotiveTachoEventListener(LocomotiveTachoEventListener listener)
   {
-    getController().addLocomotiveTachoEventListener(loco,
+    getController().addLocomotiveTachoEventListener(getAddress(),
                                                     listener);
   }
 
-  public default void removeLocomotiveTachoEventListener(int loco,
-                                                         LocomotiveTachoEventListener listener)
+  public default void removeLocomotiveTachoEventListener(LocomotiveTachoEventListener listener)
   {
-    getController().removeLocomotiveTachoEventListener(loco,
+    getController().removeLocomotiveTachoEventListener(getAddress(),
                                                        listener);
   }
 

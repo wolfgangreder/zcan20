@@ -96,6 +96,18 @@ public final class LocomotiveImpl implements Locomotive
   }
 
   @Override
+  public void scanSpeed() throws IOException
+  {
+    loco.scanSpeed();
+  }
+
+  @Override
+  public void scanFunctions() throws IOException
+  {
+    loco.scanFunctions();
+  }
+
+  @Override
   public SortedMap<Integer, Integer> getFunctions()
   {
     return loco.getAllFunctions();
@@ -105,7 +117,7 @@ public final class LocomotiveImpl implements Locomotive
   public void setFunctions(Map<Integer, Integer> functions) throws IOException
   {
     for (Map.Entry<Integer, Integer> e : functions.entrySet()) {
-      if (e.getValue() != null && e.getKey() != null && e.getKey() > 0 && e.getValue() < ZCAN.NUM_FUNCTION) {
+      if (e.getValue() != null && e.getKey() != null && e.getKey() >= 0 && e.getValue() < ZCAN.NUM_FUNCTION) {
         loco.setFunction(e.getKey(),
                          e.getValue());
       }
