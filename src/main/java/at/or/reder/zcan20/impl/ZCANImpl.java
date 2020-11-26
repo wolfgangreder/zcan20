@@ -366,7 +366,7 @@ public final class ZCANImpl implements ZCAN
           abortFlag.set(false);
           port.start();
           terminateResult = packetThread.submit(this::packetLoop);
-          Future<Ping> future = doSendPacket(createPacketBuilder().buildLoginPacket(),
+          Future<Ping> future = doSendPacket(createPacketBuilder().buildLoginPacket(getAppName()),
                                              new CanIdMatcher(CanId.valueOf(
                                                      CommandGroup.NETWORK,
                                                      CommandGroup.NETWORK_PING,

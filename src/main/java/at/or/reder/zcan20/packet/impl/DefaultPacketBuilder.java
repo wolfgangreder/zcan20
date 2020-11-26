@@ -271,15 +271,15 @@ public final class DefaultPacketBuilder implements PacketBuilder
     if (appName == null || appName.isBlank()) {
       return buildLoginPacket();
     }
-    commandGroup(CommandGroup.NETWORK);
+    commandGroup(CommandGroup.NETWORK_EXT);
     command(CommandGroup.NETWORK_PORT_OPEN);
     commandMode(CommandMode.COMMAND);
     adapterFactory(null);
     int dataLen = 8 + Math.min(appName.length(),
                                24);
     ByteBuffer buffer = Utils.allocateLEBuffer(dataLen);
-    buffer.putInt(0x100);
     buffer.putInt(0x0);
+    buffer.putInt(0x100);
     String tmp = appName.substring(0,
                                    Math.min(appName.length(),
                                             24));

@@ -145,6 +145,9 @@ public final class CommandGroup implements Serializable
                                                      NETWORK_PORT_CLOSE,
                                                      NETWORK_INTERFACE_OPTION,
                                                      NETWORK_ERROR);
+  public static final CommandGroup NETWORK_EXT = valueOf((byte) 0x1a,
+                                                         "NETWORK_EX",
+                                                         NETWORK_PORT_OPEN);
   public static final CommandGroup FILE_CONTROL = valueOf((byte) 0x0e,
                                                           "FILE CONTROL",
                                                           MAGIC_COMMAND_DISABLE);
