@@ -28,8 +28,8 @@ import at.or.reder.zcan20.impl.PacketSelectorImpl;
 public interface ModuleInfoPacketAdapter extends PacketAdapter
 {
 
-  public static final PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.CONFIG_0,
-                                                                       CommandGroup.CONFIG_0_UNKNOWN_2,
+  public static final PacketSelector SELECTOR = new PacketSelectorImpl(CommandGroup.CONFIG_CAN,
+                                                                       CommandGroup.CONFIG_CAN_UNKNOWN_2,
                                                                        CommandMode.ACK,
                                                                        8);
 

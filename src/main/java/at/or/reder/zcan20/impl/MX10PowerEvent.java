@@ -19,8 +19,7 @@ import at.or.reder.dcc.Controller;
 import at.or.reder.dcc.PowerEvent;
 import at.or.reder.dcc.PowerMode;
 import at.or.reder.dcc.PowerPort;
-import at.or.reder.zcan20.packet.PowerInfo;
-import at.or.reder.zcan20.packet.PowerStateInfo;
+import at.or.reder.zcan20.packet.PowerInfoEx;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
@@ -35,27 +34,20 @@ public final class MX10PowerEvent implements PowerEvent
   private final PowerPort port;
   private final PowerMode mode;
   private final Controller controller;
-  private final int sender;
   private final Lookup lookup;
+  private final PowerInfoEx powerInfo;
 
   public MX10PowerEvent(PowerPort port,
                         PowerMode mode,
                         Controller controller,
-                        int sender,
-                        PowerInfo powerInfo,
-                        PowerStateInfo powerState)
+                        PowerInfoEx powerInfo)
   {
     this.port = port;
     this.mode = mode;
     this.controller = controller;
-    this.sender = sender;
+    this.powerInfo = powerInfo;
     InstanceContent ic = new InstanceContent();
-    if (powerInfo != null) {
-      ic.add(powerInfo);
-    }
-    if (powerState != null) {
-      ic.add(powerState);
-    }
+    ic.add(powerInfo);
     lookup = new AbstractLookup(ic);
   }
 
@@ -80,7 +72,27 @@ public final class MX10PowerEvent implements PowerEvent
   @Override
   public int getSenderAddress()
   {
-    return sender;
+    return powerInfo.getSenderNid() & 0xffff;
+  }
+
+  @Override
+  public float getVoltage()
+  {
+    if (port != PowerPort.INPUT) {
+      return powerInfo.getOutputVoltage(port);
+    } else {
+      return powerInfo.getInputVoltage();
+    }
+  }
+
+  @Override
+  public float getCurrent()
+  {
+    if (port != PowerPort.INPUT) {
+      return powerInfo.getOutputCurrent(port);
+    } else {
+      return powerInfo.getInputCurrent();
+    }
   }
 
   @Override

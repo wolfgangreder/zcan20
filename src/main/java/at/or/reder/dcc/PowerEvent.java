@@ -26,4 +26,8 @@ public interface PowerEvent extends DCCEventObject
 
   public PowerMode getMode();
 
+  public float getVoltage();
+
+  public float getCurrent();
+
 }

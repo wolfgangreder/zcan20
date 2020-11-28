@@ -112,6 +112,25 @@ public final class CommandGroup implements Serializable
                                                   DATA_NAME_EXT,
                                                   DATA_LOCO_GUI_EXT);
   public static final byte CONFIG_POWER_INFO = 0x00;
+  /*
+  data[0]{2} = senderNid
+  data[2] = flags port 1 (main)
+            0x00 -> ein
+            0x01 -> aus
+            0x04 -> überstrom
+            0x10 -> sspf0
+            0x20 -> sspem
+  data[3] = ???
+  data[4]{2} = spannung [mV]
+  data[6]{2} = strom [mA]
+  data[8] = flags port 2 (prog)
+  data[9] = ???
+  data[10]{2} = spannung [mV]
+  data[12]{2} = strom [mA]
+  data[14]{4} = ???
+  data[18] = eingangsspannung [mV]
+  data[20] = eingangssrom [10mA]
+   */
   public static final byte CONFIG_TACHO = 0x05;  // Irgendwas mit dem Fahrzeugstatus (Decoderadressen werden gesendet) Geschwindigkeitsinformation
   /*
   data[3]: 1 -> getShort(3): tachoAnzeige
@@ -128,9 +147,11 @@ public final class CommandGroup implements Serializable
                                                     CONFIG_TACHO,
                                                     CONFIG_MODULE_INFO,
                                                     CONFIG_MODULE_POWER_INFO);
-  public static final byte CONFIG_0_UNKNOWN_2 = 0x02; // wird bei einem modulestart als ACK mit dlc=8 gesendet
-  public static final CommandGroup CONFIG_0 = valueOf((byte) 0x08,
-                                                      "CONFIG_0");
+  public static final byte CONFIG_CAN_UNKNOWN_2 = 0x02; // wird bei einem modulestart als ACK mit dlc=8 gesendet
+  public static final byte CONFIG_CAN_MAGIC = 0x08;
+  public static final CommandGroup CONFIG_CAN = valueOf(CONFIG_CAN_MAGIC,
+                                                        "CONFIG_CAN",
+                                                        CONFIG_POWER_INFO);
   public static final CommandGroup PUBLIC = valueOf((byte) 0x09,
                                                     "PUBLIC");
   public static final byte NETWORK_PING = 0x00;

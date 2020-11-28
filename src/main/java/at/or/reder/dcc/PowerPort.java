@@ -41,6 +41,8 @@ public enum PowerPort
         true),
   BOOSTER(128,
           true),
+  INPUT(0,
+        true),
   UNKNOWN(0,
           false);
   private final byte magic;

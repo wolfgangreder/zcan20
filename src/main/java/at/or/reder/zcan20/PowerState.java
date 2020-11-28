@@ -19,6 +19,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
+ * Powerstate zu 0x08 0x00
  *
  * @author Wolfgang Reder
  */

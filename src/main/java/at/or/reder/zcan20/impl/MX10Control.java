@@ -38,6 +38,7 @@ import at.or.reder.zcan20.Loco;
 import at.or.reder.zcan20.LocoControl;
 import at.or.reder.zcan20.MX10PropertiesSet;
 import at.or.reder.zcan20.PacketListener;
+import at.or.reder.zcan20.PowerStateEx;
 import at.or.reder.zcan20.SystemControl;
 import at.or.reder.zcan20.ZAccessoryControl;
 import at.or.reder.zcan20.ZCAN;
@@ -48,8 +49,7 @@ import at.or.reder.zcan20.packet.LocoFuncPacketAdapter;
 import at.or.reder.zcan20.packet.LocoSpeedPacketAdapter;
 import at.or.reder.zcan20.packet.LocoTachoPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.zcan20.packet.PowerInfo;
-import at.or.reder.zcan20.packet.PowerStateInfo;
+import at.or.reder.zcan20.packet.PowerInfoEx;
 import at.or.reder.zcan20.util.IndexedListenerSupport;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -60,13 +60,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.AbstractLookup;
@@ -222,8 +219,11 @@ final class MX10Control implements Controller
       case CommandGroup.CONFIG_MAGIC:
         dispatchConfig(packet);
         break;
+      case CommandGroup.CONFIG_CAN_MAGIC:
+        dispatchCanConfig(packet);
+        break;
       case CommandGroup.SYSTEM_MAGIC:
-        dispatchConfig(packet);
+        dispatchCanConfig(packet);
         break;
       case CommandGroup.TRACK_CONFIG_PUBLIC_MAGIC:
       case 0x06:
@@ -361,8 +361,43 @@ final class MX10Control implements Controller
     powerEventListener.remove(listener);
   }
 
-  private final ConcurrentMap<PowerPort, PowerStateInfo> lastPowerState = new ConcurrentHashMap<>();
-  private final AtomicReference<PowerInfo> powerInfo = new AtomicReference<>();
+//  private final ConcurrentMap<PowerPort, PowerStateInfo> lastPowerState = new ConcurrentHashMap<>();
+  private void dispatchCanConfig(Packet packet)
+  {
+    List<PowerEvent> events = new ArrayList<>();
+    for (PowerEvent evt : events) {
+      for (PowerEventListener l : powerEventListener) {
+        l.onPowerEvent(evt);
+      }
+    }
+  }
+
+  private PowerEvent createEventObject(PowerInfoEx pie,
+                                       PowerPort port)
+  {
+    Set<PowerStateEx> state = pie.getState(port);
+    if (state != null && !state.isEmpty()) {
+      PowerMode mode;
+      if (state.contains(PowerStateEx.OVERCURRENT)) {
+        mode = PowerMode.OVERCURRENT;
+      } else if (state.contains(PowerStateEx.SSPEM)) {
+        mode = PowerMode.SSPEM;
+      } else if (state.contains(PowerStateEx.SSPF0)) {
+        mode = PowerMode.SSPF0;
+      } else if (state.contains(PowerStateEx.OFF)) {
+        mode = PowerMode.OFF;
+      } else if (state.contains(PowerStateEx.RUN)) {
+        mode = PowerMode.ON;
+      } else {
+        mode = PowerMode.PENDING;
+      }
+      return new MX10PowerEvent(port,
+                                mode,
+                                this,
+                                pie);
+    }
+    return null;
+  }
 
   private void dispatchConfig(Packet packet)
   {
@@ -372,38 +407,14 @@ final class MX10Control implements Controller
       return;
     }
     List<PowerEvent> events = new ArrayList<>();
-    PowerInfo power = packet.getAdapter(PowerInfo.class);
+    PowerInfoEx power = packet.getAdapter(PowerInfoEx.class);
     if (power != null) {
-      powerInfo.set(power);
-      PowerStateInfo state1 = lastPowerState.get(PowerPort.OUT_1);
-      PowerStateInfo state2 = lastPowerState.get(PowerPort.OUT_2);
-      PowerMode mode = state1 != null ? state1.getMode().getSysteMode() : PowerMode.PENDING;
-      events.add(new MX10PowerEvent(PowerPort.OUT_1,
-                                    mode,
-                                    this,
-                                    packet.getSenderNID() & 0xffff,
-                                    power,
-                                    state1));
-      mode = state2 != null ? state2.getMode().getSysteMode() : PowerMode.PENDING;
-      events.add(new MX10PowerEvent(PowerPort.OUT_2,
-                                    mode,
-                                    this,
-                                    packet.getSenderNID() & 0xffff,
-                                    power,
-                                    state2));
-    } else {
-      PowerStateInfo powerState = packet.getAdapter(PowerStateInfo.class);
-      if (powerState != null) {
-        lastPowerState.put(powerState.getOutput(),
-                           powerState);
-        PowerInfo info = powerInfo.get();
-        PowerMode mode = powerState.getMode().getSysteMode();
-        events.add(new MX10PowerEvent(powerState.getOutput(),
-                                      mode,
-                                      this,
-                                      packet.getSenderNID() & 0xffff,
-                                      info,
-                                      powerState));
+      for (PowerPort p : PowerPort.values()) {
+        PowerEvent evt = createEventObject(power,
+                                           p);
+        if (evt != null) {
+          events.add(evt);
+        }
       }
     }
     for (PowerEvent evt : events) {
