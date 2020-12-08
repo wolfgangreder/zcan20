@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Wolfgang Reder.
+ * Copyright 2017-2020 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,16 @@ import java.nio.ByteOrder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
@@ -96,6 +100,19 @@ public final class Utils
   {
     ByteBuffer result = ByteBuffer.allocate(size);
     result.order(ByteOrder.LITTLE_ENDIAN);
+    return result;
+  }
+
+  /**
+   * Allocates a ByteBuffer with byteorder {@code ByteOrder.BIG_ENDIAN}.
+   *
+   * @param size size of buffer
+   * @return a Buffer with byteorder {@code ByteOrder.BIG_ENDIAN}
+   */
+  public static ByteBuffer allocateBEBuffer(int size)
+  {
+    ByteBuffer result = ByteBuffer.allocate(size);
+    result.order(ByteOrder.BIG_ENDIAN);
     return result;
   }
 
@@ -398,7 +415,7 @@ public final class Utils
   {
     Objects.requireNonNull(value,
                            "value is null");
-    if (value.length <= offset + len) {
+    if (value.length < offset + len) {
       throw new IndexOutOfBoundsException();
     }
     ByteBuffer buffer = ByteBuffer.wrap(value,
@@ -644,33 +661,6 @@ public final class Utils
     return tmp.toString();
   }
 
-  public static <C> Set<C> unmodifiableSetOf(C c1,
-                                             C c2)
-  {
-    return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(c1,
-                                                                   c2)));
-  }
-
-  public static <C> Set<C> unmodifiableSetOf(C c1,
-                                             C c2,
-                                             C c3)
-  {
-    return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(c1,
-                                                                   c2,
-                                                                   c3)));
-  }
-
-  public static <C> Set<C> unmodifiableSetOf(C c1,
-                                             C c2,
-                                             C c3,
-                                             C c4)
-  {
-    return Collections.unmodifiableSet(new HashSet<>(Arrays.asList(c1,
-                                                                   c2,
-                                                                   c3,
-                                                                   c4)));
-  }
-
   private static OSType osType;
 
   public static synchronized OSType getOSType()
@@ -688,6 +678,34 @@ public final class Utils
     return osType;
   }
 
+  private static OSPlatform osPlatform;
+
+  public static synchronized OSPlatform getOSPlatform()
+  {
+    if (osPlatform == null) {
+      String arch = System.getProperty("os.arch");
+      String dataModel = System.getProperty("sun.arch.data.model");
+      switch (arch) {
+        case "i386":
+          osPlatform = OSPlatform.I586;
+          break;
+        case "arm":
+          if ("32".equals(dataModel)) {
+            osPlatform = OSPlatform.ARM32;
+          } else {
+            osPlatform = OSPlatform.ARM64;
+          }
+          break;
+        case "amd64":
+          osPlatform = OSPlatform.AMD64;
+          break;
+        default:
+          osPlatform = OSPlatform.UNKNOWN;
+      }
+    }
+    return osPlatform;
+  }
+
   public static boolean isWindows()
   {
     return getOSType() == OSType.WINDOWS;
@@ -698,23 +716,90 @@ public final class Utils
     return getOSType() == OSType.LINUX;
   }
 
-  public static short crc16(ByteBuffer bufferIn)
+  /*
+   x⁸ + x⁵ + x⁴ + 1
+   1 0 0 0 1 1 0 0 1
+  |   8   |   c   |
+   */
+  public static byte crc8(byte crcIn,
+                          ByteBuffer bufferIn)
   {
-    short crc = 0;
-    ByteBuffer buffer = bufferIn.flip();
-    while (buffer.hasRemaining()) {
-      byte b = buffer.get();
-      for (int n = 0; n < 8; ++n) {
-        int s = b & 0x01;
-        if ((crc & 0x8000) != 0) {
-          crc = (short) ((crc * 2 + s) ^ 0x1021);
-        } else {
-          crc = (short) (crc * 2 + s);
+    return (byte) crc(crcIn & 0xff,
+                      bufferIn,
+                      0x8c);
+  }
+
+  /*
+  x¹⁶ + x¹² + x⁵+1
+  1000 1000 0001 0000 1
+  8     8    1    0
+   */
+  public static short crc16(short crcIn,
+                            ByteBuffer bufferIn)
+  {
+    return (short) crc(crcIn & 0xffff,
+                       bufferIn,
+                       0x8810);
+  }
+
+  public static int crc(int crcIn,
+                        ByteBuffer bufferIn,
+                        int poly)
+  {
+    int crc = crcIn;
+    ByteBuffer buf = bufferIn.duplicate();
+    while (buf.hasRemaining()) {
+      int b = buf.get() & 0xff;
+      for (int i = 0; i < 8; ++i) {
+        boolean mix = ((crc ^ b) & 0x01) != 0;
+        crc >>= 1;
+        if (mix) {
+          crc ^= poly;
         }
-        b = (byte) (b >> 1);
+        b >>= 1;
       }
     }
     return crc;
+  }
+
+  public static <V> List<V> copyToUnmodifiableList(Collection<? extends V> in,
+                                                   Predicate<V> filter)
+  {
+    return copyToUnmodifiable(in,
+                              ArrayList::new,
+                              Collections::unmodifiableList,
+                              Collections::emptyList,
+                              filter != null ? filter : Predicates::isNotNull);
+  }
+
+  public static <E extends Enum<E>> Set<E> copyToUnmodifiableEnumSet(Collection<? extends E> in,
+                                                                     @NotNull Class<E> valueClazz,
+                                                                     Predicate<E> filter)
+  {
+    return copyToUnmodifiable(in,
+                              () -> EnumSet.noneOf(valueClazz),
+                              Collections::unmodifiableSet,
+                              Collections::emptySet,
+                              filter != null ? filter : Predicates::isNotNull);
+  }
+
+  public static <V, C extends Collection<V>> C copyToUnmodifiable(Collection<? extends V> in,
+                                                                  @NotNull Supplier<C> resultConstructor,
+                                                                  @NotNull Function<? super C, C> unmodifiable,
+                                                                  @NotNull Supplier<C> emptyConstructor,
+                                                                  Predicate<? super V> filter)
+  {
+    if (in == null || in.isEmpty()) {
+      return emptyConstructor.get();
+    }
+    C tmp = resultConstructor.get();
+    Predicate<? super V> theFilter = filter != null ? filter : (v) -> true;
+    in.stream().filter(theFilter).forEach(tmp::add);
+    if (tmp.isEmpty()) {
+      return emptyConstructor.get();
+    } else {
+      return unmodifiable.apply(tmp);
+    }
   }
 
   private Utils()

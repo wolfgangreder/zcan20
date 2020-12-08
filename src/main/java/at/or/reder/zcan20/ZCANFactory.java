@@ -16,6 +16,7 @@
 package at.or.reder.zcan20;
 
 import at.or.reder.zcan20.impl.UDPPort;
+import at.or.reder.zcan20.impl.VCOMPort;
 import at.or.reder.zcan20.impl.ZCANImpl;
 import at.or.reder.zcan20.impl.ZPort;
 import at.or.reder.zcan20.packet.PacketBuilder;
@@ -82,7 +83,13 @@ public final class ZCANFactory
   public static ZCAN open(@NotNull final String commPort,
                           Map<String, String> properties) throws IOException
   {
-    throw new UnsupportedOperationException("not implemented yet");
+    ZPort port = new VCOMPort(commPort);
+    ZCANImpl result = new ZCANImpl(port,
+                                   properties,
+                                   null);
+    result.open(1,
+                TimeUnit.SECONDS);
+    return result;
   }
 
   /**

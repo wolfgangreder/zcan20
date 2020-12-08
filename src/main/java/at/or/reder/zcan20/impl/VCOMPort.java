@@ -235,7 +235,8 @@ public final class VCOMPort implements ZPort
   {
     ByteBuffer b = receiveBuffer.flip();
     b.limit(b.limit() - 2);
-    short crc = Utils.crc16(b);
+    short crc = Utils.crc16((short) 0,
+                            b);
     short crcRead = receiveBuffer.getShort(receiveBuffer.limit() - 2);
     return crc == crcRead;
   }

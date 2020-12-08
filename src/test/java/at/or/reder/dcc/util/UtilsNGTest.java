@@ -5,7 +5,6 @@
  */
 package at.or.reder.dcc.util;
 
-import at.or.reder.dcc.util.Utils;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
@@ -320,6 +319,17 @@ public class UtilsNGTest
                  Utils.byte3(i));
     assertEquals((byte) 0x00,
                  Utils.byte4(i));
+  }
+
+  @Test
+  public void testCrc8()
+  {
+    ByteBuffer buffer = ByteBuffer.wrap(new byte[]{(byte) 0x88, 0x00, 0x01});
+    byte crc = Utils.crc8((byte) 0xff,
+                          buffer);
+    byte expected = (byte) 0xcb;
+    assertEquals(expected,
+                 crc);
   }
 
 }

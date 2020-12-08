@@ -18,7 +18,6 @@ package at.or.reder.zcan20.ui;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.LogManager;
-import javax.swing.SwingUtilities;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -67,16 +66,17 @@ public class Main
 
   public void run()
   {
-    SwingUtilities.invokeLater(() -> {
-      switch (mode) {
-        case BUILDER:
-          new CANBuilder(commandLine).setVisible(true);
-          break;
-        default:
-          new PacketLogger(commandLine).setVisible(true);
-          break;
-      }
-    });
+    new MX1Tester().run();
+//    SwingUtilities.invokeLater(() -> {
+//      switch (mode) {
+//        case BUILDER:
+//          new CANBuilder(commandLine).setVisible(true);
+//          break;
+//        default:
+//          new PacketLogger(commandLine).setVisible(true);
+//          break;
+//      }
+//    });
   }
 
   public static void main(String[] args) throws IOException, ParseException
