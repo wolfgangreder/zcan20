@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Wolfgang Reder.
+ * Copyright 2019-2020 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package at.or.reder.zcan20.impl;
 
+import at.or.reder.dcc.DCCConstants;
 import at.or.reder.dcc.Direction;
 import at.or.reder.dcc.util.Utils;
 import at.or.reder.zcan20.CommandGroup;
@@ -81,7 +82,7 @@ final class LocoImpl implements Loco
     RequestProcessor rp = zcan.getLookup().lookup(RequestProcessor.class);
     pingTask = rp.create(this::sendLocoPing,
                          true);
-    for (int i = 0; i < ZCAN.NUM_FUNCTION; ++i) {
+    for (int i = 0; i < DCCConstants.NUM_FUNCTION; ++i) {
       _functions.put(i,
                      null);
     }
@@ -91,7 +92,7 @@ final class LocoImpl implements Loco
   @Override
   public void scanFunctions() throws IOException
   {
-    for (int i = 0; i < ZCAN.NUM_FUNCTION; ++i) {
+    for (int i = 0; i < DCCConstants.NUM_FUNCTION; ++i) {
       zcan.doSendPacket(zcan.createPacketBuilder().buildLocoFunctionPacket(loco,
                                                                            (short) i));
     }
@@ -325,7 +326,7 @@ final class LocoImpl implements Loco
   @Override
   public Integer getFunction(int iFunction)
   {
-    if (iFunction >= 0 && iFunction < ZCAN.NUM_FUNCTION) {
+    if (iFunction >= 0 && iFunction < DCCConstants.NUM_FUNCTION) {
       synchronized (getLock()) {
         return _functions.get(iFunction);
       }

@@ -15,7 +15,6 @@
  */
 package at.or.reder.dcc;
 
-import at.or.reder.zcan20.ZCAN;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -51,7 +50,7 @@ public interface Locomotive extends AutoCloseable
 
   public default boolean isFunction(int iFunction)
   {
-    if (iFunction < 0 || iFunction >= ZCAN.NUM_FUNCTION) {
+    if (iFunction < 0 || iFunction >= DCCConstants.NUM_FUNCTION) {
       throw new IndexOutOfBoundsException();
     }
     Integer v = getFunctions().get(iFunction);
@@ -60,7 +59,7 @@ public interface Locomotive extends AutoCloseable
 
   public default Integer getFunction(int iFunction)
   {
-    if (iFunction < 0 || iFunction >= ZCAN.NUM_FUNCTION) {
+    if (iFunction < 0 || iFunction >= DCCConstants.NUM_FUNCTION) {
       throw new IndexOutOfBoundsException();
     }
     return getFunctions().get(iFunction);
@@ -69,7 +68,7 @@ public interface Locomotive extends AutoCloseable
   public default void setFunction(int iFunction,
                                   boolean val) throws IOException
   {
-    if (iFunction < 0 || iFunction >= ZCAN.NUM_FUNCTION) {
+    if (iFunction < 0 || iFunction >= DCCConstants.NUM_FUNCTION) {
       throw new IndexOutOfBoundsException();
     }
     setFunctions(Collections.singletonMap(iFunction,
@@ -79,7 +78,7 @@ public interface Locomotive extends AutoCloseable
   public default void setFunction(int iFunction,
                                   int val) throws IOException
   {
-    if (iFunction < 0 || iFunction >= ZCAN.NUM_FUNCTION) {
+    if (iFunction < 0 || iFunction >= DCCConstants.NUM_FUNCTION) {
       throw new IndexOutOfBoundsException();
     }
     setFunctions(Collections.singletonMap(iFunction,

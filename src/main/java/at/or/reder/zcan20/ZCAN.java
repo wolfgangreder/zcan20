@@ -26,7 +26,6 @@ import org.openide.util.Lookup;
 public interface ZCAN extends AutoCloseable, Lookup.Provider
 {
 
-  public static final int NUM_FUNCTION = 29;
   public static final Logger LOGGER = Logger.getLogger("at.or.reder.zcan20");
 
   public LinkState getLinkState();

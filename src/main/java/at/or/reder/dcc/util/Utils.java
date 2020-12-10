@@ -15,6 +15,7 @@
  */
 package at.or.reder.dcc.util;
 
+import at.or.reder.dcc.DCCConstants;
 import at.or.reder.zcan20.packet.Packet;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -717,9 +718,9 @@ public final class Utils
   }
 
   /*
-   x⁸ + x⁵ + x⁴ + 1
-   1 0 0 0 1 1 0 0 1
-  |   8   |   c   |
+   * x⁸ + x⁵ + x⁴ + 1
+   * 1000 1100 1
+   * 8 c
    */
   public static byte crc8(byte crcIn,
                           ByteBuffer bufferIn)
@@ -730,9 +731,9 @@ public final class Utils
   }
 
   /*
-  x¹⁶ + x¹² + x⁵+1
-  1000 1000 0001 0000 1
-  8     8    1    0
+   * x¹⁶ + x¹² + x⁵+1
+   * 1000 1000 0001 0000 1
+   * 8 8 1 0
    */
   public static short crc16(short crcIn,
                             ByteBuffer bufferIn)
@@ -799,6 +800,120 @@ public final class Utils
       return emptyConstructor.get();
     } else {
       return unmodifiable.apply(tmp);
+    }
+  }
+
+  /**
+   * Erzeugt aus der Adresse {@code address}, das CV-Paar CV17/18.
+   * Im ersten Byte liegt CV18, im zweiten (höherwertigen) CV17
+   *
+   * @param address
+   * @return Adresspaar 17/18 oder -1 falls es sich um eine Adresse &lt;1 oder &gt;{@code DCCConstants.ADDRESS_MAX}
+   */
+  public static int encodeLongAddress(int address)
+  {
+    if (address < 1 || address > DCCConstants.ADDRESS_MAX) {
+      return -1;
+    }
+    return 0xc000 | (address & 0x3fff);
+  }
+
+  public static int encodeCV17(int address)
+  {
+    int enc = encodeLongAddress(address);
+    if (enc != -1) {
+      return byte2(enc) & 0xff;
+    }
+    return -1;
+  }
+
+  public static int encodeCV18(int address)
+  {
+    int enc = encodeLongAddress(address);
+    if (enc != -1) {
+      return byte1(enc) & 0xff;
+    }
+    return -1;
+  }
+
+  public static int decodeLongAddress(int cv17,
+                                      int cv18)
+  {
+    if (((cv17 & ~0xff) != 0) || ((cv18 & ~0xff) != 0) || ((cv17 & 0xc0) != 0xc0)) {
+      return -1;
+    }
+    int result = ((cv17 & 0x3f) << 8) + cv18;
+    if (result > DCCConstants.ADDRESS_MAX) {
+      return -1;
+    }
+    return result;
+  }
+
+  /**
+   * Erzeugt aus der Adresse {@code address}, das CV-Paar CV19/20.Im ersten Byte liegt CV19, um zweite (höherwertigen) CV20
+   *
+   * @param address
+   * @param invertDirection
+   * @return addresspar 19/20 oder -1 falls es sich um eine adresse&lt;0 oder &gt;10239
+   */
+  public static int encodeConsistAddress(int address,
+                                         boolean invertDirection)
+  {
+    if (address < 0 || address > DCCConstants.ADDRESS_MAX) {
+      return -1;
+    }
+    if (address == 0) {
+      return 0;
+    }
+    int cv19;
+    int cv20;
+    if (address > DCCConstants.ADDRESS_SHORT_MAX) { // CV20 ist notwendig!
+      cv19 = address % 100;
+      cv20 = address / 100;
+    } else {
+      cv19 = address;
+      cv20 = 0;
+    }
+    return (cv20 << 8) + (cv19 + (invertDirection ? 0x80 : 0));
+  }
+
+  public static int encodeCV19(int address,
+                               boolean invertDirection)
+  {
+    int enc = encodeConsistAddress(address,
+                                   invertDirection);
+    if (enc != -1) {
+      return byte1(enc) & 0xff;
+    }
+    return -1;
+  }
+
+  public static int encodeCV20(int address)
+  {
+    int enc = encodeConsistAddress(address,
+                                   false);
+    if (enc != -1) {
+      return byte2(enc) & 0xff;
+    }
+    return -1;
+  }
+
+  public static boolean isConsistsDirectionInverted(int cv19)
+  {
+    return (cv19 & 0x80) != 0;
+  }
+
+  public static int decodeConsistsAddress(int cv19,
+                                          int cv20)
+  {
+    if (cv19 < 0 || cv19 > 0xff || cv20 < 0 || cv20 > 0xff) {
+      return -1;
+    }
+    if (cv20 == 0) {
+      return (cv19 & ~0x80) != 0 ? cv19 & ~0x80 : -1;
+    } else {
+      int tmp = (cv19 & ~0x80) + cv20 * 100;
+      return tmp > DCCConstants.ADDRESS_MAX ? -1 : tmp;
     }
   }
 

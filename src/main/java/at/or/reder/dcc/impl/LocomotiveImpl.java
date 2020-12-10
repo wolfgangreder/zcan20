@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Wolfgang Reder.
+ * Copyright 2019-2020 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 package at.or.reder.dcc.impl;
 
 import at.or.reder.dcc.Controller;
+import at.or.reder.dcc.DCCConstants;
 import at.or.reder.dcc.Direction;
 import at.or.reder.dcc.Locomotive;
 import at.or.reder.zcan20.Loco;
-import at.or.reder.zcan20.ZCAN;
 import java.io.IOException;
 import java.util.Map;
 import java.util.SortedMap;
@@ -117,7 +117,7 @@ public final class LocomotiveImpl implements Locomotive
   public void setFunctions(Map<Integer, Integer> functions) throws IOException
   {
     for (Map.Entry<Integer, Integer> e : functions.entrySet()) {
-      if (e.getValue() != null && e.getKey() != null && e.getKey() >= 0 && e.getValue() < ZCAN.NUM_FUNCTION) {
+      if (e.getValue() != null && e.getKey() != null && e.getKey() >= 0 && e.getValue() < DCCConstants.NUM_FUNCTION) {
         loco.setFunction(e.getKey(),
                          e.getValue());
       }
@@ -127,7 +127,7 @@ public final class LocomotiveImpl implements Locomotive
   @Override
   public void toggleFunction(int iFunction) throws IOException
   {
-    if (iFunction < 0 || iFunction >= ZCAN.NUM_FUNCTION) {
+    if (iFunction < 0 || iFunction >= DCCConstants.NUM_FUNCTION) {
       throw new IndexOutOfBoundsException();
     }
     Integer i = loco.getFunction(iFunction);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Wolfgang Reder.
+ * Copyright 2019-2020 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package at.or.reder.dcc.util;
 
-import at.or.reder.dcc.util.HexStringInputStream;
 import java.io.IOException;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.BeforeClass;
