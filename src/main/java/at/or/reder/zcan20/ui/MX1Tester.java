@@ -16,13 +16,20 @@
 package at.or.reder.zcan20.ui;
 
 import at.or.reder.dcc.LinkState;
-import at.or.reder.mx1.CVPacketAdapter;
+import at.or.reder.dcc.PowerMode;
 import at.or.reder.mx1.MX1;
 import at.or.reder.mx1.MX1Factory;
-import at.or.reder.mx1.MX1PacketObject;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import javax.swing.event.ChangeEvent;
 import org.openide.util.Exceptions;
 
@@ -35,7 +42,15 @@ public class MX1Tester
 
   boolean linkStateSet;
   boolean cvPacketReceived;
-  int cv8Value;
+
+  private void printResult(int cv,
+                           int val,
+                           long start,
+                           long end)
+  {
+    System.err.println(MessageFormat.format("CV #{0,number,0} read with value #{1,number,0} in {2,number,0}ms",
+                                            new Object[]{cv, val, end - start}));
+  }
 
   public void run()
   {
@@ -43,23 +58,51 @@ public class MX1Tester
     try (MX1 mx1 = MX1Factory.open("/dev/ttyACM0",
                                    config)) {
       mx1.addChangeListener(this::onLinkStateChanged);
-      mx1.addMX1PacketListener(this::onPacket);
+      List<Integer> toRead = new ArrayList<>();
+      for (int i = 1; i <= 256; ++i) {
+        toRead.add(i);
+      }
       synchronized (this) {
         while (!linkStateSet) {
           this.wait();
         }
       }
-      System.err.println("Linkstate=" + mx1.getLinkState());
+      Map<Integer, Integer> result = new TreeMap<>();
       if (mx1.getLinkState() == LinkState.CONNECTED) {
-        mx1.readCV(0,
-                   8);
-        synchronized (this) {
-          while (!cvPacketReceived) {
-            this.wait();
+        try {
+          mx1.setPowerMode(PowerMode.ON);
+          for (int round = 0; !toRead.isEmpty() && round < 5; round++) {
+            ListIterator<Integer> iter = toRead.listIterator();
+            while (iter.hasNext()) {
+              long start = System.currentTimeMillis();
+              int cv = iter.next();
+              int value = mx1.readCV(0,
+                                     cv,
+                                     10,
+                                     TimeUnit.SECONDS);
+              if (value != -1) {
+                result.put(cv,
+                           value);
+                iter.remove();
+              }
+              printResult(cv,
+                          value,
+                          start,
+                          System.currentTimeMillis());
+            }
           }
+        } finally {
+          mx1.setPowerMode(PowerMode.OFF);
         }
       }
-      System.err.println("CV8=" + cv8Value);
+      try (Writer writer = new FileWriter("/home/wolfi/cvlist.csv")) {
+        for (Map.Entry<Integer, Integer> e : result.entrySet()) {
+          writer.write(e.getKey());
+          writer.write(";");
+          writer.write(e.getValue());
+          writer.write("\n");
+        }
+      }
     } catch (InterruptedException | IOException ex) {
       Exceptions.printStackTrace(ex);
     }
@@ -71,20 +114,6 @@ public class MX1Tester
     synchronized (this) {
       linkStateSet = true;
       this.notifyAll();
-    }
-  }
-
-  private void onPacket(MX1PacketObject evt)
-  {
-    CVPacketAdapter cva = evt.getPacket().getAdapter(CVPacketAdapter.class);
-    if (cva != null) {
-      if (cva.getCV() == 8) {
-        cv8Value = cva.getValue();
-        synchronized (this) {
-          cvPacketReceived = true;
-          this.notifyAll();
-        }
-      }
     }
   }
 

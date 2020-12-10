@@ -97,7 +97,7 @@ final class CVPacketAdapterImpl extends AbstractPacketAdapter implements CVPacke
   public int getValue()
   {
     if (hasData()) {
-      return getPacket().getData().get(5);
+      return getPacket().getData().get(5) & 0xff;
     } else {
       return -1;
     }

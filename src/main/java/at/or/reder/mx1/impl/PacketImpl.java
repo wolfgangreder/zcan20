@@ -36,7 +36,8 @@ final class PacketImpl implements MX1Packet
   private final Set<MX1PacketFlags> flags;
   private final MX1Command command;
   private final ByteBuffer payload;
-  private final MX1PacketAdapter adapter;
+  private boolean adapterCreated;
+  private MX1PacketAdapter adapter;
   private String toString;
 
   PacketImpl(byte sequence,
@@ -44,7 +45,7 @@ final class PacketImpl implements MX1Packet
              @NotNull MX1Command command,
              ByteBuffer payload)
   {
-    this.sequence = sequence;
+    this.sequence = sequence & 0xff;
     this.command = Objects.requireNonNull(command,
                                           "command is null");
     this.flags = Utils.copyToUnmodifiableEnumSet(Objects.requireNonNull(flags,
@@ -60,30 +61,7 @@ final class PacketImpl implements MX1Packet
     }
     tmp.rewind();
     this.payload = tmp.asReadOnlyBuffer();
-    switch (command) {
-      case RW_DECODER_CV:
-        adapter = new CVPacketAdapterImpl(this);
-        break;
-      case ACCEL:
-      case ACCESSORY:
-      case ADDRESS_CONTROL:
-      case CS_EQ_QUERY:
-      case CURRENT_DECODER_MEM:
-      case CURRENT_LOCO_MEM:
-      case INVERT_FUNCTION:
-      case LOCO_CONTROL:
-      case NACK:
-      case QUERY_CS_DECODER:
-      case QUERY_CS_LOCO:
-      case READ_CS_IO:
-      case RESET:
-      case RW_CS_CV:
-      case SERIAL_INFO:
-      case SHUTTLE_TRAIN:
-      case TRACK_CONTROL:
-      default:
-        adapter = null;
-    }
+
     toString = null; // hilft bei debuggen, und kostet nicht viel
   }
 
@@ -126,9 +104,42 @@ final class PacketImpl implements MX1Packet
   @Override
   public <A extends MX1PacketAdapter> A getAdapter(@NotNull Class<? extends A> clazz)
   {
+    MX1PacketAdapter currentAdapter;
+    synchronized (this) {
+      if (!adapterCreated) {
+        switch (command) {
+          case RW_DECODER_CV:
+            adapter = new CVPacketAdapterImpl(this);
+            break;
+          case TRACK_CONTROL:
+            adapter = new PowerModePacketAdapterImpl(this);
+            break;
+          case ACCEL:
+          case ACCESSORY:
+          case ADDRESS_CONTROL:
+          case CS_EQ_QUERY:
+          case CURRENT_DECODER_MEM:
+          case CURRENT_LOCO_MEM:
+          case INVERT_FUNCTION:
+          case LOCO_CONTROL:
+          case NACK:
+          case QUERY_CS_DECODER:
+          case QUERY_CS_LOCO:
+          case READ_CS_IO:
+          case RESET:
+          case RW_CS_CV:
+          case SERIAL_INFO:
+          case SHUTTLE_TRAIN:
+          default:
+            adapter = null;
+        }
+        adapterCreated = true;
+      }
+      currentAdapter = adapter;
+    }
     if (Objects.requireNonNull(clazz,
-                               "clazz is null").isInstance(adapter)) {
-      return clazz.cast(adapter);
+                               "clazz is null").isInstance(currentAdapter)) {
+      return clazz.cast(currentAdapter);
     }
     return null;
   }
@@ -139,17 +150,19 @@ final class PacketImpl implements MX1Packet
     synchronized (this) {
       if (toString == null) {
         StringBuilder tmp = new StringBuilder("M1Packet: #");
-        tmp.append(sequence);
+        tmp.append(sequence & 0xff);
         tmp.append(", ");
         tmp.append(flags.stream().map(MX1PacketFlags::name).collect(Collectors.joining(",",
                                                                                        "[",
                                                                                        "]")));
         tmp.append(", ");
         tmp.append(command.name());
-        tmp.append(", ");
-        Utils.byteBuffer2HexString(payload,
-                                   tmp,
-                                   ' ');
+        if (payload.hasRemaining()) {
+          tmp.append(", ");
+          Utils.byteBuffer2HexString(payload,
+                                     tmp,
+                                     ' ');
+        }
         toString = tmp.toString();
       }
       return toString;

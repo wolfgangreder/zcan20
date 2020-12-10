@@ -28,7 +28,7 @@ import javax.validation.constraints.NotNull;
 abstract class AbstractPacketAdapter implements MX1PacketAdapter
 {
 
-  private final MX1Packet packet;
+  protected final MX1Packet packet;
 
   public AbstractPacketAdapter(@NotNull MX1Packet packet)
   {

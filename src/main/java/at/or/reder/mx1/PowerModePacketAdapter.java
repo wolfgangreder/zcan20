@@ -15,26 +15,15 @@
  */
 package at.or.reder.mx1;
 
-import at.or.reder.dcc.TrackProtocol;
+import at.or.reder.dcc.PowerMode;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface CVPacketAdapter extends MX1PacketAdapter
+public interface PowerModePacketAdapter extends MX1PacketAdapter
 {
 
-  public TrackProtocol getTrackProtocol();
-
-  public int getAddress();
-
-  public int getCV();
-
-  public int getValue();
-
-  public static boolean isValidPacket(MX1Packet packet)
-  {
-    return packet.getCommand() == MX1Command.RW_DECODER_CV;
-  }
+  public PowerMode getPowerMode();
 
 }

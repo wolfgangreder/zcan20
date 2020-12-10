@@ -58,6 +58,7 @@ final class MX1PortImpl implements MX1Port
     ST_SOH,
     ST_DATA,
     ST_ESCAPE_START,
+    ST_ESCAPED_DATA,
     ERROR;
   }
   public static final Logger LOGGER = Logger.getLogger("at.or.reder.mx1.port");
@@ -79,7 +80,6 @@ final class MX1PortImpl implements MX1Port
   private ByteBuffer outBuffer;
   private ByteBuffer inBuffer;
   private State readerState = State.INIT;
-  private State pushedState = State.ERROR;
 
   public MX1PortImpl(@NotNull String port)
   {
@@ -332,7 +332,9 @@ final class MX1PortImpl implements MX1Port
         result = doSOH(b);
         break;
       case ST_DATA:
-        result = doData(b);
+      case ST_ESCAPED_DATA:
+        result = doData(b,
+                        stateIn);
         break;
       case ST_ESCAPE_START:
         result = doEscapeStart(b);
@@ -362,7 +364,7 @@ final class MX1PortImpl implements MX1Port
           bytesRead.limit(read);
           bytesRead.rewind();
           if (!bytesRead.hasRemaining()) {
-            return;
+            continue;
           }
           while (bytesRead.hasRemaining()) {
             byte b = bytesRead.get();
@@ -400,21 +402,22 @@ final class MX1PortImpl implements MX1Port
   private State checkEscape(byte b,
                             State out)
   {
-    if (b == DLE) {
-      pushedState = readerState;
+    if (readerState != State.ST_ESCAPE_START && b == DLE) {
       return State.ST_ESCAPE_START;
     }
     return out;
   }
 
-  private State doData(byte b)
+  private State doData(byte b,
+                       State stateIn)
   {
     State result;
     result = checkEscape(b,
                          State.ST_DATA);
     if (result != State.ST_ESCAPE_START) {
-      if (b != EOT) {
+      if (b != EOT || stateIn == State.ST_ESCAPED_DATA) {
         inBuffer.put(b);
+        result = State.ST_DATA;
       } else {
         ByteBuffer receivedData = ByteBuffer.allocate(inBuffer.position());
         inBuffer.limit(inBuffer.position());
@@ -439,9 +442,8 @@ final class MX1PortImpl implements MX1Port
       case DLE:
       case SOH:
       case EOT:
-        result = processByte(pushedState,
+        result = processByte(State.ST_ESCAPED_DATA,
                              r);
-        pushedState = State.ERROR;
     }
     return result;
   }
@@ -493,6 +495,9 @@ final class MX1PortImpl implements MX1Port
                                 flags,
                                 command,
                                 payload);
+        MX1Packet p = packet;
+        READ_LOGGER.log(Level.FINER,
+                        () -> "Dispatch Packet " + p.toString());
       } else {
         READ_LOGGER.log(Level.SEVERE,
                         "CRC mismatch");

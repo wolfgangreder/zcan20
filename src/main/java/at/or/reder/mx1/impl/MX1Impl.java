@@ -16,7 +16,9 @@
 package at.or.reder.mx1.impl;
 
 import at.or.reder.dcc.LinkState;
+import at.or.reder.dcc.PowerMode;
 import at.or.reder.dcc.util.Utils;
+import at.or.reder.mx1.CVPacketAdapter;
 import at.or.reder.mx1.MX1;
 import at.or.reder.mx1.MX1Command;
 import at.or.reder.mx1.MX1Packet;
@@ -24,12 +26,16 @@ import at.or.reder.mx1.MX1PacketFlags;
 import at.or.reder.mx1.MX1PacketListener;
 import at.or.reder.mx1.MX1PacketObject;
 import at.or.reder.mx1.MX1Port;
+import at.or.reder.mx1.PowerModePacketAdapter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeEvent;
@@ -68,14 +74,18 @@ public class MX1Impl implements MX1
   }
 
   @Override
-  public LinkState getLinkState()
+  public synchronized LinkState getLinkState()
   {
     return linkState;
   }
 
   private void setLinkState(LinkState ls)
   {
-    linkState = ls;
+    synchronized (this) {
+      LOGGER.log(Level.FINEST,
+                 "Setting linkState to " + ls.name());
+      linkState = ls;
+    }
     ChangeEvent evt = new ChangeEvent(this);
     for (ChangeListener lsl : linkStateListener) {
       lsl.stateChanged(evt);
@@ -98,7 +108,7 @@ public class MX1Impl implements MX1
 
   private void checkConnected()
   {
-    if (linkState != LinkState.CONNECTED) {
+    if (getLinkState() != LinkState.CONNECTED) {
       throw new IllegalStateException("port not connected");
     }
   }
@@ -152,6 +162,8 @@ public class MX1Impl implements MX1
       }
       if (packet.getFlags().contains(MX1PacketFlags.REPLY)) {
         try {
+          LOGGER.log(Level.FINEST,
+                     "Enter sendack for packet " + packet.toString());
           sendACK(packet.getCommand(),
                   packet.getSequence());
         } catch (IOException ex) {
@@ -203,13 +215,131 @@ public class MX1Impl implements MX1
                                                  MX1PacketFlags.TO_COMMANDSTATION),
                                       MX1Command.RW_DECODER_CV,
                                       payLoad);
+    String p = packet.toString();
     LOGGER.log(Level.FINE,
-               "Sending reset");
+               "Sending readCV #{0,number,0} to address {1,number,0}:{2}",
+               new Object[]{iCV, address, p});
     port.sendPacket(packet);
   }
 
   @Override
-  public void addMX1PacketListener(MX1PacketListener l)
+  public int readCV(int address,
+                    int iCV,
+                    long timeout,
+                    TimeUnit unit) throws IOException
+  {
+    try (PacketListenerFuture<Integer> future = new PacketListenerFuture<>(this,
+                                                                           (p) -> {
+                                                                             CVPacketAdapter a = p.getAdapter(
+                                                                                     CVPacketAdapter.class);
+                                                                             return a != null && a.getCV() == iCV
+                                                                                            && a.getPacket().getFlags().contains(
+                                                                                     MX1PacketFlags.REPLY);
+                                                                           },
+                                                                           (p) -> p.getAdapter(CVPacketAdapter.class).getValue())) {
+      readCV(address,
+             iCV);
+      Integer result = future.get(timeout,
+                                  unit);
+      if (result != null && !future.isCompleted()) {
+        return result;
+      }
+    } catch (TimeoutException ex) {
+    } catch (InterruptedException | ExecutionException ex) {
+      LOGGER.log(Level.SEVERE,
+                 "Waiting for response",
+                 ex);
+    }
+    return -1;
+  }
+
+  @Override
+  public void getPowerMode() throws IOException
+  {
+    checkConnected();
+    ByteBuffer payLoad = Utils.allocateBEBuffer(1);
+    payLoad.put((byte) 3); // query status
+    payLoad.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.TRACK_CONTROL,
+                                      payLoad);
+    LOGGER.log(Level.FINE,
+               "Sending getPowerMode");
+    port.sendPacket(packet);
+  }
+
+  @Override
+  public PowerMode getPowerMode(long timeout,
+                                TimeUnit unit) throws IOException
+  {
+    try (PacketListenerFuture<PowerMode> future = new PacketListenerFuture<>(this,
+                                                                             (p) -> {
+                                                                               PowerModePacketAdapter a = p.getAdapter(
+                                                                                       PowerModePacketAdapter.class);
+                                                                               return a != null && a.getPowerMode()
+                                                                                                           != PowerMode.PENDING
+                                                                                              && a.getPacket().getFlags().
+                                                                                       contains(
+                                                                                               MX1PacketFlags.ACK_1);
+                                                                             },
+                                                                             (p) -> p.getAdapter(PowerModePacketAdapter.class).
+                                                                                     getPowerMode())) {
+      getPowerMode();
+      PowerMode result = future.get(timeout,
+                                    unit);
+      if (result != null && !future.isCompleted()) {
+        return result;
+      }
+    } catch (TimeoutException ex) {
+    } catch (InterruptedException | ExecutionException ex) {
+      LOGGER.log(Level.SEVERE,
+                 "Waiting for response",
+                 ex);
+    }
+    return PowerMode.PENDING;
+  }
+
+  @Override
+  public void setPowerMode(PowerMode newMode) throws IOException
+  {
+    byte mode;
+    switch (newMode) {
+      case ON:
+        mode = 2;
+        break;
+      case OFF:
+        mode = 1;
+        break;
+      case SSPEM:
+      case SSPF0:
+        mode = 0;
+        break;
+      default:
+        return;
+    }
+    checkConnected();
+    ByteBuffer payLoad = Utils.allocateBEBuffer(1);
+    payLoad.put(mode); // query status
+    payLoad.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.TRACK_CONTROL,
+                                      payLoad);
+    LOGGER.log(Level.FINE,
+               "Sending setPowerMode");
+    port.sendPacket(packet);
+  }
+
+  @Override
+  public void addMX1PacketListener(MX1PacketListener l
+  )
   {
     if (l != null) {
       packetListener.add(l);
@@ -217,7 +347,8 @@ public class MX1Impl implements MX1
   }
 
   @Override
-  public void removeMX1PacketListener(MX1PacketListener l)
+  public void removeMX1PacketListener(MX1PacketListener l
+  )
   {
     if (l != null) {
       packetListener.remove(l);

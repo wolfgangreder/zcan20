@@ -16,7 +16,9 @@
 package at.or.reder.mx1;
 
 import at.or.reder.dcc.LinkState;
+import at.or.reder.dcc.PowerMode;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import javax.swing.event.ChangeListener;
 
 public interface MX1 extends AutoCloseable
@@ -31,6 +33,18 @@ public interface MX1 extends AutoCloseable
 
   public void readCV(int address,
                      int iCV) throws IOException;
+
+  public int readCV(int address,
+                    int iCV,
+                    long timeout,
+                    TimeUnit unit) throws IOException;
+
+  public void getPowerMode() throws IOException;
+
+  public PowerMode getPowerMode(long timeout,
+                                TimeUnit unit) throws IOException;
+
+  public void setPowerMode(PowerMode newMode) throws IOException;
 
   public LinkState getLinkState();
 
