@@ -16,7 +16,15 @@
 package at.or.reder.dcc.util;
 
 import at.or.reder.dcc.DCCConstants;
+import at.or.reder.dcc.DecoderClass;
+import at.or.reder.dcc.DecoderInfo;
+import at.or.reder.dcc.IdentifyProvider;
+import at.or.reder.dcc.Manufacturer;
+import at.or.reder.dcc.SpeedstepSystem;
+import at.or.reder.dcc.impl.DefaultDecoderInfo;
+import at.or.reder.zcan20.DecoderType;
 import at.or.reder.zcan20.packet.Packet;
+import at.or.reder.zcan20.util.IOFunction;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,6 +34,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,12 +45,15 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
 
 /**
  *
@@ -727,7 +739,8 @@ public final class Utils
   {
     return (byte) crc(crcIn & 0xff,
                       bufferIn,
-                      0x8c);
+                      0x8c,
+                      0xff);
   }
 
   /*
@@ -740,17 +753,19 @@ public final class Utils
   {
     return (short) crc(crcIn & 0xffff,
                        bufferIn,
-                       0x8810);
+                       0x8810,
+                       0xffff);
   }
 
   public static int crc(int crcIn,
                         ByteBuffer bufferIn,
-                        int poly)
+                        int poly,
+                        int mask)
   {
     int crc = crcIn;
     ByteBuffer buf = bufferIn.duplicate();
     while (buf.hasRemaining()) {
-      int b = buf.get() & 0xff;
+      int b = buf.get() & mask;
       for (int i = 0; i < 8; ++i) {
         boolean mix = ((crc ^ b) & 0x01) != 0;
         crc >>= 1;
@@ -804,8 +819,7 @@ public final class Utils
   }
 
   /**
-   * Erzeugt aus der Adresse {@code address}, das CV-Paar CV17/18.
-   * Im ersten Byte liegt CV18, im zweiten (höherwertigen) CV17
+   * Erzeugt aus der Adresse {@code address}, das CV-Paar CV17/18. Im ersten Byte liegt CV18, im zweiten (höherwertigen) CV17
    *
    * @param address
    * @return Adresspaar 17/18 oder -1 falls es sich um eine Adresse &lt;1 oder &gt;{@code DCCConstants.ADDRESS_MAX}
@@ -839,7 +853,7 @@ public final class Utils
   public static int decodeLongAddress(int cv17,
                                       int cv18)
   {
-    if (((cv17 & ~0xff) != 0) || ((cv18 & ~0xff) != 0) || ((cv17 & 0xc0) != 0xc0)) {
+    if (((cv17 & ~0xff) != 0) || ((cv18 & ~0xff) != 0)) {// || ((cv17 & 0xc0) != 0xc0)) {
       return -1;
     }
     int result = ((cv17 & 0x3f) << 8) + cv18;
@@ -915,6 +929,126 @@ public final class Utils
       int tmp = (cv19 & ~0x80) + cv20 * 100;
       return tmp > DCCConstants.ADDRESS_MAX ? -1 : tmp;
     }
+  }
+
+  private static String readCVList(IOFunction<Integer, Integer> provider,
+                                   String pattern,
+                                   int... icvs) throws IOException
+  {
+    DecimalFormat fmt = new DecimalFormat(pattern);
+    StringBuilder builder = new StringBuilder();
+    for (int i : icvs) {
+      int val = provider.apply(i);
+      if (val != 0) {
+        builder.append(fmt.format(val));
+      } else {
+        builder.append('?');
+      }
+      builder.append('.');
+    }
+    builder.setLength(builder.length() - 1);
+    return builder.toString();
+  }
+
+  public static DecoderInfo identifyDecoder(IdentifyProvider provider) throws IOException
+  {
+    return identifyDecoder(provider,
+                           0,
+                           false);
+  }
+
+  public static DecoderInfo identifyDecoder(IdentifyProvider provider,
+                                            int address,
+                                            boolean forceService) throws IOException
+  {
+    boolean railCom;
+    int cv29;
+    int cv28;
+    if (address == 0) {
+      provider.enterServiceMode();
+      cv29 = provider.readCV(0,
+                             29);
+      cv28 = provider.readCV(0,
+                             28);
+      final boolean longAddress = (cv29 & 0x20) != 0;
+      railCom = (cv29 & 0x08) != 0 && cv28 == 3;
+      if (longAddress) {
+        int cv17 = provider.readCV(0,
+                                   17);
+        int cv18 = provider.readCV(0,
+                                   18);
+        address = decodeLongAddress(cv17,
+                                    cv18);
+      } else {
+        address = provider.readCV(0,
+                                  1);
+      }
+    } else {
+      railCom = true;
+      cv29 = provider.readCV(address,
+                             29);
+    }
+    if (railCom && !forceService) {
+      provider.enterPOMMode();
+    } else {
+      provider.enterServiceMode();
+    }
+    int cv8 = provider.readCV(address,
+                              8);
+    int cv19 = provider.readCV(address,
+                               19);
+    int cv20 = provider.readCV(address,
+                               20);
+    final String manName = Manufacturer.getManufacturerName(cv8);
+    AtomicInteger cv250 = new AtomicInteger();
+    String version = "";
+    String name = "";
+    String serial = "";
+    String soundCode = "";
+    SpeedstepSystem speedSteps = (cv29 & 0x02) != 0 ? SpeedstepSystem.SPEED_128 : SpeedstepSystem.SPEED_14;
+    Lookup lookup = null;
+    if (cv8 == 145) { // ZIMO
+      final int addr = address;
+      version = readCVList((i) -> provider.readCV(addr,
+                                                  i),
+                           "00",
+                           7,
+                           65);
+      serial = readCVList((i) -> {
+        int result = provider.readCV(addr,
+                                     i);
+        if (i == 250) {
+          cv250.set(result);
+        }
+        return result;
+      },
+                          "000",
+                          250,
+                          251,
+                          252,
+                          253);
+      soundCode = readCVList((i) -> provider.readCV(addr,
+                                                    i),
+                             "000",
+                             260,
+                             261,
+                             262,
+                             263);
+      DecoderType decoderType = DecoderType.valueOf(cv250.get());
+      name = decoderType.getName();
+      lookup = Lookups.singleton(decoderType);
+    }
+    return new DefaultDecoderInfo(manName,
+                                  address,
+                                  decodeConsistsAddress(cv19,
+                                                        cv20),
+                                  (cv29 & 0x80) != 0 ? DecoderClass.ACCESSORY : DecoderClass.LOCO,
+                                  name,
+                                  version,
+                                  serial,
+                                  soundCode,
+                                  speedSteps,
+                                  lookup);
   }
 
   private Utils()

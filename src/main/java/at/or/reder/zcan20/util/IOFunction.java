@@ -13,32 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.mx1;
+package at.or.reder.zcan20.util;
 
 import java.io.IOException;
-import java.util.function.Consumer;
-import javax.validation.constraints.NotNull;
 
-public interface MX1Port extends AutoCloseable
+@FunctionalInterface
+public interface IOFunction<P, R>
 {
 
-  public void open() throws IOException;
-
-  @Override
-  public void close() throws IOException;
-
-  public void sendPacket(@NotNull MX1Packet packet) throws IOException;
-
-  public Consumer<MX1Packet> getPacketListener();
-
-  public void setPacketListener(Consumer<MX1Packet> listener);
-
-  public long getBytesSent();
-
-  public long getBytesReceived();
-
-  public long getPacketsSent();
-
-  public long getPacketsReceived();
+  public R apply(P p) throws IOException;
 
 }

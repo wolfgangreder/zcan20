@@ -13,32 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.mx1;
+package at.or.reder.dcc;
 
-import java.io.IOException;
-import java.util.function.Consumer;
-import javax.validation.constraints.NotNull;
+import org.openide.util.Lookup;
 
-public interface MX1Port extends AutoCloseable
+public interface DecoderInfo extends Lookup.Provider
 {
 
-  public void open() throws IOException;
+  public String getManufacturerName();
+
+  public int getAddress();
+
+  public int getConsistsAddress();
+
+  public SpeedstepSystem getSpeedSteps();
+
+  public DecoderClass getDecoderType();
+
+  public String getDecoderName();
+
+  public String getSWVersion();
+
+  public String getSerial();
+
+  public String getSoundcode();
 
   @Override
-  public void close() throws IOException;
-
-  public void sendPacket(@NotNull MX1Packet packet) throws IOException;
-
-  public Consumer<MX1Packet> getPacketListener();
-
-  public void setPacketListener(Consumer<MX1Packet> listener);
-
-  public long getBytesSent();
-
-  public long getBytesReceived();
-
-  public long getPacketsSent();
-
-  public long getPacketsReceived();
+  public default Lookup getLookup()
+  {
+    return Lookup.EMPTY;
+  }
 
 }

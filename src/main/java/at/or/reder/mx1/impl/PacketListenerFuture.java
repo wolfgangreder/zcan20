@@ -17,6 +17,7 @@ package at.or.reder.mx1.impl;
 
 import at.or.reder.mx1.MX1;
 import at.or.reder.mx1.MX1Packet;
+import at.or.reder.mx1.MX1PacketAdapter;
 import at.or.reder.mx1.MX1PacketListener;
 import at.or.reder.mx1.MX1PacketObject;
 import java.util.Objects;
@@ -37,6 +38,36 @@ public final class PacketListenerFuture<V> implements AutoCloseable, Future<V>
   private final Function<MX1Packet, V> valueExtractor;
   private final CompletableFuture<V> future;
   private final MX1PacketListener listener = this::onMX1Packet;
+
+  public static <A extends MX1PacketAdapter> PacketListenerFuture<A> createFuture(@NotNull MX1 mx1,
+                                                                                  @NotNull Class<? extends A> adapterClazz)
+  {
+    return new PacketListenerFuture<>(mx1,
+                                      (MX1Packet p) -> p.getAdapter(adapterClazz) != null,
+                                      (MX1Packet p) -> p.getAdapter(adapterClazz));
+
+  }
+
+  public static <A extends MX1PacketAdapter, R> PacketListenerFuture<R> createFuture(@NotNull MX1 mx1,
+                                                                                     @NotNull Class<? extends A> adapterClazz,
+                                                                                     @NotNull Function<A, R> resultAdapter)
+  {
+    Function<MX1Packet, A> afunc = (MX1Packet p) -> p.getAdapter(adapterClazz);
+    Function<MX1Packet, R> func;
+    func = afunc.andThen(resultAdapter);
+    return new PacketListenerFuture<>(mx1,
+                                      (MX1Packet p) -> p.getAdapter(adapterClazz) != null,
+                                      func);
+  }
+
+  public static PacketListenerFuture<MX1Packet> createFuture(@NotNull MX1 mx1,
+                                                             @NotNull Predicate<MX1Packet> packetFilter)
+  {
+    Function<MX1Packet, MX1Packet> ve = (p) -> p;
+    return new PacketListenerFuture<>(mx1,
+                                      packetFilter,
+                                      ve);
+  }
 
   public PacketListenerFuture(@NotNull MX1 mx1,
                               @NotNull Predicate<MX1Packet> packetFilter,

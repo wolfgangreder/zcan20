@@ -15,30 +15,7 @@
  */
 package at.or.reder.mx1;
 
-import java.io.IOException;
-import java.util.function.Consumer;
-import javax.validation.constraints.NotNull;
-
-public interface MX1Port extends AutoCloseable
+public interface LocoInfoAdpater extends LocoInfo, MX1PacketAdapter
 {
-
-  public void open() throws IOException;
-
-  @Override
-  public void close() throws IOException;
-
-  public void sendPacket(@NotNull MX1Packet packet) throws IOException;
-
-  public Consumer<MX1Packet> getPacketListener();
-
-  public void setPacketListener(Consumer<MX1Packet> listener);
-
-  public long getBytesSent();
-
-  public long getBytesReceived();
-
-  public long getPacketsSent();
-
-  public long getPacketsReceived();
 
 }

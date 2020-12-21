@@ -35,6 +35,6 @@ public interface Decoder
 
   public CVSet getCVSet();
 
-  public DecoderType getType();
+  public DecoderClass getType();
 
 }

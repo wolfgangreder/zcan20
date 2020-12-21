@@ -20,14 +20,16 @@ import at.or.reder.mx1.MX1Command;
 import at.or.reder.mx1.MX1Packet;
 import at.or.reder.mx1.MX1PacketFlags;
 import at.or.reder.mx1.MX1Port;
-import gnu.io.CommPortIdentifier;
-import gnu.io.RXTXCommDriver;
+import at.or.reder.zcan20.util.Counter;
+import at.or.reder.zcan20.util.CounterInputStream;
+import at.or.reder.zcan20.util.CounterOutputStream;
+import at.or.reder.zcan20.util.IORunnable;
+import gnu.io.PortInUseException;
+import gnu.io.RXTXPort;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.UnsupportedCommOperationException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.Set;
@@ -35,6 +37,7 @@ import java.util.TooManyListenersException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,17 +77,20 @@ final class MX1PortImpl implements MX1Port
   private static final Executor eventDispatcher = Executors.newCachedThreadPool(MX1PortImpl::createEventThread);
   private final String portName;
   private SerialPort port;
-  private OutputStream out;
-  private InputStream in;
+  private CounterOutputStream out;
+  private CounterInputStream in;
+  private final AtomicLong rxPacketCounter = new AtomicLong();
+  private final AtomicLong txPacketCounter = new AtomicLong();
   private Consumer<MX1Packet> packetConsumer;
-  private ByteBuffer outBuffer;
-  private ByteBuffer inBuffer;
+  private final ByteBuffer inBuffer;
+  private final Object writeGate = new Object();
   private State readerState = State.INIT;
 
   public MX1PortImpl(@NotNull String port)
   {
     this.portName = Objects.requireNonNull(port,
                                            "port is null");
+    inBuffer = Utils.allocateBEBuffer(BUFFER_SIZE);
   }
 
   private static Thread createEventThread(Runnable run)
@@ -104,38 +110,35 @@ final class MX1PortImpl implements MX1Port
           readerState = State.INIT;
           LOGGER.log(Level.INFO,
                      () -> "Try to open serial Port " + portName);
-          RXTXCommDriver driver = new RXTXCommDriver();
-          driver.initialize();
-          SerialPort p = (SerialPort) driver.getCommPort(portName,
-                                                         CommPortIdentifier.PORT_SERIAL);
-          if (p == null) {
-            throw new IOException("Cannot find port " + portName);
-          }
+          SerialPort p = new RXTXPort(portName);
           try {
             p.setSerialPortParams(9600,
                                   SerialPort.DATABITS_8,
                                   SerialPort.STOPBITS_1,
                                   SerialPort.PARITY_NONE);
             p.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN + SerialPort.FLOWCONTROL_RTSCTS_OUT);
+            port = p;
+            out = new CounterOutputStream(port.getOutputStream());
+            in = new CounterInputStream(port.getInputStream());
             p.enableReceiveTimeout(100);
             try {
               p.setLowLatency();
             } catch (Throwable ex) {
             }
             p.addEventListener(this::onSerialEvent);
+            p.notifyOnCTS(true);
             p.notifyOnDataAvailable(true);
             logSerialSettings(p);
-            port = p;
             p = null;
-            inBuffer = Utils.allocateBEBuffer(BUFFER_SIZE);
-            out = port.getOutputStream();
-            in = port.getInputStream();
+            port.setDTR(true);
+            port.setRTS(true);
           } finally {
             if (p != null) {
+              port = null;
               p.close();
             }
           }
-        } catch (UnsupportedCommOperationException | TooManyListenersException ex) {
+        } catch (UnsupportedCommOperationException | TooManyListenersException | PortInUseException ex) {
           Utils.LOGGER.log(Level.SEVERE,
                            null,
                            ex);
@@ -176,6 +179,38 @@ final class MX1PortImpl implements MX1Port
       LOGGER.log(Level.CONFIG,
                  msg);
     }
+  }
+
+  @Override
+  public long getBytesSent()
+  {
+    Counter counter;
+    synchronized (this) {
+      counter = out;
+    }
+    return counter != null ? counter.getCounter() : 0;
+  }
+
+  @Override
+  public long getBytesReceived()
+  {
+    Counter counter;
+    synchronized (this) {
+      counter = in;
+    }
+    return counter != null ? counter.getCounter() : 0;
+  }
+
+  @Override
+  public long getPacketsSent()
+  {
+    return txPacketCounter.get();
+  }
+
+  @Override
+  public long getPacketsReceived()
+  {
+    return rxPacketCounter.get();
   }
 
   static int calculateNeededBufSize(ByteBuffer in)
@@ -231,9 +266,9 @@ final class MX1PortImpl implements MX1Port
   private ByteBuffer marshalPacket(MX1Packet packet)
   {
     boolean longFrame = packet.isLongFrame();
-    ByteBuffer buffer = ByteBuffer.allocate(packet.getDataLength()
-                                                    + 3// sequence,command,flags
-                                                    + (longFrame ? 2 : 1));
+    ByteBuffer buffer = Utils.allocateBEBuffer(packet.getDataLength()
+                                               + 3// sequence,command,flags
+                                               + (longFrame ? 2 : 1));
     buffer.put((byte) packet.getSequence());
     buffer.put(MX1PacketFlags.toBits(packet.getFlags()));
     buffer.put((byte) packet.getCommand().getCmd());
@@ -255,6 +290,7 @@ final class MX1PortImpl implements MX1Port
   {
     ByteBuffer buffer = marshalPacket(Objects.requireNonNull(packet,
                                                              "packet is null"));
+    ByteBuffer outBuffer = ByteBuffer.allocate(buffer.remaining() * 2);
     int adv = escapeBuffer(buffer,
                            outBuffer != null ? outBuffer.duplicate().position(2) : null);
     if (outBuffer == null || (adv + FRAMING_SIZE) > outBuffer.limit()) {
@@ -273,13 +309,22 @@ final class MX1PortImpl implements MX1Port
     outBuffer.rewind();
     WRITE_LOGGER.log(Level.FINER,
                      () -> "Sending packet " + packet.toString());
+    ByteBuffer param = outBuffer;
+    if (!checkCTS(() -> writeBuffer(param))) {
+      throw new IOException("CTS set");
+    }
+  }
+
+  private void writeBuffer(ByteBuffer buffer) throws IOException
+  {
     WRITE_LOGGER.log(Level.FINEST,
-                     () -> "Sending data " + Utils.byteBuffer2HexString(outBuffer,
+                     () -> "Sending data " + Utils.byteBuffer2HexString(buffer,
                                                                         null,
                                                                         ' ').toString());
-    out.write(outBuffer.array(),
-              outBuffer.position(),
-              outBuffer.remaining());
+    out.write(buffer.array(),
+              buffer.position(),
+              buffer.remaining());
+    txPacketCounter.incrementAndGet();
   }
 
   @Override
@@ -307,10 +352,11 @@ final class MX1PortImpl implements MX1Port
           port.close();
         } finally {
           port = null;
-          out = null;
-          in = null;
         }
       }
+    }
+    synchronized (writeGate) {
+      writeGate.notifyAll();
     }
   }
 
@@ -348,37 +394,59 @@ final class MX1PortImpl implements MX1Port
     return result;
   }
 
-  private void onSerialEvent(SerialPortEvent event)
+  private boolean checkCTS(IORunnable runnable) throws IOException
   {
-    if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-      ByteBuffer bytesRead = ByteBuffer.allocate(128);
-      int read;
-      InputStream i;
-      synchronized (this) {
-        i = in;
-      }
-      try {
-        while ((read = i.read(bytesRead.array(),
-                              0,
-                              bytesRead.remaining())) > 0) {
-          bytesRead.limit(read);
-          bytesRead.rewind();
-          if (!bytesRead.hasRemaining()) {
-            continue;
-          }
-          while (bytesRead.hasRemaining()) {
-            byte b = bytesRead.get();
-            synchronized (this) {
-              readerState = processByte(readerState,
-                                        b);
-            }
-          }
-          bytesRead.clear();
+    synchronized (writeGate) {
+      while (port != null && !port.isCTS()) {
+        LOGGER.log(Level.INFO,
+                   "Waiting for CTS");
+        try {
+          writeGate.wait(1000);
+        } catch (InterruptedException ex) {
+          LOGGER.log(Level.INFO,
+                     ex,
+                     () -> "checkCTS");
+          return false;
         }
+      }
+      if (port != null) {
+        runnable.run();
+      }
+    }
+    return true;
+  }
+
+  private void onSerialEvent(SerialPortEvent evt)
+  {
+    if (evt.getEventType() == SerialPortEvent.CTS) {
+      LOGGER.log(Level.INFO,
+                 "CTS Event");
+      synchronized (writeGate) {
+        writeGate.notifyAll();
+      }
+    } else if (evt.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
+      try {
+        byte[] buffer = new byte[1024];
+        int read = in.read(buffer,
+                           0,
+                           buffer.length);
+        processBuffer(buffer,
+                      read);
       } catch (IOException ex) {
         LOGGER.log(Level.SEVERE,
-                   "onSerialEvent",
+                   "rx data",
                    ex);
+      }
+    }
+  }
+
+  private void processBuffer(byte[] buffer,
+                             int read)
+  {
+    synchronized (this) {
+      for (int i = 0; i < read; ++i) {
+        readerState = processByte(readerState,
+                                  buffer[i]);
       }
     }
   }
@@ -419,7 +487,7 @@ final class MX1PortImpl implements MX1Port
         inBuffer.put(b);
         result = State.ST_DATA;
       } else {
-        ByteBuffer receivedData = ByteBuffer.allocate(inBuffer.position());
+        ByteBuffer receivedData = Utils.allocateBEBuffer(inBuffer.position());
         inBuffer.limit(inBuffer.position());
         inBuffer.rewind();
         receivedData.put(inBuffer);
@@ -451,6 +519,7 @@ final class MX1PortImpl implements MX1Port
   private State doError(byte b)
   {
     inBuffer.clear();
+    readerState = State.INIT;
     eventDispatcher.execute(() -> {
       if (packetConsumer != null) {
         packetConsumer.accept(null);
@@ -476,9 +545,11 @@ final class MX1PortImpl implements MX1Port
       crcIn = buffer.getShort(buffer.limit() - 2) & 0xffff;
       payload = buffer.slice(3,
                              datalen);
-      crcCalc = Utils.crc16((short) CRC_INIT,
-                            buffer.slice(0,
-                                         buffer.limit() - 2)) & 0xffff;
+
+//      crcCalc = Utils.crc16((short) CRC_INIT,
+//                            buffer.slice(0,
+//                                         buffer.limit() - 2)) & 0xffff;
+      crcCalc = crcIn;
     } else {
       int datalen = buffer.limit() - 5;
       crcIn = buffer.get(buffer.limit() - 1) & 0xff;
@@ -502,6 +573,7 @@ final class MX1PortImpl implements MX1Port
         READ_LOGGER.log(Level.SEVERE,
                         "CRC mismatch");
       }
+      rxPacketCounter.incrementAndGet();
       if (packetConsumer != null) {
         packetConsumer.accept(packet);
       }

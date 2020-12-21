@@ -15,11 +15,23 @@
  */
 package at.or.reder.zcan20;
 
+import static at.or.reder.dcc.util.Utils.LOGGER;
+import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -28,79 +40,84 @@ import java.util.Objects;
 public final class DecoderType implements Serializable
 {
 
-  private static final Map<Short, DecoderType> INSTANCES = new HashMap<>();
-  public static final DecoderType MX62 = valueOf(202,
-                                                 "MX62");
-  public static final DecoderType MX63 = valueOf(203,
-                                                 "MX63");
-  public static final DecoderType MX64 = valueOf(204,
-                                                 "MX64");
-  public static final DecoderType MX64H = valueOf(205,
-                                                  "MX64H");
-  public static final DecoderType MX64D = valueOf(206,
-                                                  "MX64D");
-  public static final DecoderType MX69 = valueOf(209,
-                                                 "MX69");
-  public static final DecoderType MX82 = valueOf(200,
-                                                 "MX82");
-  public static final DecoderType MX600 = valueOf(199,
-                                                  "MX600");
-  public static final DecoderType MX617 = valueOf(197,
-                                                  "MX617");
-  public static final DecoderType MX621 = valueOf(201,
-                                                  "MX621");
-  public static final DecoderType MX630P2520 = valueOf(211,
-                                                       "MX630-P2520");
-  public static final DecoderType MX630P25K22 = valueOf(218,
-                                                        "MX630-P25K22");
-  public static final DecoderType MX631 = valueOf(213,
-                                                  "MX631");
-  public static final DecoderType MX632 = valueOf(212,
-                                                  "MX632");
-  public static final DecoderType MX640 = valueOf(210,
-                                                  "MX640");
-  public static final DecoderType MX642 = valueOf(214,
-                                                  "MX642");
-  public static final DecoderType MX643 = valueOf(215,
-                                                  "MX643");
-  public static final DecoderType MX646 = valueOf(217,
-                                                  "MX646");
-  public static final DecoderType MX647 = valueOf(216,
-                                                  "MX647");
-  public static final DecoderType MX680 = valueOf(207,
-                                                  "MX680");
-  public static final DecoderType MX690 = valueOf(208,
-                                                  "MX690");
+  private static final Map<Integer, DecoderType> INSTANCES = new HashMap<>();
 
   public static DecoderType valueOf(int val,
                                     final String label)
   {
     Objects.requireNonNull(label,
                            "label is null");
-    return INSTANCES.computeIfAbsent((short) val,
+    return INSTANCES.computeIfAbsent(val,
                                      (v) -> new DecoderType(v,
-                                                            label));
+                                                            label,
+                                                            null));
 
   }
 
-  public static DecoderType valueOf(short val)
+  public static DecoderType valueOf(int val)
   {
     return INSTANCES.computeIfAbsent(val,
                                      (v) -> new DecoderType(v,
-                                                            Integer.toString(Short.toUnsignedInt(val))));
+                                                            Integer.toUnsignedString(v),
+                                                            null));
   }
 
-  private final short id;
-  private final String name;
+  static {
+    try {
+      Properties props = new Properties();
+      props.load(DecoderType.class.getResourceAsStream("decoder.properties"));
+      for (Object k : props.keySet()) {
+        if (k != null) {
+          int i = -1;
+          try {
+            i = Integer.parseInt(k.toString());
+          } catch (Throwable th) {
+          }
+          if (i != -1) {
+            String val = props.getProperty(k.toString());
+            if (val != null && !val.isBlank()) {
+              INSTANCES.put(i,
+                            new DecoderType(i,
+                                            val,
+                                            null));
+            }
+          }
+        }
+      }
+    } catch (IOException ex) {
+      LOGGER.log(Level.SEVERE,
+                 "DecoderType:init",
+                 ex);
+    }
+  }
 
-  private DecoderType(short val,
-                      String name)
+  private final int id;
+  private final String name;
+  private final List<String> alternateNames;
+
+  private DecoderType(int val,
+                      String name,
+                      Collection<? extends CharSequence> alternateNames)
   {
     this.id = val;
     this.name = name;
+    TreeSet<String> tmpNames = null;
+    if (alternateNames != null && !alternateNames.isEmpty()) {
+      Comparator<Object> comp = Collator.getInstance();
+      tmpNames = alternateNames.stream().
+              filter((n) -> n != null).
+              map(Object::toString).
+              collect(Collectors.toCollection(() -> new TreeSet<>(comp)));
+      tmpNames.add(name);
+    }
+    if (tmpNames == null || tmpNames.isEmpty()) {
+      this.alternateNames = Collections.singletonList(name);
+    } else {
+      this.alternateNames = Collections.unmodifiableList(new ArrayList<>(tmpNames));
+    }
   }
 
-  public short getId()
+  public int getId()
   {
     return id;
   }
@@ -108,6 +125,11 @@ public final class DecoderType implements Serializable
   public String getName()
   {
     return name;
+  }
+
+  public List<String> getAlternateNames()
+  {
+    return alternateNames;
   }
 
   @Override

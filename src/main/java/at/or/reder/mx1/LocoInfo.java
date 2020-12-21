@@ -15,30 +15,34 @@
  */
 package at.or.reder.mx1;
 
-import java.io.IOException;
-import java.util.function.Consumer;
-import javax.validation.constraints.NotNull;
+import at.or.reder.dcc.Direction;
+import at.or.reder.dcc.SpeedstepSystem;
 
-public interface MX1Port extends AutoCloseable
+public interface LocoInfo
 {
 
-  public void open() throws IOException;
+  public int getError();
 
-  @Override
-  public void close() throws IOException;
+  public int getAddress();
 
-  public void sendPacket(@NotNull MX1Packet packet) throws IOException;
+  public int getSpeed();
 
-  public Consumer<MX1Packet> getPacketListener();
+  public default Direction getDirection()
+  {
+    return ((getFlags() & 0x10) != 0) ? Direction.REVERSE : Direction.FORWARD;
+  }
 
-  public void setPacketListener(Consumer<MX1Packet> listener);
+  public default SpeedstepSystem getSpeedstepSystem()
+  {
+    return SpeedstepSystem.valueOfMagic((getFlags() & 0xc) >> 2);
+  }
 
-  public long getBytesSent();
+  public int getFlags();
 
-  public long getBytesReceived();
+  public int getFunctions();
 
-  public long getPacketsSent();
+  public int getAZBZ();
 
-  public long getPacketsReceived();
+  public int getStatus();
 
 }

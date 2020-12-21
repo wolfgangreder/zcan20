@@ -19,7 +19,7 @@ package at.or.reder.dcc;
  *
  * @author Wolfgang Reder
  */
-public enum DecoderType
+public enum DecoderClass
 {
   LOCO,
   FUNCTION,

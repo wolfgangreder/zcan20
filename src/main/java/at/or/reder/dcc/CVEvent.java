@@ -22,7 +22,7 @@ package at.or.reder.dcc;
 public interface CVEvent extends DCCEventObject
 {
 
-  public DecoderType getDecoderType();
+  public DecoderClass getDecoderType();
 
   public int getDecoderAddress();
 

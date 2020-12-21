@@ -98,7 +98,7 @@ final class PacketImpl implements MX1Packet
   @Override
   public ByteBuffer getData()
   {
-    return payload.rewind();
+    return payload.duplicate();
   }
 
   @Override
@@ -109,22 +109,34 @@ final class PacketImpl implements MX1Packet
       if (!adapterCreated) {
         switch (command) {
           case RW_DECODER_CV:
-            adapter = new CVPacketAdapterImpl(this);
+            if (flags.contains(MX1PacketFlags.REPLY)) {
+              adapter = new CVPacketAdapterImpl(this);
+            }
             break;
           case TRACK_CONTROL:
             adapter = new PowerModePacketAdapterImpl(this);
             break;
+          case CS_EQ_QUERY:
+            if (flags.contains(MX1PacketFlags.ACK_2)) {
+              adapter = new CommandStationInfoImpl(this);
+            }
+            break;
+          case QUERY_CS_LOCO:
+            if (flags.contains(MX1PacketFlags.ACK_1)) {
+              adapter = new LocoInfoPacketAdapter(this);
+            }
+            break;
+          case CURRENT_LOCO_MEM:
+            adapter = new LocoInfoPacketAdapter(this);
+            break;
           case ACCEL:
           case ACCESSORY:
           case ADDRESS_CONTROL:
-          case CS_EQ_QUERY:
           case CURRENT_DECODER_MEM:
-          case CURRENT_LOCO_MEM:
           case INVERT_FUNCTION:
           case LOCO_CONTROL:
           case NACK:
           case QUERY_CS_DECODER:
-          case QUERY_CS_LOCO:
           case READ_CS_IO:
           case RESET:
           case RW_CS_CV:
@@ -157,9 +169,10 @@ final class PacketImpl implements MX1Packet
                                                                                        "]")));
         tmp.append(", ");
         tmp.append(command.name());
-        if (payload.hasRemaining()) {
+        ByteBuffer pl = getData();
+        if (pl.hasRemaining()) {
           tmp.append(", ");
-          Utils.byteBuffer2HexString(payload,
+          Utils.byteBuffer2HexString(pl,
                                      tmp,
                                      ' ');
         }

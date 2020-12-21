@@ -15,30 +15,24 @@
  */
 package at.or.reder.mx1;
 
-import java.io.IOException;
-import java.util.function.Consumer;
-import javax.validation.constraints.NotNull;
-
-public interface MX1Port extends AutoCloseable
+public enum MX1LocoFlags
 {
+  MAN(0x80),
+  DIRECTION(0x20),
+  F0(0x10),
+  REDUCED_SPEED(0x0c),
+  BZ_ON(0x2),
+  AZ_ON(0x01);
+  private final int mask;
 
-  public void open() throws IOException;
+  private MX1LocoFlags(int mask)
+  {
+    this.mask = mask;
+  }
 
-  @Override
-  public void close() throws IOException;
-
-  public void sendPacket(@NotNull MX1Packet packet) throws IOException;
-
-  public Consumer<MX1Packet> getPacketListener();
-
-  public void setPacketListener(Consumer<MX1Packet> listener);
-
-  public long getBytesSent();
-
-  public long getBytesReceived();
-
-  public long getPacketsSent();
-
-  public long getPacketsReceived();
+  public int getMask()
+  {
+    return mask;
+  }
 
 }

@@ -427,7 +427,7 @@ public class UtilsNGTest
   {
     int result = Utils.decodeLongAddress(0,
                                          0);
-    assertEquals(-1,
+    assertEquals(0,
                  result);
     result = Utils.decodeLongAddress(256,
                                      0);
@@ -439,11 +439,11 @@ public class UtilsNGTest
                  result);
     result = Utils.decodeLongAddress(0x80,
                                      0);
-    assertEquals(-1,
+    assertEquals(0,
                  result);
     result = Utils.decodeLongAddress(0x40,
                                      0);
-    assertEquals(-1,
+    assertEquals(0,
                  result);
     result = Utils.decodeLongAddress(0xc0,
                                      0x7f);

@@ -31,7 +31,7 @@ public final class CVEventImpl implements CVEvent
 
   private final Controller controller;
   private final int senderAddress;
-  private final DecoderType decoderType;
+  private final DecoderClass decoderType;
   private final int decoderAddress;
   private final int cvIndex;
   private final int value;
@@ -39,7 +39,7 @@ public final class CVEventImpl implements CVEvent
 
   public CVEventImpl(Controller controller,
                      short senderAddress,
-                     DecoderType decoderType,
+                     DecoderClass decoderType,
                      short decoderAddress,
                      int cvIndex,
                      int value,
@@ -73,7 +73,7 @@ public final class CVEventImpl implements CVEvent
   }
 
   @Override
-  public DecoderType getDecoderType()
+  public DecoderClass getDecoderType()
   {
     return decoderType;
   }

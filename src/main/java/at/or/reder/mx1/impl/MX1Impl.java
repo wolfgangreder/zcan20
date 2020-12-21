@@ -15,10 +15,15 @@
  */
 package at.or.reder.mx1.impl;
 
+import at.or.reder.dcc.Direction;
+import at.or.reder.dcc.IdentifyProvider;
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.PowerMode;
+import at.or.reder.dcc.SpeedstepSystem;
 import at.or.reder.dcc.util.Utils;
 import at.or.reder.mx1.CVPacketAdapter;
+import at.or.reder.mx1.CommandStationInfo;
+import at.or.reder.mx1.LocoInfo;
 import at.or.reder.mx1.MX1;
 import at.or.reder.mx1.MX1Command;
 import at.or.reder.mx1.MX1Packet;
@@ -27,9 +32,11 @@ import at.or.reder.mx1.MX1PacketListener;
 import at.or.reder.mx1.MX1PacketObject;
 import at.or.reder.mx1.MX1Port;
 import at.or.reder.mx1.PowerModePacketAdapter;
+import at.or.reder.mx1.SerialInfoAction;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -40,6 +47,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
 
 /**
  *
@@ -55,12 +64,49 @@ public class MX1Impl implements MX1
   private volatile LinkState linkState = LinkState.CLOSED;
   private final Set<ChangeListener> linkStateListener = new CopyOnWriteArraySet<>();
   private final Set<MX1PacketListener> packetListener = new CopyOnWriteArraySet<>();
+  private final Map<Integer, LocoInfoRecord> locoInfo = new HashMap<>();
+  private final Lookup lookup;
 
   public MX1Impl(String portName,
                  Map<String, String> settings)
   {
     port = new MX1PortImpl(portName);
     port.setPacketListener(this::onPacketData);
+    lookup = Lookups.fixed(port,
+                           new IdentifyProvider()
+                   {
+                     private boolean pomMode = true;
+
+                     @Override
+                     public void enterPOMMode()
+                     {
+                       pomMode = true;
+                     }
+
+                     @Override
+                     public void enterServiceMode()
+                     {
+                       pomMode = false;
+                     }
+
+                     @Override
+                     public int readCV(int iAddress,
+                                       int iCV) throws IOException
+                     {
+                       long timeout = (!pomMode || iAddress == 0) ? 10 : 2;
+                       return MX1Impl.this.readCV(pomMode ? iAddress : 0,
+                                                  iCV,
+                                                  timeout,
+                                                  TimeUnit.SECONDS);
+                     }
+
+                   });
+  }
+
+  @Override
+  public Lookup getLookup()
+  {
+    return lookup;
   }
 
   @Override
@@ -70,6 +116,7 @@ public class MX1Impl implements MX1
       port.open();
     }
     reset();
+    sendSerialInfo(SerialInfoAction.COMMUNICATION_START);
     return linkState == LinkState.CONNECTED;
   }
 
@@ -108,9 +155,9 @@ public class MX1Impl implements MX1
 
   private void checkConnected()
   {
-    if (getLinkState() != LinkState.CONNECTED) {
-      throw new IllegalStateException("port not connected");
-    }
+//    if (getLinkState() != LinkState.CONNECTED) {
+//      throw new IllegalStateException("port not connected");
+//    }
   }
 
   @Override
@@ -132,6 +179,24 @@ public class MX1Impl implements MX1
     port.sendPacket(packet);
   }
 
+  private void sendSerialInfo(SerialInfoAction action) throws IOException
+  {
+    ByteBuffer payload = Utils.allocateBEBuffer(2);
+    payload.put((byte) 1);
+    payload.put(action.getCode());
+    payload.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.SERIAL_INFO,
+                                      payload);
+    LOGGER.log(Level.FINE,
+               "Sending reset");
+    port.sendPacket(packet);
+  }
+
   @Override
   @SuppressWarnings("ConvertToTryWithResources")
   public void close() throws IOException
@@ -139,6 +204,7 @@ public class MX1Impl implements MX1
     try {
       LOGGER.log(Level.FINE,
                  "Closing conection");
+      sendSerialInfo(SerialInfoAction.COMMUNICATION_END);
       port.close();
     } finally {
       setLinkState(LinkState.CLOSED);
@@ -159,6 +225,10 @@ public class MX1Impl implements MX1
       switch (packet.getCommand()) {
         case RESET:
           setLinkState(LinkState.CONNECTED);
+          if (packet.getFlags().contains(MX1PacketFlags.PRIMARY)) {
+
+          }
+          break;
       }
       if (packet.getFlags().contains(MX1PacketFlags.REPLY)) {
         try {
@@ -170,6 +240,14 @@ public class MX1Impl implements MX1
           LOGGER.log(Level.SEVERE,
                      "Sending ACK",
                      ex);
+        }
+      }
+      LocoInfoPacketAdapter li = packet.getAdapter(LocoInfoPacketAdapter.class);
+      if (li != null) {
+        LocoInfoRecord lir = this.locoInfo.computeIfAbsent(li.getAddress(),
+                                                           LocoInfoRecord::new);
+        synchronized (lir) {
+          lir.update(li);
         }
       }
       if (!packetListener.isEmpty()) {
@@ -228,20 +306,14 @@ public class MX1Impl implements MX1
                     long timeout,
                     TimeUnit unit) throws IOException
   {
-    try (PacketListenerFuture<Integer> future = new PacketListenerFuture<>(this,
-                                                                           (p) -> {
-                                                                             CVPacketAdapter a = p.getAdapter(
-                                                                                     CVPacketAdapter.class);
-                                                                             return a != null && a.getCV() == iCV
-                                                                                            && a.getPacket().getFlags().contains(
-                                                                                     MX1PacketFlags.REPLY);
-                                                                           },
-                                                                           (p) -> p.getAdapter(CVPacketAdapter.class).getValue())) {
+    try (PacketListenerFuture<Integer> future = PacketListenerFuture.createFuture(this,
+                                                                                  CVPacketAdapter.class,
+                                                                                  CVPacketAdapter::getValue)) {
       readCV(address,
              iCV);
       Integer result = future.get(timeout,
                                   unit);
-      if (result != null && !future.isCompleted()) {
+      if (result != null && future.isCompleted()) {
         return result;
       }
     } catch (TimeoutException ex) {
@@ -251,6 +323,56 @@ public class MX1Impl implements MX1
                  ex);
     }
     return -1;
+  }
+
+  @Override
+  public void writeCV(int address,
+                      int iCV,
+                      int value) throws IOException
+  {
+    checkConnected();
+    ByteBuffer payLoad = Utils.allocateBEBuffer(5);
+    payLoad.putShort(Utils.short1((address & 0x3fff) | 0x8000)); // force DCC!
+    payLoad.putShort(Utils.short1(iCV));
+    payLoad.put((byte) value);
+    payLoad.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.RW_DECODER_CV,
+                                      payLoad);
+    String p = packet.toString();
+    LOGGER.log(Level.FINE,
+               "Sending writeCV #{0,number,0}={3} to address {1,number,0}:{2}",
+               new Object[]{iCV, address, p, value});
+    port.sendPacket(packet);
+  }
+
+  @Override
+  public boolean writeCV(int address,
+                         int iCV,
+                         int value,
+                         long timeout,
+                         TimeUnit unit) throws IOException
+  {
+    try (PacketListenerFuture<MX1Packet> future = PacketListenerFuture.createFuture(this,
+                                                                                    (p) -> p.getFlags().contains(
+                                                                                            MX1PacketFlags.ACK_1))) {
+      writeCV(address,
+              iCV,
+              value);
+      MX1Packet result = future.get(timeout,
+                                    unit);
+      return (result != null && future.isCompleted());
+    } catch (TimeoutException ex) {
+    } catch (InterruptedException | ExecutionException ex) {
+      LOGGER.log(Level.SEVERE,
+                 "Waiting for response",
+                 ex);
+    }
+    return false;
   }
 
   @Override
@@ -276,22 +398,13 @@ public class MX1Impl implements MX1
   public PowerMode getPowerMode(long timeout,
                                 TimeUnit unit) throws IOException
   {
-    try (PacketListenerFuture<PowerMode> future = new PacketListenerFuture<>(this,
-                                                                             (p) -> {
-                                                                               PowerModePacketAdapter a = p.getAdapter(
-                                                                                       PowerModePacketAdapter.class);
-                                                                               return a != null && a.getPowerMode()
-                                                                                                           != PowerMode.PENDING
-                                                                                              && a.getPacket().getFlags().
-                                                                                       contains(
-                                                                                               MX1PacketFlags.ACK_1);
-                                                                             },
-                                                                             (p) -> p.getAdapter(PowerModePacketAdapter.class).
-                                                                                     getPowerMode())) {
+    try (PacketListenerFuture<PowerMode> future = PacketListenerFuture.createFuture(this,
+                                                                                    PowerModePacketAdapter.class,
+                                                                                    PowerModePacketAdapter::getPowerMode)) {
       getPowerMode();
       PowerMode result = future.get(timeout,
                                     unit);
-      if (result != null && !future.isCompleted()) {
+      if (result != null && future.isCompleted()) {
         return result;
       }
     } catch (TimeoutException ex) {
@@ -353,6 +466,261 @@ public class MX1Impl implements MX1
     if (l != null) {
       packetListener.remove(l);
     }
+  }
+
+  @Override
+  public void getCommandStationInfo() throws IOException
+  {
+    checkConnected();
+    ByteBuffer payLoad = Utils.allocateBEBuffer(1);
+    payLoad.put((byte) 0);
+    payLoad.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.CS_EQ_QUERY,
+                                      payLoad);
+    LOGGER.log(Level.FINE,
+               "Sending getCommandStationInfo");
+    port.sendPacket(packet);
+  }
+
+  @Override
+  public CommandStationInfo getCommandStationInfo(long timeout,
+                                                  TimeUnit unit) throws IOException
+  {
+    try (PacketListenerFuture<CommandStationInfo> future = PacketListenerFuture.createFuture(this,
+                                                                                             CommandStationInfo.class)) {
+      getCommandStationInfo();
+      CommandStationInfo result = future.get(timeout,
+                                             unit);
+      if (result != null && future.isCompleted()) {
+        return result;
+      }
+    } catch (TimeoutException ex) {
+    } catch (InterruptedException | ExecutionException ex) {
+      LOGGER.log(Level.SEVERE,
+                 "Waiting for response",
+                 ex);
+    }
+    return null;
+  }
+
+  @Override
+  public void setFunction(int address,
+                          int iFunction,
+                          int val) throws IOException
+  {
+    LocoInfoRecord loco = this.locoInfo.computeIfAbsent(address,
+                                                        LocoInfoRecord::new);
+    int flags = 0;
+    int functions = 0;
+    synchronized (loco) {
+      if (loco.getLastRead() == null) {
+        LocoInfo li = getLocoInfo(address,
+                                  2,
+                                  TimeUnit.SECONDS);
+        if (li != null) {
+          loco.update(li);
+          flags = loco.getFlags();
+          functions = loco.getFunctions();
+        }
+      }
+      if (iFunction == 0) {
+        if (val != 0) {
+          flags |= 0x10;
+        } else {
+          flags &= ~0x10;
+        }
+      } else {
+        int mask = 1 << iFunction;
+        if (val != 0) {
+          functions |= mask;
+        } else {
+          functions &= ~mask;
+        }
+      }
+      ByteBuffer payLoad = Utils.allocateBEBuffer(5);
+      payLoad.putShort((short) address);
+      payLoad.put((byte) flags);
+      payLoad.put((byte) ((functions & 0x1fe) >> 1));
+      payLoad.put((byte) ((functions & 0x1e00) >> 9));
+      payLoad.rewind();
+      MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                        EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                   MX1PacketFlags.SHORT_FRAME,
+                                                   MX1PacketFlags.PRIMARY,
+                                                   MX1PacketFlags.TO_COMMANDSTATION),
+                                        MX1Command.INVERT_FUNCTION,
+                                        payLoad);
+      LOGGER.log(Level.FINE,
+                 "Sending getInvertFunctionBits");
+      port.sendPacket(packet);
+
+    }
+  }
+
+  @Override
+  public int getFunction(int address,
+                         int iFunction) throws IOException
+  {
+    LocoInfoRecord loco = this.locoInfo.computeIfAbsent(address,
+                                                        LocoInfoRecord::new);
+    synchronized (loco) {
+      if (loco.getLastRead() != null) {
+        return loco.isFunctionSet(iFunction) ? 1 : 0;
+      }
+    }
+    return -1;
+  }
+
+  @Override
+  public int getFunction(int address,
+                         int iFunction,
+                         long timeout,
+                         TimeUnit unit) throws IOException
+  {
+    getLocoInfo(address,
+                timeout,
+                unit);
+    return getFunction(address,
+                       iFunction);
+  }
+
+  @Override
+  public void setSpeed(int address,
+                       int speed,
+                       SpeedstepSystem speedSystem) throws IOException
+  {
+    ByteBuffer payload = Utils.allocateBEBuffer(3);
+    payload.putShort((short) address);
+    payload.put((byte) speedSystem.normalizedToSystem(speed));
+    payload.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.LOCO_CONTROL,
+                                      payload);
+    LOGGER.log(Level.FINE,
+               "Sending setSpeed");
+    port.sendPacket(packet);
+
+  }
+
+  @Override
+  public void emergencyStop(int address) throws IOException
+  {
+    ByteBuffer payload = Utils.allocateBEBuffer(3);
+    payload.putShort((short) address);
+    payload.put((byte) 0x80);
+    payload.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.LOCO_CONTROL,
+                                      payload);
+    LOGGER.log(Level.FINE,
+               "Sending emergencyStop");
+    port.sendPacket(packet);
+  }
+
+  @Override
+  public void locoControl(int address,
+                          int speed,
+                          SpeedstepSystem speedSytem,
+                          Direction direction,
+                          boolean man,
+                          int functions) throws IOException
+  {
+    ByteBuffer payload = Utils.allocateBEBuffer(6);
+    payload.putShort((short) address);
+    int s = speedSytem.normalizedToSystem(speed);
+    payload.put((byte) s);
+    int flags = 0;
+    if (man) {
+      flags |= 0x80;
+    }
+    if ((functions & 0x1) != 0) {
+      flags |= 0x10;
+    }
+    if (direction == Direction.REVERSE) {
+      flags |= 0x20;
+    }
+    flags |= speedSytem.getMagic();
+    payload.put((byte) flags);
+    payload.put((byte) ((functions & 0x1fe) >> 1));
+    payload.put((byte) ((functions & 0x1e00) >> 9));
+    payload.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.LOCO_CONTROL,
+                                      payload);
+    LOGGER.log(Level.FINE,
+               "Sending locoControl");
+    port.sendPacket(packet);
+  }
+
+  @Override
+  public void getLocoInfo(int address) throws IOException
+  {
+    ByteBuffer payload = Utils.allocateBEBuffer(2);
+    payload.putShort((short) address);
+    payload.rewind();
+    MX1Packet packet = new PacketImpl((byte) (sequence++),
+                                      EnumSet.of(MX1PacketFlags.FROM_PC,
+                                                 MX1PacketFlags.SHORT_FRAME,
+                                                 MX1PacketFlags.PRIMARY,
+                                                 MX1PacketFlags.TO_COMMANDSTATION),
+                                      MX1Command.QUERY_CS_LOCO,
+                                      payload);
+    LOGGER.log(Level.FINE,
+               "Sending getLocoInfo");
+    port.sendPacket(packet);
+  }
+
+  @Override
+  public LocoInfo getLocoInfo(int address,
+                              long timeout,
+                              TimeUnit unit) throws IOException
+  {
+    try (PacketListenerFuture<LocoInfoPacketAdapter> future = new PacketListenerFuture<>(this,
+                                                                                         (p) -> {
+                                                                                           LocoInfoPacketAdapter pa = p.
+                                                                                                   getAdapter(
+                                                                                                           LocoInfoPacketAdapter.class);
+                                                                                           return pa != null && pa.
+                                                                                                   getAddress() == address;
+                                                                                         },
+                                                                                         (p) -> p.getAdapter(
+                                                                                                 LocoInfoPacketAdapter.class))) {
+      getLocoInfo(address);
+      LocoInfo result = future.get(timeout,
+                                   unit);
+      LocoInfoRecord rec = this.locoInfo.computeIfAbsent(address,
+                                                         LocoInfoRecord::new);
+      if (result != null && future.isCompleted()) {
+        synchronized (rec) {
+          rec.update(result);
+        }
+        return result;
+      }
+      return rec.toLocoInfo();
+    } catch (TimeoutException ex) {
+    } catch (InterruptedException | ExecutionException ex) {
+      LOGGER.log(Level.SEVERE,
+                 "Waiting for response",
+                 ex);
+    }
+    return null;
   }
 
 }

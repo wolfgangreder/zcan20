@@ -13,32 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.mx1;
+package at.or.reder.dcc;
 
-import java.io.IOException;
-import java.util.function.Consumer;
-import javax.validation.constraints.NotNull;
+import static org.testng.AssertJUnit.assertEquals;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-public interface MX1Port extends AutoCloseable
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public class ManufacturerNGTest
 {
 
-  public void open() throws IOException;
+  public ManufacturerNGTest()
+  {
+  }
 
-  @Override
-  public void close() throws IOException;
+  @BeforeClass
+  public static void setUpClass() throws Exception
+  {
+  }
 
-  public void sendPacket(@NotNull MX1Packet packet) throws IOException;
-
-  public Consumer<MX1Packet> getPacketListener();
-
-  public void setPacketListener(Consumer<MX1Packet> listener);
-
-  public long getBytesSent();
-
-  public long getBytesReceived();
-
-  public long getPacketsSent();
-
-  public long getPacketsReceived();
+  @Test
+  public void testGetManufacturerName()
+  {
+    String name = Manufacturer.getManufacturerName(145);
+    assertEquals("Zimo Elektronik",
+                 name);
+  }
 
 }
