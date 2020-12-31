@@ -94,13 +94,21 @@ public final class DecoderType implements Serializable
   private final int id;
   private final String name;
   private final List<String> alternateNames;
+  private final boolean sound;
 
   private DecoderType(int val,
                       String name,
                       Collection<? extends CharSequence> alternateNames)
   {
     this.id = val;
-    this.name = name;
+    if (name.endsWith("_S")) {
+      sound = true;
+      this.name = name.substring(0,
+                                 name.length() - 2);
+    } else {
+      this.name = name;
+      sound = false;
+    }
     TreeSet<String> tmpNames = null;
     if (alternateNames != null && !alternateNames.isEmpty()) {
       Comparator<Object> comp = Collator.getInstance();
@@ -120,6 +128,11 @@ public final class DecoderType implements Serializable
   public int getId()
   {
     return id;
+  }
+
+  public boolean isSound()
+  {
+    return sound;
   }
 
   public String getName()

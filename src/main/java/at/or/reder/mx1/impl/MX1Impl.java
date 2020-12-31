@@ -35,6 +35,7 @@ import at.or.reder.mx1.PowerModePacketAdapter;
 import at.or.reder.mx1.SerialInfoAction;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -516,7 +517,7 @@ public class MX1Impl implements MX1
     LocoInfoRecord loco = this.locoInfo.computeIfAbsent(address,
                                                         LocoInfoRecord::new);
     int flags = 0;
-    int functions = 0;
+    BitSet functions = new BitSet(13);
     synchronized (loco) {
       if (loco.getLastRead() == null) {
         LocoInfo li = getLocoInfo(address,
@@ -535,18 +536,13 @@ public class MX1Impl implements MX1
           flags &= ~0x10;
         }
       } else {
-        int mask = 1 << iFunction;
-        if (val != 0) {
-          functions |= mask;
-        } else {
-          functions &= ~mask;
-        }
+        functions.set(iFunction,
+                      val != 0);
       }
       ByteBuffer payLoad = Utils.allocateBEBuffer(5);
       payLoad.putShort((short) address);
       payLoad.put((byte) flags);
-      payLoad.put((byte) ((functions & 0x1fe) >> 1));
-      payLoad.put((byte) ((functions & 0x1e00) >> 9));
+      payLoad.putShort((short) LocoInfoPacketAdapter.getF112(functions));
       payLoad.rewind();
       MX1Packet packet = new PacketImpl((byte) (sequence++),
                                         EnumSet.of(MX1PacketFlags.FROM_PC,
@@ -636,7 +632,7 @@ public class MX1Impl implements MX1
                           SpeedstepSystem speedSytem,
                           Direction direction,
                           boolean man,
-                          int functions) throws IOException
+                          BitSet functions) throws IOException
   {
     ByteBuffer payload = Utils.allocateBEBuffer(6);
     payload.putShort((short) address);
@@ -646,7 +642,7 @@ public class MX1Impl implements MX1
     if (man) {
       flags |= 0x80;
     }
-    if ((functions & 0x1) != 0) {
+    if (functions.get(0)) {
       flags |= 0x10;
     }
     if (direction == Direction.REVERSE) {
@@ -654,8 +650,7 @@ public class MX1Impl implements MX1
     }
     flags |= speedSytem.getMagic();
     payload.put((byte) flags);
-    payload.put((byte) ((functions & 0x1fe) >> 1));
-    payload.put((byte) ((functions & 0x1e00) >> 9));
+    payload.putShort((short) LocoInfoPacketAdapter.getF112(functions));
     payload.rewind();
     MX1Packet packet = new PacketImpl((byte) (sequence++),
                                       EnumSet.of(MX1PacketFlags.FROM_PC,

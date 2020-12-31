@@ -20,6 +20,7 @@ import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.PowerMode;
 import at.or.reder.dcc.SpeedstepSystem;
 import java.io.IOException;
+import java.util.BitSet;
 import java.util.concurrent.TimeUnit;
 import javax.swing.event.ChangeListener;
 import org.openide.util.Lookup;
@@ -92,7 +93,7 @@ public interface MX1 extends AutoCloseable, Lookup.Provider
                           SpeedstepSystem speedSytem,
                           Direction direction,
                           boolean man,
-                          int functions) throws IOException;
+                          BitSet functions) throws IOException;
 
   public void getLocoInfo(int address) throws IOException;
 

@@ -20,11 +20,13 @@ import at.or.reder.dcc.SpeedstepSystem;
 import at.or.reder.mx1.LocoInfoAdpater;
 import at.or.reder.mx1.MX1Command;
 import at.or.reder.mx1.MX1Packet;
+import java.util.BitSet;
 
 public final class LocoInfoPacketAdapter extends AbstractPacketAdapter implements LocoInfoAdpater
 {
 
   private final int dataOffset;
+  private final BitSet functions;
 
   public LocoInfoPacketAdapter(MX1Packet packet)
   {
@@ -34,6 +36,8 @@ public final class LocoInfoPacketAdapter extends AbstractPacketAdapter implement
     } else {
       dataOffset = 0;
     }
+    functions = encodeFunctions(getFlags(),
+                                getPacket().getData().getShort(dataOffset + 4));
   }
 
   @Override
@@ -78,9 +82,9 @@ public final class LocoInfoPacketAdapter extends AbstractPacketAdapter implement
   }
 
   @Override
-  public int getFunctions()
+  public BitSet getFunctions()
   {
-    return getPacket().getData().getShort(dataOffset + 4) & 0x3ff;
+    return functions;
   }
 
   @Override
@@ -101,10 +105,35 @@ public final class LocoInfoPacketAdapter extends AbstractPacketAdapter implement
     return "LocoInfoPacketAdapter(address=" + getAddress() + ", speed=" + getSpeed()
            + " steps=" + getSpeedstepSystem() + " f0=" + ((getFlags() & 0x10) != 0
                                                           ? "on"
-                                                          : "off") + " functions=" + Integer.
-            toUnsignedString(
-                    getFunctions(),
-                    2);
+                                                          : "off") + " functions=" + getFunctions().toString();
+  }
+
+  public static BitSet encodeFunctions(int flags,
+                                       int f112)
+  {
+    BitSet result = new BitSet(13);
+    result.set(0,
+               (flags & 0x10) != 0);
+    int mask = 1;
+    for (int i = 1; i < 13; ++i) {
+      result.set(1,
+                 (f112 & mask) != 0);
+      mask <<= 1;
+    }
+    return result;
+  }
+
+  public static int getF112(BitSet bs)
+  {
+    int result = 0;
+    int mask = 1;
+    for (int i = 1; i < 13; ++i) {
+      if (bs.get(i)) {
+        result |= mask;
+      }
+      mask <<= 1;
+    }
+    return result;
   }
 
 }

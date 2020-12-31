@@ -1051,6 +1051,15 @@ public final class Utils
                                   lookup);
   }
 
+  public static <C> C dynamicCast(Object o,
+                                  Class<? extends C> clazz)
+  {
+    if (clazz.isInstance(o)) {
+      return clazz.cast(o);
+    }
+    return null;
+  }
+
   private Utils()
   {
   }

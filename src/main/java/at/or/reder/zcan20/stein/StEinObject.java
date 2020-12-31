@@ -13,37 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.mx1;
+package at.or.reder.zcan20.stein;
 
-import at.or.reder.dcc.Direction;
-import at.or.reder.dcc.SpeedstepSystem;
-import java.util.BitSet;
+import org.openide.util.Lookup;
 
-public interface LocoInfo
+public interface StEinObject extends Lookup.Provider
 {
 
-  public int getError();
+  public ObjectClass getObjectClass();
 
-  public int getAddress();
+  public String getName();
 
-  public int getSpeed();
+  public Integer getModuleNumber();
 
-  public default Direction getDirection()
+  @Override
+  public default Lookup getLookup()
   {
-    return ((getFlags() & 0x10) != 0) ? Direction.REVERSE : Direction.FORWARD;
+    return Lookup.EMPTY;
   }
-
-  public default SpeedstepSystem getSpeedstepSystem()
-  {
-    return SpeedstepSystem.valueOfMagic((getFlags() & 0xc) >> 2);
-  }
-
-  public int getFlags();
-
-  public BitSet getFunctions();
-
-  public int getAZBZ();
-
-  public int getStatus();
 
 }

@@ -19,6 +19,7 @@ import at.or.reder.dcc.Direction;
 import at.or.reder.dcc.SpeedstepSystem;
 import at.or.reder.mx1.LocoInfo;
 import java.time.LocalDateTime;
+import java.util.BitSet;
 
 public final class LocoInfoRecord
 {
@@ -31,7 +32,7 @@ public final class LocoInfoRecord
     private final Direction direction;
     private final SpeedstepSystem speedSystem;
     private final int flags;
-    private final int function;
+    private final BitSet functions;
     private final int azbz;
     private final int state;
 
@@ -40,7 +41,7 @@ public final class LocoInfoRecord
                       Direction direction,
                       SpeedstepSystem speedSystem,
                       int flags,
-                      int function,
+                      BitSet functions,
                       int azbz,
                       int state)
     {
@@ -49,7 +50,7 @@ public final class LocoInfoRecord
       this.direction = direction;
       this.speedSystem = speedSystem;
       this.flags = flags;
-      this.function = function;
+      this.functions = (BitSet) functions.clone();
       this.azbz = azbz;
       this.state = state;
     }
@@ -91,9 +92,9 @@ public final class LocoInfoRecord
     }
 
     @Override
-    public int getFunctions()
+    public BitSet getFunctions()
     {
-      return function;
+      return functions;
     }
 
     @Override
@@ -111,7 +112,7 @@ public final class LocoInfoRecord
     @Override
     public String toString()
     {
-      return "MyLocoInfo{" + "address=" + address + ", speed=" + speed + ", direction=" + direction + ", speedSystem=" + speedSystem + ", flags=" + flags + ", function=" + function + ", azbz=" + azbz + ", state=" + state + '}';
+      return "MyLocoInfo{" + "address=" + address + ", speed=" + speed + ", direction=" + direction + ", speedSystem=" + speedSystem + ", flags=" + flags + ", function=" + functions + ", azbz=" + azbz + ", state=" + state + '}';
     }
 
   }
@@ -120,7 +121,7 @@ public final class LocoInfoRecord
   private Direction direction;
   private int speed;
   private int flags;
-  private int functions;
+  private BitSet functions;
   private int azbz;
   private int state;
 
@@ -195,18 +196,12 @@ public final class LocoInfoRecord
 
   public boolean isFunctionSet(int iFunction)
   {
-    if (iFunction == 0) {
-      return (flags & 0x10) != 0;
-    } else if (iFunction > 0 && iFunction < 13) {
-      int mask = 1 << iFunction;
-      return (functions & mask) != 0;
-    }
-    return false;
+    return functions.get(iFunction);
   }
 
-  public int getFunctions()
+  public BitSet getFunctions()
   {
-    return functions;
+    return (BitSet) functions.clone();
   }
 
   public int getFlags()

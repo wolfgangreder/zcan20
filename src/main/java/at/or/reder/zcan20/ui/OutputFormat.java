@@ -13,37 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.mx1;
+package at.or.reder.zcan20.ui;
 
-import at.or.reder.dcc.Direction;
-import at.or.reder.dcc.SpeedstepSystem;
-import java.util.BitSet;
-
-public interface LocoInfo
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public enum OutputFormat
 {
-
-  public int getError();
-
-  public int getAddress();
-
-  public int getSpeed();
-
-  public default Direction getDirection()
-  {
-    return ((getFlags() & 0x10) != 0) ? Direction.REVERSE : Direction.FORWARD;
-  }
-
-  public default SpeedstepSystem getSpeedstepSystem()
-  {
-    return SpeedstepSystem.valueOfMagic((getFlags() & 0xc) >> 2);
-  }
-
-  public int getFlags();
-
-  public BitSet getFunctions();
-
-  public int getAZBZ();
-
-  public int getStatus();
-
+  ZCS
 }

@@ -13,37 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package at.or.reder.mx1;
+package at.or.reder.zcan20.stein;
 
-import at.or.reder.dcc.Direction;
-import at.or.reder.dcc.SpeedstepSystem;
-import java.util.BitSet;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface LocoInfo
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public class StEinBuilder
 {
 
-  public int getError();
+  private final List<StEinObject> objectList = new ArrayList<>();
 
-  public int getAddress();
-
-  public int getSpeed();
-
-  public default Direction getDirection()
+  public StEinBuilder addObject(StEinObject obj)
   {
-    return ((getFlags() & 0x10) != 0) ? Direction.REVERSE : Direction.FORWARD;
+    if (obj != null) {
+      objectList.add(obj);
+    }
+    return this;
   }
-
-  public default SpeedstepSystem getSpeedstepSystem()
-  {
-    return SpeedstepSystem.valueOfMagic((getFlags() & 0xc) >> 2);
-  }
-
-  public int getFlags();
-
-  public BitSet getFunctions();
-
-  public int getAZBZ();
-
-  public int getStatus();
 
 }
