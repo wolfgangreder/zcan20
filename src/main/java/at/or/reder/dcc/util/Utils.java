@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -785,6 +786,16 @@ public final class Utils
                               ArrayList::new,
                               Collections::unmodifiableList,
                               Collections::emptyList,
+                              filter != null ? filter : Predicates::isNotNull);
+  }
+
+  public static <V> Set<V> copyToUnmodifiableSet(Collection<? extends V> in,
+                                                 Predicate<V> filter)
+  {
+    return copyToUnmodifiable(in,
+                              HashSet::new,
+                              Collections::unmodifiableSet,
+                              Collections::emptySet,
                               filter != null ? filter : Predicates::isNotNull);
   }
 

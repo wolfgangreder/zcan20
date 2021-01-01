@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 public class CVFactoriesTest
 {
 
-  @Test
+  @Test(enabled = false)
   public void testLoadBasic() throws Exception
   {
     CVSet set = null;
@@ -46,7 +46,7 @@ public class CVFactoriesTest
     System.err.println(tmp);
   }
 
-  @Test
+  @Test(enabled = false)
   public void testLoadAllowedValues() throws Exception
   {
     CVSet set;
