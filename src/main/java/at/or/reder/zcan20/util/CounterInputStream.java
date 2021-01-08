@@ -126,12 +126,6 @@ public final class CounterInputStream extends InputStream implements Counter
   }
 
   @Override
-  public void skipNBytes(long n) throws IOException
-  {
-    in.skipNBytes(n);
-  }
-
-  @Override
   public int available() throws IOException
   {
     return in.available();

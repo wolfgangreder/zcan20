@@ -65,8 +65,10 @@ final class MX1PortImpl implements MX1Port
     ERROR;
   }
   public static final Logger LOGGER = Logger.getLogger("at.or.reder.mx1.port");
-  public static final Logger READ_LOGGER = Logger.getLogger("at.or.reder.mx1.port.read");
-  public static final Logger WRITE_LOGGER = Logger.getLogger("at.or.reder.mx1.port.write");
+  public static final Logger READ_LOGGER = Logger.getLogger(
+      "at.or.reder.mx1.port.read");
+  public static final Logger WRITE_LOGGER = Logger.getLogger(
+      "at.or.reder.mx1.port.write");
   public static final byte SOH = (byte) 0x01;
   public static final byte EOT = (byte) 0x17;
   public static final byte DLE = (byte) 0x10;
@@ -74,7 +76,8 @@ final class MX1PortImpl implements MX1Port
   public static final int FRAMING_SIZE = 3;
   public static final short CRC_INIT = (short) 0xffff;
   private static final AtomicInteger threadCounter = new AtomicInteger();
-  private static final Executor eventDispatcher = Executors.newCachedThreadPool(MX1PortImpl::createEventThread);
+  private static final Executor eventDispatcher = Executors.newCachedThreadPool(
+      MX1PortImpl::createEventThread);
   private final String portName;
   private SerialPort port;
   private CounterOutputStream out;
@@ -116,7 +119,8 @@ final class MX1PortImpl implements MX1Port
                                   SerialPort.DATABITS_8,
                                   SerialPort.STOPBITS_1,
                                   SerialPort.PARITY_NONE);
-            p.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN + SerialPort.FLOWCONTROL_RTSCTS_OUT);
+            p.setFlowControlMode(
+                SerialPort.FLOWCONTROL_RTSCTS_IN + SerialPort.FLOWCONTROL_RTSCTS_OUT);
             port = p;
             out = new CounterOutputStream(port.getOutputStream());
             in = new CounterInputStream(port.getInputStream());
@@ -267,20 +271,18 @@ final class MX1PortImpl implements MX1Port
   {
     boolean longFrame = packet.isLongFrame();
     ByteBuffer buffer = Utils.allocateBEBuffer(packet.getDataLength()
-                                               + 3// sequence,command,flags
-                                               + (longFrame ? 2 : 1));
+        + 3// sequence,command,flags
+        + (longFrame ? 2 : 1));
     buffer.put((byte) packet.getSequence());
     buffer.put(MX1PacketFlags.toBits(packet.getFlags()));
     buffer.put((byte) packet.getCommand().getCmd());
     buffer.put(packet.getData());
     if (longFrame) {
       buffer.putShort(Utils.crc16((short) CRC_INIT,
-                                  buffer.slice(0,
-                                               buffer.position())));
+                                  buffer.slice().limit(buffer.position())));
     } else {
       buffer.put(Utils.crc8((byte) CRC_INIT,
-                            buffer.slice(0,
-                                         buffer.position())));
+                            buffer.slice().limit(buffer.position())));
     }
     return buffer.rewind();
   }
@@ -543,8 +545,7 @@ final class MX1PortImpl implements MX1Port
     if (flags.contains(MX1PacketFlags.LONG_FRAME)) {
       int datalen = buffer.limit() - 6;
       crcIn = buffer.getShort(buffer.limit() - 2) & 0xffff;
-      payload = buffer.slice(3,
-                             datalen);
+      payload = buffer.slice().position(3).limit(datalen);
 
 //      crcCalc = Utils.crc16((short) CRC_INIT,
 //                            buffer.slice(0,
@@ -553,11 +554,9 @@ final class MX1PortImpl implements MX1Port
     } else {
       int datalen = buffer.limit() - 5;
       crcIn = buffer.get(buffer.limit() - 1) & 0xff;
-      payload = buffer.slice(3,
-                             datalen);
+      payload = buffer.slice().position(3).limit(datalen);
       crcCalc = Utils.crc8((byte) CRC_INIT,
-                           buffer.slice(0,
-                                        buffer.limit() - 1)) & 0xff;
+                           buffer.slice().limit(buffer.limit() - 1)) & 0xff;
     }
     if (packetConsumer != null) {
       MX1Packet packet = null;
