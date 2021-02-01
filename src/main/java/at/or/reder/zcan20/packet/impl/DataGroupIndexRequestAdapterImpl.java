@@ -18,7 +18,7 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.packet.DataGroupIndexRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 
 /**
  *
@@ -74,7 +74,7 @@ final class DataGroupIndexRequestAdapterImpl extends AbstractPacketAdapter imple
   public String toString()
   {
     StringBuilder builder = new StringBuilder("ITEMLIST_INDEX(0x");
-    Utils.appendHexString(getMasterNID() & 0xffff,
+    DCCUtils.appendHexString(getMasterNID() & 0xffff,
                           builder,
                           4);
     builder.append(", ");

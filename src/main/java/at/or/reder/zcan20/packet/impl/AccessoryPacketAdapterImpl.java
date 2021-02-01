@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.AccessoryPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
@@ -88,15 +88,15 @@ final class AccessoryPacketAdapterImpl extends AbstractPacketAdapter implements 
     StringBuilder builder = new StringBuilder("AccessoryPacket(");
     builder.append(getPacket().getCommandMode());
     builder.append(", nid=0x");
-    Utils.appendHexString(getNID() & 0xffff,
+    DCCUtils.appendHexString(getNID() & 0xffff,
                           builder,
                           4);
     builder.append(", port=0x");
-    Utils.appendHexString(getPort() & 0xff,
+    DCCUtils.appendHexString(getPort() & 0xff,
                           builder,
                           2);
     builder.append(", value=0x");
-    Utils.appendHexString(getValue() & 0xff,
+    DCCUtils.appendHexString(getValue() & 0xff,
                           builder,
                           2);
     builder.append(')');

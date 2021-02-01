@@ -17,9 +17,8 @@ package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.cv.EnumeratedValue;
 import at.or.reder.dcc.util.AbstractDescripted;
+import at.or.reder.dcc.util.Localizable;
 import at.or.reder.dcc.util.ResourceDescription;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  *
@@ -31,7 +30,7 @@ final class EnumeratedValueImpl extends AbstractDescripted implements Enumerated
   private final int value;
 
   public EnumeratedValueImpl(int value,
-                             Map<Locale, ? extends ResourceDescription> descriptions)
+                             Localizable<ResourceDescription> descriptions)
   {
     super(descriptions,
           null);

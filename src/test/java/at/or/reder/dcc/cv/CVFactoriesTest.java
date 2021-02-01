@@ -35,7 +35,8 @@ public class CVFactoriesTest
   {
     CVSet set = null;
     try (InputStream is = getClass().getResourceAsStream("/at/or/reder/dcc/cv/impl/zimo.xml")) {
-      set = CVFactories.loadCVSetFromXML(is);
+      set = CVFactories.loadCVSetFromXML(null,
+                                         is);
       assertNotNull(set);
     }
     ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -51,10 +52,11 @@ public class CVFactoriesTest
   {
     CVSet set;
     try (InputStream is = getClass().getResourceAsStream("/at/or/reder/dcc/cv/impl/test_allowed_value.xml")) {
-      set = CVFactories.loadCVSetFromXML(is);
+      set = CVFactories.loadCVSetFromXML(null,
+                                         is);
       assertNotNull(set);
     }
-    CVEntry entry = set.getEntry(new SimpleCVAddress(155));
+    CVEntry entry = set.getEntry(SimpleCVAddress.valueOf(155));
     assertNotNull(entry);
     List<CVBitDescriptor> bitDescriptors = entry.getBitDescriptors();
     assertNotNull(bitDescriptors);

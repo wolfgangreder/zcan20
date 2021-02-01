@@ -15,10 +15,9 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.dcc.util.Localizable;
 import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -46,12 +45,12 @@ public interface CVBitDescriptorBuilder
 
   public CVBitDescriptorBuilder clearAllowedValues();
 
-  public CVBitDescriptorBuilder addDescription(Locale locale,
+  public CVBitDescriptorBuilder addDescription(String locale,
                                                ResourceDescription desc);
 
-  public CVBitDescriptorBuilder addDescriptions(@NotNull Map<Locale, ResourceDescription> names);
+  public CVBitDescriptorBuilder addDescriptions(Localizable<? extends ResourceDescription> names);
 
-  public CVBitDescriptorBuilder removeDescription(Locale locale);
+  public CVBitDescriptorBuilder removeDescription(String locale);
 
   public CVBitDescriptorBuilder clearDescriptions();
 

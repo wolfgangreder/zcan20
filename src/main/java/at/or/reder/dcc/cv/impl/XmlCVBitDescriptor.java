@@ -74,7 +74,7 @@ public final class XmlCVBitDescriptor extends XmlDescripted
 
   public XmlCVBitDescriptor(CVBitDescriptor d)
   {
-    super(d.getAllResourceDescriptions());
+    super(d.getLocalized());
     bitMask = d.getBitMask() & 0xff;
     defaultValue = d.getDefaultValue() & bitMask;
     d.getAllowedValues().stream().filter(Predicates::isNotNull).map(XmlEnumeratedValue::new).forEach(allowedValues::add);
@@ -91,7 +91,7 @@ public final class XmlCVBitDescriptor extends XmlDescripted
     builder.defaultValue(defaultValue);
     builder.minValue(min);
     builder.maxValue(max);
-    builder.addDescriptions(toMap());
+    builder.addDescriptions(toModel());
     flags.stream().filter(Predicates::isNotNull).forEach(builder::addFlag);
     return builder.build();
   }

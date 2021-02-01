@@ -21,12 +21,10 @@ import at.or.reder.dcc.cv.CVEntryBuilder;
 import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.util.AbstractDescriptedBuilder;
-import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -105,49 +103,6 @@ public final class CVEntryBuilderImpl extends AbstractDescriptedBuilder<CVEntryB
   public CVEntryBuilder type(CVType type)
   {
     this.type = type != null ? type : CVType.NUMERIC;
-    return this;
-  }
-
-  @Override
-  public CVEntryBuilder addDescription(Locale locale,
-                                       ResourceDescription description)
-  {
-    if (description != null) {
-      descriptions.put(locale,
-                       description);
-    } else {
-      descriptions.remove(locale);
-    }
-    return this;
-  }
-
-  @Override
-  public CVEntryBuilder addDescriptions(Map<Locale, ResourceDescription> description)
-  {
-    if (description != null) {
-      for (Map.Entry<Locale, ResourceDescription> e : description.entrySet()) {
-        if (e.getValue() != null) {
-          descriptions.put(e.getKey(),
-                           e.getValue());
-        } else {
-          descriptions.remove(e.getKey());
-        }
-      }
-    }
-    return this;
-  }
-
-  @Override
-  public CVEntryBuilder removeDescription(Locale locale)
-  {
-    descriptions.remove(locale);
-    return this;
-  }
-
-  @Override
-  public CVEntryBuilder clearDescriptions()
-  {
-    descriptions.clear();
     return this;
   }
 

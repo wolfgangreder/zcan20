@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.ModuleInfoType;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.ModuleInfoPacketAdapter;
@@ -94,7 +94,7 @@ final class ModuleInfoPacketAdapterImpl extends AbstractPacketAdapter implements
     StringBuilder builder = new StringBuilder("ModuleInfo(type=");
     builder.append(getInfoType().toString());
     builder.append(", rawValue=0x");
-    Utils.appendHexString(getRawValue(),
+    DCCUtils.appendHexString(getRawValue(),
                           builder,
                           8);
     builder.append(')');

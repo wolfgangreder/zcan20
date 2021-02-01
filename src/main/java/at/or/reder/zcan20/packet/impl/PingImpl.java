@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.PacketSelector;
@@ -95,15 +95,15 @@ final class PingImpl extends AbstractPacketAdapter implements Ping
   public String toString()
   {
     StringBuilder builder = new StringBuilder("PING(0x");
-    Utils.appendHexString(getMasterNID(),
+    DCCUtils.appendHexString(getMasterNID(),
                           builder,
                           8);
     builder.append(", 0x");
-    Utils.appendHexString(getType(),
+    DCCUtils.appendHexString(getType(),
                           builder,
                           4);
     builder.append(", 0x");
-    Utils.appendHexString(getSession(),
+    DCCUtils.appendHexString(getSession(),
                           builder,
                           4);
     return builder.append(')').toString();

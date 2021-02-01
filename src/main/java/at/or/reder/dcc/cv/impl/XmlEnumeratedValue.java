@@ -53,13 +53,13 @@ public final class XmlEnumeratedValue extends XmlDescripted
 
   XmlEnumeratedValue(EnumeratedValue v)
   {
-    super(v.getAllResourceDescriptions());
+    super(v.getLocalized());
   }
 
   public EnumeratedValue toEnumeratedValue()
   {
     return new EnumeratedValueImpl(value,
-                                   toMap());
+                                   toModel());
   }
 
   @XmlAttribute(name = "value")

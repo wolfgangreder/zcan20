@@ -17,7 +17,7 @@ package at.or.reder.zcan20.impl;
 
 import at.or.reder.dcc.util.BufferPool;
 import at.or.reder.dcc.util.CanIdMatcher;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
@@ -136,7 +136,7 @@ public final class McastPort implements ZPort
     WRITE_LOGGER.log(Level.FINEST,
                      () -> {
                        StringBuilder builder = new StringBuilder("Sending raw ");
-                       Utils.byteBuffer2HexString(buffer,
+                       DCCUtils.byteBuffer2HexString(buffer,
                                                   builder,
                                                   ' ');
                        return builder.toString();

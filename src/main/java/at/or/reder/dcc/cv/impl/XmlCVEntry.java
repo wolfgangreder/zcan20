@@ -22,7 +22,6 @@ import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
 import at.or.reder.dcc.util.XmlDescripted;
 import at.or.reder.dcc.util.XmlIntAdapter;
-import at.or.reder.dcc.util.XmlResourceDescriptor;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -158,7 +157,6 @@ public final class XmlCVEntry extends XmlDescripted
 
   }
   private CVType type;
-  private final List<XmlResourceDescriptor> descriptors = new ArrayList<>();
   private final Set<CVFlag> flags = EnumSet.noneOf(CVFlag.class);
   private int defaultValue = 0;
   private int rangeMin = 0;
@@ -175,7 +173,7 @@ public final class XmlCVEntry extends XmlDescripted
 
   public XmlCVEntry(CVEntry e)
   {
-    super(e.getAllResourceDescriptions());
+    super(e.getLocalized());
     type = e.getCVType();
     flags.addAll(e.getFlags());
     defaultValue = e.getDefaultValue();
@@ -208,7 +206,7 @@ public final class XmlCVEntry extends XmlDescripted
     builder.rangeMin(rangeMin);
     builder.type(type);
     builder.valueMask(valueMask);
-    builder.addDescriptions(toMap());
+    builder.addDescriptions(toModel());
     return builder.build();
   }
 

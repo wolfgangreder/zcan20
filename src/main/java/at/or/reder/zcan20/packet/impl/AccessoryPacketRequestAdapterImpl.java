@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.AccessoryPacketRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
@@ -74,11 +74,11 @@ final class AccessoryPacketRequestAdapterImpl extends AbstractPacketAdapter impl
   public String toString()
   {
     StringBuilder builder = new StringBuilder("AccessoryPacketRequest(nid=0x");
-    Utils.appendHexString(getNID() & 0xffff,
+    DCCUtils.appendHexString(getNID() & 0xffff,
                           builder,
                           4);
     builder.append(", port=0x");
-    Utils.appendHexString(getPort() & 0xff,
+    DCCUtils.appendHexString(getPort() & 0xff,
                           builder,
                           2);
     builder.append(')');

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Wolfgang Reder.
+ * Copyright 2021 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,37 +15,34 @@
  */
 package at.or.reder.dcc.util;
 
-import java.util.Locale;
-
 /**
  *
  * @author Wolfgang Reder
  */
-public interface Descripted
+public final class DescriptionLocalizable extends Localizable<ResourceDescription>
 {
 
-  public Localizable<ResourceDescription> getLocalized();
-
-  public default String getName()
+  public DescriptionLocalizable(boolean mutable)
   {
-    return getLocalized().getValue(Locale.getDefault().getLanguage()).getName();
+    super(mutable);
   }
 
-  public default String getName(String language)
+  public DescriptionLocalizable(ResourceDescription defaultValue)
   {
-    return getLocalized().getValue(language).getName();
+    super(defaultValue);
   }
 
-  public default String getDescription(String lang)
+  public DescriptionLocalizable(ResourceDescription defaultValue,
+                                boolean mutable)
   {
-    return getLocalized().getValue(lang).getDescrption();
+    super(defaultValue,
+          mutable);
   }
 
-  public default String getDescription()
+  @Override
+  protected boolean isValueValid(ResourceDescription value)
   {
-    return getDescription(Locale.getDefault().getLanguage());
+    return value != null && value.getName() != null && !value.getName().isBlank();
   }
-
-  public ResourceDescription getFallbackDescription();
 
 }

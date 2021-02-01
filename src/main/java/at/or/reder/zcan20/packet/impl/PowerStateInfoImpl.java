@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.dcc.PowerPort;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.ZimoPowerMode;
 import at.or.reder.zcan20.packet.Packet;
@@ -91,7 +91,7 @@ final class PowerStateInfoImpl extends AbstractPacketAdapter implements PowerSta
   public String toString()
   {
     StringBuilder builder = new StringBuilder("SYSTEM_POWER(SystemNID: 0x");
-    Utils.appendHexString(getSystemNID(),
+    DCCUtils.appendHexString(getSystemNID(),
                           builder,
                           4);
     builder.append(", Port: ");

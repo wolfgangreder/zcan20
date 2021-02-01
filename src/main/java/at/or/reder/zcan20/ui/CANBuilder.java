@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.ui;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
@@ -84,7 +84,7 @@ public final class CANBuilder extends JFrame
   private ByteBuffer parseEdit(JTextField field)
   {
     try {
-      return Utils.hexString2ByteBuffer(field.getText(),
+      return DCCUtils.hexString2ByteBuffer(field.getText(),
                                         null,
                                         ':').rewind();
     } catch (ParseException ex) {
@@ -121,7 +121,7 @@ public final class CANBuilder extends JFrame
                        JTextField field)
   {
     StringBuilder builder = new StringBuilder();
-    Utils.byteBuffer2HexString(buffer,
+    DCCUtils.byteBuffer2HexString(buffer,
                                builder,
                                ':');
     field.setText(builder.toString());
@@ -218,7 +218,7 @@ public final class CANBuilder extends JFrame
     buffer.putInt(i);
     buffer.rewind();
     buffer.position(4 - (numDigits / 2));
-    Utils.byteBuffer2HexString(buffer,
+    DCCUtils.byteBuffer2HexString(buffer,
                                builder,
                                ':');
     field.setText(builder.toString());

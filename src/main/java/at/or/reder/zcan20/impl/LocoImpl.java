@@ -17,7 +17,7 @@ package at.or.reder.zcan20.impl;
 
 import at.or.reder.dcc.DCCConstants;
 import at.or.reder.dcc.Direction;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.Loco;
@@ -105,7 +105,7 @@ final class LocoImpl implements Loco
 
   private void takeOwnership(boolean force) throws IOException
   {
-    ByteBuffer buffer = Utils.allocateLEBuffer(8);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(8);
     buffer.putShort(loco);
     // 1. status abfragen LOCO.0x10.REQUEST
     Packet packet = zcan.createPacketBuilder().

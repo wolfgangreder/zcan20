@@ -15,9 +15,8 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.dcc.util.Localizable;
 import at.or.reder.dcc.util.ResourceDescription;
-import java.util.Locale;
-import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -31,12 +30,12 @@ public interface EnumeratedValueBuilder
 
   public EnumeratedValueBuilder value(int value);
 
-  public EnumeratedValueBuilder addDescription(Locale locale,
+  public EnumeratedValueBuilder addDescription(String locale,
                                                @NotNull ResourceDescription description);
 
-  public EnumeratedValueBuilder addDescriptions(@NotNull Map<Locale, ResourceDescription> description);
+  public EnumeratedValueBuilder addDescriptions(Localizable<? extends ResourceDescription> description);
 
-  public EnumeratedValueBuilder removeDescription(Locale locale);
+  public EnumeratedValueBuilder removeDescription(String locale);
 
   public EnumeratedValueBuilder clearDescriptions();
 

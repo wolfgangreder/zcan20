@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapterFactory;
@@ -92,7 +92,7 @@ public final class TSEInfoPacketAdapterImpl extends AbstractPacketAdapter implem
   public String toString()
   {
     StringBuilder builder = new StringBuilder("TSE_INFO_MODE(SystemNID: 0x");
-    Utils.appendHexString(getSenderNID() & 0xffff,
+    DCCUtils.appendHexString(getSenderNID() & 0xffff,
                           builder,
                           4);
     builder.append(", Decoder: ");
@@ -100,11 +100,11 @@ public final class TSEInfoPacketAdapterImpl extends AbstractPacketAdapter implem
     builder.append(", CVIndex: ");
     builder.append(getCVIndex());
     builder.append(", State: 0x");
-    Utils.appendHexString(getState() & 0xff,
+    DCCUtils.appendHexString(getState() & 0xff,
                           builder,
                           2);
     builder.append(", Code: 0x");
-    Utils.appendHexString(getCode() & 0xff,
+    DCCUtils.appendHexString(getCode() & 0xff,
                           builder,
                           2);
     return builder.append(')').toString();

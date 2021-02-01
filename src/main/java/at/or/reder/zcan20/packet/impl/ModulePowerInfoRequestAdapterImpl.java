@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.dcc.PowerPort;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.ModulePowerInfoRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
@@ -84,7 +84,7 @@ final class ModulePowerInfoRequestAdapterImpl extends AbstractPacketAdapter impl
   public String toString()
   {
     StringBuilder builder = new StringBuilder("MODULE_POWER_INFO(0x");
-    Utils.appendHexString(getTargetNID() & 0xffff,
+    DCCUtils.appendHexString(getTargetNID() & 0xffff,
                           builder,
                           4);
     builder.append(", ");

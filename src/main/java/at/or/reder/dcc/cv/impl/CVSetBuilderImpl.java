@@ -19,6 +19,7 @@ import at.or.reder.dcc.cv.CVAddress;
 import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVSet;
 import at.or.reder.dcc.cv.CVSetBuilder;
+import at.or.reder.dcc.cv.CVSetProvider;
 import at.or.reder.dcc.util.AbstractDescriptedBuilder;
 import java.util.Collection;
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import java.util.UUID;
 public final class CVSetBuilderImpl extends AbstractDescriptedBuilder<CVSetBuilder> implements CVSetBuilder
 {
 
+  private CVSetProvider provider;
   private UUID id;
   private final SortedSet<CVEntry> entries = new TreeSet<>(Comparator.comparing(CVEntry::getFlatAddress));
 
@@ -49,9 +51,9 @@ public final class CVSetBuilderImpl extends AbstractDescriptedBuilder<CVSetBuild
     this.id = Objects.requireNonNull(set,
                                      "set is null").getId();
     super.copy(set);
-    descriptions.clear();
     entries.clear();
     addEntries(set.getEntries());
+    provider(set.getProvider());
     return this;
   }
 
@@ -59,6 +61,13 @@ public final class CVSetBuilderImpl extends AbstractDescriptedBuilder<CVSetBuild
   public CVSetBuilder id(UUID id)
   {
     this.id = id;
+    return this;
+  }
+
+  @Override
+  public CVSetBuilder provider(CVSetProvider provider)
+  {
+    this.provider = provider;
     return this;
   }
 
@@ -111,6 +120,7 @@ public final class CVSetBuilderImpl extends AbstractDescriptedBuilder<CVSetBuild
       id = UUID.randomUUID();
     }
     return new CVSetImpl(id,
+                         provider,
                          descriptions,
                          entries);
   }

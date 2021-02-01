@@ -15,10 +15,8 @@
  */
 package at.or.reder.dcc.util;
 
-import java.util.Locale;
 import java.util.Map;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlValue;
 
 /**
@@ -36,30 +34,20 @@ public final class XmlResourceDescriptor
   {
   }
 
-  public XmlResourceDescriptor(Map.Entry<Locale, ResourceDescription> e)
+  public XmlResourceDescriptor(Map.Entry<String, ? extends ResourceDescription> e)
   {
     this(e.getKey(),
          e.getValue().getName(),
          e.getValue().getDescrption());
   }
 
-  public XmlResourceDescriptor(Locale loc,
+  public XmlResourceDescriptor(String loc,
                                String name,
                                String desc)
   {
-    if (loc != null) {
-      this.loc = loc.toLanguageTag();
-    } else {
-      this.loc = null;
-    }
+    this.loc = loc;
     this.name = name;
     this.description = desc;
-  }
-
-  @XmlTransient
-  public Locale getLocale()
-  {
-    return loc != null ? Locale.forLanguageTag(loc) : null;
   }
 
   @XmlAttribute(name = "lang")

@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -125,19 +125,19 @@ public final class CanId extends Number
   public String toString()
   {
     StringBuilder builder = new StringBuilder("CanId(0x");
-    Utils.appendHexString(value,
+    DCCUtils.appendHexString(value,
                           builder,
                           8);
     builder.append(", ");
     builder.append(getCommandGroup());
     builder.append(", ");
-    Utils.appendHexString(getCommand(),
+    DCCUtils.appendHexString(getCommand(),
                           builder,
                           1);
     builder.append(", ");
     builder.append(getCommandMode());
     builder.append(", 0x");
-    Utils.appendHexString(getSenderNid() & 0xffff,
+    DCCUtils.appendHexString(getSenderNid() & 0xffff,
                           builder,
                           4);
     return builder.append(')').toString();

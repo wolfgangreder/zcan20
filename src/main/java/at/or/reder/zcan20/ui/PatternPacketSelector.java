@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.ui;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.Packet;
 
@@ -84,11 +84,11 @@ public final class PatternPacketSelector implements PacketSelector
   public String toString()
   {
     StringBuilder builder = new StringBuilder("PatternPacketSelector{mask=0x");
-    Utils.appendHexString(mask,
+    DCCUtils.appendHexString(mask,
                           builder,
                           8);
     builder.append(", pattern=0x");
-    Utils.appendHexString(pattern,
+    DCCUtils.appendHexString(pattern,
                           builder,
                           8);
     builder.append('}');

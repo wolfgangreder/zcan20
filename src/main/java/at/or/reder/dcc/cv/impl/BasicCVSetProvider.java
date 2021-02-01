@@ -17,12 +17,16 @@ package at.or.reder.dcc.cv.impl;
 
 import at.or.reder.dcc.Decoder;
 import at.or.reder.dcc.cv.CVAddress;
+import at.or.reder.dcc.cv.CVFactories;
 import at.or.reder.dcc.cv.CVSet;
 import at.or.reder.dcc.cv.CVSetProvider;
 import at.or.reder.dcc.cv.CVValue;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.lookup.ServiceProvider;
@@ -36,6 +40,8 @@ import org.openide.util.lookup.ServiceProvider;
            "BasicCVSetProvider_desc=Basis CV Set nach RCN-225"})
 public final class BasicCVSetProvider implements CVSetProvider
 {
+
+  private List<CVSet> cvsets;
 
   @Override
   public String getName()
@@ -58,7 +64,23 @@ public final class BasicCVSetProvider implements CVSetProvider
   @Override
   public List<CVSet> getCVSets()
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    synchronized (this) {
+      if (cvsets == null) {
+        try (InputStream is = getClass().getResourceAsStream("basic.xml")) {
+          CVSet set = CVFactories.loadCVSetFromXML(this,
+                                                   is);
+          if (set != null) {
+            cvsets = Collections.singletonList(set);
+          } else {
+            cvsets = Collections.emptyList();
+          }
+        } catch (IOException ex) {
+          Exceptions.printStackTrace(ex);
+          cvsets = Collections.emptyList();
+        }
+      }
+      return cvsets;
+    }
   }
 
   @Override

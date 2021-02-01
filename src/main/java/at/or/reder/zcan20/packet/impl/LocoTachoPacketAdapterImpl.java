@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.dcc.Direction;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.LocoDirection;
 import at.or.reder.zcan20.LocoSpeed;
 import at.or.reder.zcan20.LocoVoltage;
@@ -120,7 +120,7 @@ abstract class LocoTachoPacketAdapterImpl extends AbstractPacketAdapter implemen
     public String toString()
     {
       StringBuilder builder = new StringBuilder("LOCO_TACHO_DIRECTION(0x");
-      Utils.appendHexString(getDecoderId(),
+      DCCUtils.appendHexString(getDecoderId(),
                             builder,
                             4);
       builder.append(", ");
@@ -156,7 +156,7 @@ abstract class LocoTachoPacketAdapterImpl extends AbstractPacketAdapter implemen
     public String toString()
     {
       StringBuilder builder = new StringBuilder("LOCO_TACHO_SPPED(0x");
-      Utils.appendHexString(getDecoderId(),
+      DCCUtils.appendHexString(getDecoderId(),
                             builder,
                             4);
       builder.append(", ");
@@ -188,7 +188,7 @@ abstract class LocoTachoPacketAdapterImpl extends AbstractPacketAdapter implemen
     public String toString()
     {
       StringBuilder builder = new StringBuilder("LOCO_TACHO_VOLTAGE(0x");
-      Utils.appendHexString(getDecoderId(),
+      DCCUtils.appendHexString(getDecoderId(),
                             builder,
                             4);
       builder.append(", ");

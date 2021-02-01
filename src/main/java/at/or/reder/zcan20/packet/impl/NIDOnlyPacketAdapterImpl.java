@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.NIDOnlyPacketAdapter;
@@ -100,7 +100,7 @@ final class NIDOnlyPacketAdapterImpl extends AbstractPacketAdapter implements NI
   {
     StringBuilder builder = new StringBuilder(packetName);
     builder.append("(0x");
-    Utils.appendHexString(getMasterNID() & 0xffff,
+    DCCUtils.appendHexString(getMasterNID() & 0xffff,
                           builder,
                           4);
     return builder.append(')').toString();

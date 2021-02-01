@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.Loco;
 import at.or.reder.zcan20.LocoControl;
 import at.or.reder.zcan20.LocoMode;
@@ -44,7 +44,7 @@ public final class LocoControlImpl implements LocoControl
   public Loco getLoco(short loco,
                       boolean takeOwnership) throws IOException
   {
-    ByteBuffer buffer = Utils.allocateLEBuffer(8);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(8);
     buffer.putShort(loco);
     // 1. abfrage fahrzeug mode LOCO.0x01.COMMAND
     Packet packet = zcan.createPacketBuilder().buildLocoModePacket(loco);

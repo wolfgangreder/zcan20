@@ -21,6 +21,8 @@ import at.or.reder.dcc.DecoderInfo;
 import at.or.reder.dcc.IdentifyProvider;
 import at.or.reder.dcc.Manufacturer;
 import at.or.reder.dcc.SpeedstepSystem;
+import at.or.reder.dcc.cv.CVAddress;
+import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.impl.DefaultDecoderInfo;
 import at.or.reder.zcan20.DecoderType;
 import at.or.reder.zcan20.packet.Packet;
@@ -44,6 +46,7 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,7 +63,7 @@ import org.openide.util.lookup.Lookups;
  *
  * @author Wolfgang Reder
  */
-public final class Utils
+public final class DCCUtils
 {
 
   public static final Logger LOGGER = Logger.getLogger("at.or.reder.zcan20");
@@ -666,9 +669,9 @@ public final class Utils
     if (data.capacity() > 0) {
       tmp.append(", ");
       for (int i = 0; i < data.capacity(); ++i) {
-        Utils.appendHexString(data.get(i) & 0xff,
-                              tmp,
-                              2);
+        DCCUtils.appendHexString(data.get(i) & 0xff,
+                                 tmp,
+                                 2);
         tmp.append(' ');
       }
     }
@@ -944,13 +947,14 @@ public final class Utils
 
   private static String readCVList(IOFunction<Integer, Integer> provider,
                                    String pattern,
+                                   boolean zeroAllowed,
                                    int... icvs) throws IOException
   {
     DecimalFormat fmt = new DecimalFormat(pattern);
     StringBuilder builder = new StringBuilder();
     for (int i : icvs) {
       int val = provider.apply(i);
-      if (val != 0) {
+      if (val != 0 || zeroAllowed) {
         builder.append(fmt.format(val));
       } else {
         builder.append('?');
@@ -1023,6 +1027,7 @@ public final class Utils
       version = readCVList((i) -> provider.readCV(addr,
                                                   i),
                            "00",
+                           true,
                            7,
                            65);
       serial = readCVList((i) -> {
@@ -1034,6 +1039,7 @@ public final class Utils
         return result;
       },
                           "000",
+                          true,
                           250,
                           251,
                           252,
@@ -1041,6 +1047,7 @@ public final class Utils
       soundCode = readCVList((i) -> provider.readCV(addr,
                                                     i),
                              "000",
+                             true,
                              260,
                              261,
                              262,
@@ -1071,7 +1078,47 @@ public final class Utils
     return null;
   }
 
-  private Utils()
+  public static String formatCVAddress(CVAddress address)
+  {
+    Map<CVType, Integer> bankAddresses = address.getBankAddresses();
+    StringBuilder result = new StringBuilder();
+    int i = bankAddresses.getOrDefault(CVType.INDEX_3,
+                                       0);
+    if (i != 0) {
+      result.append(Integer.toString(i));
+    }
+    i = bankAddresses.getOrDefault(CVType.INDEX_2,
+                                   0);
+    if (i != 0) {
+      if (result.length() > 0) {
+        result.append(":");
+      }
+      result.append(Integer.toString(i));
+    }
+    i = bankAddresses.getOrDefault(CVType.INDEX_1,
+                                   0);
+    if (i != 0) {
+      if (result.length() > 0) {
+        result.append(":");
+      }
+      result.append(Integer.toString(i));
+    }
+    i = bankAddresses.getOrDefault(CVType.INDEX_0,
+                                   0);
+    if (i != 0) {
+      if (result.length() > 0) {
+        result.append(":");
+      }
+      result.append(Integer.toString(i));
+    }
+    if (result.length() > 0) {
+      result.append(":");
+    }
+    result.append(Integer.toString(address.getAddress()));
+    return result.toString();
+  }
+
+  private DCCUtils()
   {
   }
 

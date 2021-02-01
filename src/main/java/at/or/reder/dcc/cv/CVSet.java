@@ -27,6 +27,8 @@ import org.openide.util.Lookup;
 public interface CVSet extends Lookup.Provider, Descripted
 {
 
+  public CVSetProvider getProvider();
+
   public UUID getId();
 
   public List<CVEntry> getEntries();

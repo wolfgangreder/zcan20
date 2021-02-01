@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.dcc.PowerPort;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.DataGroup;
@@ -277,7 +277,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     adapterFactory(null);
     int dataLen = 8 + Math.min(appName.length(),
                                24);
-    ByteBuffer buffer = Utils.allocateLEBuffer(dataLen);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(dataLen);
     buffer.putInt(0x0);
     buffer.putInt(0x100);
     String tmp = appName.substring(0,
@@ -296,7 +296,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     command(CommandGroup.NETWORK_PORT_CLOSE);
     commandMode(CommandMode.COMMAND);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(2);
     buffer.putShort(masterNID);
     buffer.clear();
     data(buffer);
@@ -313,7 +313,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     command(CommandGroup.NETWORK_INTERFACE_OPTION);
     commandMode(CommandMode.REQUEST);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort(objectNID);
     buffer.putShort(type.getMagic());
     buffer.clear();
@@ -337,7 +337,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     command(CommandGroup.SYSTEM_POWER);
     commandMode(CommandMode.REQUEST);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(3);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(3);
     buffer.putShort(systemNID);
     buffer.put(PowerPort.toValue(outputs));
     buffer.clear();
@@ -356,7 +356,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.LOCO_STATE);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(2);
     buffer.putShort(locoID);
     buffer.clear();
     data(buffer);
@@ -374,7 +374,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.LOCO_MODE);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(2);
     buffer.putShort(locoID);
     buffer.clear();
     data(buffer);
@@ -413,7 +413,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.LOCO_MODE);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(6);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(6);
     buffer.putShort(locoID);
     int m1 = (steps.getMagic() & 0x0f) + ((protocol.getMagic() & 0x0f) << 4);
     int m3 = (limitMode.getMagic() << 2) + (pulseFx ? 1 : 0) + (analogFx ? 2 : 0);
@@ -436,7 +436,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.LOCO_SPEED);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(2);
     buffer.putShort(locoID);
     buffer.clear();
     data(buffer);
@@ -468,10 +468,10 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.LOCO_SPEED);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(6);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(6);
     buffer.putShort(locoID);
     buffer.putShort(sf);
-    buffer.put(Utils.byte1(speedDivisor));
+    buffer.put(DCCUtils.byte1(speedDivisor));
     buffer.put((byte) 0);
     buffer.clear();
     data(buffer);
@@ -489,7 +489,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.LOCO_FUNC_INFO);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(2);
     buffer.putShort(locoID);
     buffer.clear();
     data(buffer);
@@ -507,7 +507,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.LOCO_FUNC_SWITCH);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(2);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(2);
     buffer.putShort(locoID);
     buffer.clear();
     data(buffer);
@@ -530,7 +530,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.LOCO_FUNC_SWITCH);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort(locoID);
     buffer.putShort(fxNumber);
     buffer.clear();
@@ -555,7 +555,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.LOCO_FUNC_SWITCH);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(6);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(6);
     buffer.putShort(locoID);
     buffer.putShort(fxNumber);
     buffer.putShort(fxValue);
@@ -579,7 +579,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     command(CommandGroup.LOCO_ACTIVE);
     commandMode(CommandMode.COMMAND);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort(locoID);
     buffer.putShort((short) (mode.getMagic() & 0xff));
     buffer.flip();
@@ -595,7 +595,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.TSE_PROG_MODE);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(3);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(3);
     buffer.putShort(systemID);
     buffer.put(port.getMagic());
     buffer.clear();
@@ -612,7 +612,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.TSE_PROG_MODE);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort(systemID);
     buffer.put(port.getMagic());
     buffer.put(mode);
@@ -630,7 +630,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.TSE_PROG_READ);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(8);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(8);
     buffer.putShort(systemID);
     buffer.putShort(locoID);
     buffer.putInt(cvNumber);
@@ -649,7 +649,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.TSE_PROG_WRITE);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(10);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(10);
     buffer.putShort(systemID);
     buffer.putShort(locoID);
     buffer.putInt(cvNumber);
@@ -666,7 +666,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     return commandGroup(CommandGroup.TRACK_CONFIG_PRIVATE).
             command(CommandGroup.TSE_PROG_CLEAR).
             commandMode(CommandMode.COMMAND).
-            data(Utils.allocateLEBuffer(2 * Short.BYTES).
+            data(DCCUtils.allocateLEBuffer(2 * Short.BYTES).
                     putShort(systemID).
                     putShort(locoID)).
             adapterFactory(null);
@@ -682,7 +682,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.DATA_GROUP_COUNT);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort(masterNID);
     buffer.putShort(dataGroup.getMagic());
     buffer.rewind();
@@ -701,7 +701,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.DATA_ITEMLIST_INDEX);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(6);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(6);
     buffer.putShort(masterNID);
     buffer.putShort(dataGroup.getMagic());
     buffer.putShort(index);
@@ -718,7 +718,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.DATA_ITEMLIST_NID);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort(masterNID);
     buffer.putShort(nid);
     buffer.rewind();
@@ -737,7 +737,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.DATA_NAME_EXT);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(16);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(16);
     buffer.putShort(masterNID);
     buffer.putShort(objectNID);
     buffer.putInt(subID);
@@ -758,7 +758,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.SYSTEM_POWER);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(3);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(3);
     buffer.putShort(nid);
     byte mask = PowerPort.toValue(output);
     buffer.put(mask);
@@ -778,7 +778,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.COMMAND);
     command(CommandGroup.SYSTEM_POWER);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort(nid);
     byte mask = PowerPort.toValue(output);
     buffer.put(mask);
@@ -816,7 +816,7 @@ public final class DefaultPacketBuilder implements PacketBuilder
     commandMode(CommandMode.REQUEST);
     command(CommandGroup.CONFIG_MODULE_INFO);
     adapterFactory(null);
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort(nid);
     buffer.putShort(type.getMagic());
     buffer.rewind();

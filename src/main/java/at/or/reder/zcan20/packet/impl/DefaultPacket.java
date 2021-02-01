@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
@@ -59,7 +59,7 @@ public final class DefaultPacket implements Packet
     this.address = address;
     final int dataLen = data != null ? data.remaining() : 0;
     if (dataLen > 0) {
-      ByteBuffer tmp = Utils.allocateLEBuffer(dataLen);
+      ByteBuffer tmp = DCCUtils.allocateLEBuffer(dataLen);
       tmp.put(data);
       tmp.clear();
       this.data = tmp.asReadOnlyBuffer();
@@ -174,7 +174,7 @@ public final class DefaultPacket implements Packet
   public synchronized String toString()
   {
     if (string == null) {
-      string = Utils.packetToString(this);
+      string = DCCUtils.packetToString(this);
     }
     return string;
   }

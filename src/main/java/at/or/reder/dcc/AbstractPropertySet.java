@@ -15,7 +15,7 @@
  */
 package at.or.reder.dcc;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -42,7 +42,7 @@ public abstract class AbstractPropertySet implements PropertySet
 
   protected boolean testSerialPort(String value)
   {
-    switch (Utils.getOSType()) {
+    switch (DCCUtils.getOSType()) {
       case LINUX: {
         Pattern pattern = Pattern.compile("\\A/dev/(tty|ACM)/\\d+\\z",
                                           Pattern.CASE_INSENSITIVE);

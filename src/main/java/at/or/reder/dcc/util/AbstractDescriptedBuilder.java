@@ -15,11 +15,6 @@
  */
 package at.or.reder.dcc.util;
 
-import at.or.reder.dcc.util.ResourceDescription;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 /**
  *
  * @author Wolfgang Reder
@@ -28,7 +23,7 @@ import java.util.Map;
 public abstract class AbstractDescriptedBuilder<V>
 {
 
-  protected final Map<Locale, ResourceDescription> descriptions = new HashMap<>();
+  protected final Localizable<ResourceDescription> descriptions = new DescriptionLocalizable(true);
   private V subThis;
 
   protected AbstractDescriptedBuilder()
@@ -42,47 +37,37 @@ public abstract class AbstractDescriptedBuilder<V>
 
   protected void copy(Descripted d)
   {
-    descriptions.clear();
-    d.getAllResourceDescriptions().
-            entrySet().
-            stream().
-            filter((e) -> e.getValue() != null).
-            forEach((e) -> this.descriptions.put(e.getKey(),
-                                                 e.getValue()));
+    descriptions.getValues().clear();
+    descriptions.addValues(d.getLocalized());
   }
 
-  public V addDescription(Locale locale,
+  public V addDescription(String locale,
                           ResourceDescription description)
   {
     if (description != null) {
-      descriptions.put(locale,
-                       description);
+      descriptions.addValue(locale,
+                            description);
     }
     return subThis;
   }
 
-  public V addDescriptions(Map<Locale, ResourceDescription> description)
+  public V addDescriptions(Localizable<? extends ResourceDescription> descriptions)
   {
-    if (description != null) {
-      description.
-              entrySet().
-              stream().
-              filter((e) -> e.getValue() != null).
-              forEach((e) -> this.descriptions.put(e.getKey(),
-                                                   e.getValue()));
+    if (descriptions != null) {
+      this.descriptions.addValues(descriptions);
     }
     return subThis;
   }
 
-  public V removeDescription(Locale locale)
+  public V removeDescription(String locale)
   {
-    descriptions.remove(locale);
+    descriptions.removeLanguage(locale);
     return subThis;
   }
 
   public V clearDescriptions()
   {
-    descriptions.clear();
+    descriptions.getValues().clear();
     return subThis;
   }
 

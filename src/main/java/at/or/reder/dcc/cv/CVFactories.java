@@ -77,14 +77,15 @@ public final class CVFactories
     }
   }
 
-  public static CVSet loadCVSetFromXML(InputStream is) throws IOException
+  public static CVSet loadCVSetFromXML(CVSetProvider provider,
+                                       InputStream is) throws IOException
   {
     try {
       JAXBContext ctx = JAXBHelper.getJAXBContext();
       Unmarshaller u = ctx.createUnmarshaller();
       Object tmp = u.unmarshal(is);
       if (tmp instanceof XmlCVSet) {
-        return ((XmlCVSet) tmp).toCVSet();
+        return ((XmlCVSet) tmp).toCVSet(provider);
       }
       return null;
     } catch (JAXBException ex) {

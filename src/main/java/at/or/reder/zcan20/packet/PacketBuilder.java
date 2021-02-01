@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.packet;
 
 import at.or.reder.dcc.PowerPort;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
 import at.or.reder.zcan20.DataGroup;
@@ -178,7 +178,7 @@ public interface PacketBuilder
   public default PacketBuilder buildAccessoryRequestPacket(short decoder,
                                                            byte port)
   {
-    ByteBuffer buffer = Utils.allocateLEBuffer(3);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(3);
     buffer.putShort((short) (decoder | 0x3000));
     buffer.put(port);
     return commandGroup(CommandGroup.ACCESSORY).
@@ -192,7 +192,7 @@ public interface PacketBuilder
                                                            byte port,
                                                            byte mode)
   {
-    ByteBuffer buffer = Utils.allocateLEBuffer(4);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(4);
     buffer.putShort((short) (decoder | 0x3000));
     buffer.put(port);
     buffer.put(mode);

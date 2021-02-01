@@ -18,6 +18,7 @@ package at.or.reder.dcc.cv.impl;
 import at.or.reder.dcc.cv.CVEntry;
 import at.or.reder.dcc.cv.CVSet;
 import at.or.reder.dcc.cv.CVSetBuilder;
+import at.or.reder.dcc.cv.CVSetProvider;
 import at.or.reder.dcc.util.XmlDescripted;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,6 @@ import java.util.UUID;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -36,28 +36,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public final class XmlCVSet extends XmlDescripted
 {
 
-  public static final class Adapter extends XmlAdapter<XmlCVSet, CVSet>
-  {
-
-    @Override
-    public CVSet unmarshal(XmlCVSet v)
-    {
-      if (v != null) {
-        return v.toCVSet();
-      }
-      return null;
-    }
-
-    @Override
-    public XmlCVSet marshal(CVSet v)
-    {
-      if (v != null) {
-        return new XmlCVSet(v);
-      }
-      return null;
-    }
-
-  }
   private UUID id;
   private final List<CVEntry> entries = new ArrayList<>();
 
@@ -67,17 +45,18 @@ public final class XmlCVSet extends XmlDescripted
 
   public XmlCVSet(CVSet set)
   {
-    super(set.getAllResourceDescriptions());
+    super(set.getLocalized());
     id = set.getId();
     entries.addAll(set.getEntries());
   }
 
-  public CVSet toCVSet()
+  public CVSet toCVSet(CVSetProvider provider)
   {
     CVSetBuilder builder = new CVSetBuilderImpl();
     builder.id(id);
     builder.addEntries(entries);
-    builder.addDescriptions(toMap());
+    builder.addDescriptions(toModel());
+    builder.provider(provider);
     return builder.build();
   }
 

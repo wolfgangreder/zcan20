@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20;
 
-import static at.or.reder.dcc.util.Utils.LOGGER;
+import static at.or.reder.dcc.util.DCCUtils.LOGGER;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;

@@ -18,7 +18,7 @@ package at.or.reder.zcan20.impl;
 import at.or.reder.dcc.NotConnectedException;
 import at.or.reder.dcc.util.BufferPool;
 import at.or.reder.dcc.util.CanIdMatcher;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
@@ -124,9 +124,9 @@ public final class UDPPort implements ZPort
 
   private InetAddress getMatchingAddress(InetAddress remoteAddress) throws SocketException
   {
-    List<InterfaceAddress> addresses = Utils.getAllInterfaceAddresses();
+    List<InterfaceAddress> addresses = DCCUtils.getAllInterfaceAddresses();
     for (InterfaceAddress a : addresses) {
-      if (Utils.matchesSubnet(remoteAddress,
+      if (DCCUtils.matchesSubnet(remoteAddress,
                               a.getAddress(),
                               a.getNetworkPrefixLength())) {
         return a.getAddress();
@@ -178,7 +178,7 @@ public final class UDPPort implements ZPort
                          String action)
   {
     if ((filter == null || filter.contains(packet.getCommandGroup().getMagic())) && (logger.isLoggable(Level.FINER))) {
-      StringBuilder builder = Utils.appendHexString(sequence,
+      StringBuilder builder = DCCUtils.appendHexString(sequence,
                                                     new StringBuilder(),
                                                     8);
       builder.append(' ');
@@ -191,7 +191,7 @@ public final class UDPPort implements ZPort
         PacketAdapter adapter = packet.getAdapter(PacketAdapter.class);
         if (adapter != null) {
           builder.setLength(0);
-          Utils.appendHexString(sequence,
+          DCCUtils.appendHexString(sequence,
                                 builder,
                                 8);
           builder.append(' ');
@@ -241,7 +241,7 @@ public final class UDPPort implements ZPort
     WRITE_LOGGER.log(Level.FINEST,
                      () -> {
                        StringBuilder builder = new StringBuilder("Sending raw ");
-                       Utils.byteBuffer2HexString(buffer,
+                       DCCUtils.byteBuffer2HexString(buffer,
                                                   builder,
                                                   ' ');
                        return builder.toString();

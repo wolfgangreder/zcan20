@@ -15,7 +15,7 @@
  */
 package at.or.reder.dcc.util;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import java.io.InvalidClassException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
@@ -96,7 +96,7 @@ public abstract class MockEnum implements Serializable
           return f.getName();
         }
       } catch (IllegalArgumentException | IllegalAccessException ex) {
-        Utils.LOGGER.log(Level.SEVERE,
+        DCCUtils.LOGGER.log(Level.SEVERE,
                          null,
                          ex);
       }

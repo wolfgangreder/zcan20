@@ -66,7 +66,7 @@ public class UtilsNGTest
                                      0xff);
     String in = "0001020304051a1b1cadafefff";
     AtomicInteger index = new AtomicInteger();
-    Utils.hexString2ByteConsumer(in,
+    DCCUtils.hexString2ByteConsumer(in,
                                  (byte b) -> {
                                    int i = index.get();
                                    assertEquals("Missmatch at position " + i,
@@ -77,7 +77,7 @@ public class UtilsNGTest
                                  (char) 0);
     in = "00 01 02 03 04 05 1a 1b 1c ad af ef ff";
     index.set(0);
-    Utils.hexString2ByteConsumer(in,
+    DCCUtils.hexString2ByteConsumer(in,
                                  (byte b) -> {
                                    int i = index.get();
                                    assertEquals("Missmatch at position " + i,
@@ -88,7 +88,7 @@ public class UtilsNGTest
                                  ' ');
     in = "00:01:02:03:04:05:1a:1b:1c:ad:af:eF:ff";
     index.set(0);
-    Utils.hexString2ByteConsumer(in,
+    DCCUtils.hexString2ByteConsumer(in,
                                  (byte b) -> {
                                    int i = index.get();
                                    assertEquals("Missmatch at position " + i,
@@ -102,7 +102,7 @@ public class UtilsNGTest
   @Test
   public void testHexString2ByteSinkEmptyString() throws ParseException
   {
-    Utils.hexString2ByteConsumer("",
+    DCCUtils.hexString2ByteConsumer("",
                                  (b) -> fail("Empty input not detected"),
                                  (char) 0);
   }
@@ -112,7 +112,7 @@ public class UtilsNGTest
   {
     String in = "00f";
     AtomicInteger index = new AtomicInteger();
-    Utils.hexString2ByteConsumer(in,
+    DCCUtils.hexString2ByteConsumer(in,
                                  (b) -> {
                                    if (index.incrementAndGet() > 1) {
                                      fail("Illegal Input not detected");
@@ -126,7 +126,7 @@ public class UtilsNGTest
   {
     String in = "0gf";
     AtomicInteger index = new AtomicInteger();
-    Utils.hexString2ByteConsumer(in,
+    DCCUtils.hexString2ByteConsumer(in,
                                  (b) -> {
                                    if (index.incrementAndGet() > 1) {
                                      fail("Illegal Input not detected");
@@ -139,7 +139,7 @@ public class UtilsNGTest
   public void testHexString2ByteSinkIllegalLength2() throws ParseException
   {
     String in = "0gf";
-    Utils.hexString2ByteConsumer(in,
+    DCCUtils.hexString2ByteConsumer(in,
                                  (b) -> fail("Illegal Input not detected"),
                                  (char) 'g');
   }
@@ -148,7 +148,7 @@ public class UtilsNGTest
   @SuppressWarnings("null")
   public void testHexString2ByteSinkNullCharsequence() throws ParseException
   {
-    Utils.hexString2ByteConsumer(null,
+    DCCUtils.hexString2ByteConsumer(null,
                                  (b) -> fail("Illegal Input not detected"),
                                  (char) 'g');
   }
@@ -157,7 +157,7 @@ public class UtilsNGTest
   @SuppressWarnings("null")
   public void testHexString2ByteSinkNullSink() throws ParseException
   {
-    Utils.hexString2ByteConsumer("ab",
+    DCCUtils.hexString2ByteConsumer("ab",
                                  null,
                                  (char) 'g');
   }
@@ -166,7 +166,7 @@ public class UtilsNGTest
   public void testHexString2ByteSinkIllegalInterbyteChar() throws ParseException
   {
     AtomicInteger index = new AtomicInteger();
-    Utils.hexString2ByteConsumer("ab cD:EF",
+    DCCUtils.hexString2ByteConsumer("ab cD:EF",
                                  (b) -> {
                                    if (index.incrementAndGet() > 2) {
                                      fail("Illegal Input not detected");
@@ -179,7 +179,7 @@ public class UtilsNGTest
   public void testHexString2ByteBuffer() throws ParseException
   {
     ByteBuffer expected = ByteBuffer.allocate(0);
-    ByteBuffer result = Utils.hexString2ByteBuffer("",
+    ByteBuffer result = DCCUtils.hexString2ByteBuffer("",
                                                    null,
                                                    (char) 0);
     result.clear();
@@ -187,7 +187,7 @@ public class UtilsNGTest
                  result);
     expected = ByteBuffer.wrap(toByteArray(0xaf));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("af",
+    result = DCCUtils.hexString2ByteBuffer("af",
                                         null,
                                         (char) 0);
     result.clear();
@@ -196,7 +196,7 @@ public class UtilsNGTest
     expected = ByteBuffer.wrap(toByteArray(0xaf,
                                            0xfe));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("affe",
+    result = DCCUtils.hexString2ByteBuffer("affe",
                                         null,
                                         (char) 0);
     result.clear();
@@ -206,7 +206,7 @@ public class UtilsNGTest
                                            0xfe,
                                            0xba));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("cafeba",
+    result = DCCUtils.hexString2ByteBuffer("cafeba",
                                         null,
                                         (char) 0);
     result.clear();
@@ -217,14 +217,14 @@ public class UtilsNGTest
                                            0xba,
                                            0xbe));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("cafebabe",
+    result = DCCUtils.hexString2ByteBuffer("cafebabe",
                                         null,
                                         (char) 0);
     result.clear();
     assertEquals(expected,
                  result);
     expected = ByteBuffer.allocate(0);
-    result = Utils.hexString2ByteBuffer("",
+    result = DCCUtils.hexString2ByteBuffer("",
                                         null,
                                         ' ');
     result.clear();
@@ -232,7 +232,7 @@ public class UtilsNGTest
                  result);
     expected = ByteBuffer.wrap(toByteArray(0xaf));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("af",
+    result = DCCUtils.hexString2ByteBuffer("af",
                                         null,
                                         ' ');
     result.clear();
@@ -241,7 +241,7 @@ public class UtilsNGTest
     expected = ByteBuffer.wrap(toByteArray(0xaf,
                                            0xfe));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("af fe",
+    result = DCCUtils.hexString2ByteBuffer("af fe",
                                         null,
                                         ' ');
     result.clear();
@@ -251,7 +251,7 @@ public class UtilsNGTest
                                            0xfe,
                                            0xba));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("ca fe ba",
+    result = DCCUtils.hexString2ByteBuffer("ca fe ba",
                                         null,
                                         ' ');
     result.clear();
@@ -262,7 +262,7 @@ public class UtilsNGTest
                                            0xba,
                                            0xbe));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("ca fe ba be",
+    result = DCCUtils.hexString2ByteBuffer("ca fe ba be",
                                         null,
                                         ' ');
     result.clear();
@@ -270,7 +270,7 @@ public class UtilsNGTest
                  result);
     expected = ByteBuffer.wrap(toByteArray(0xbe));
     expected.clear();
-    result = Utils.hexString2ByteBuffer("be ",
+    result = DCCUtils.hexString2ByteBuffer("be ",
                                         null,
                                         ' ');
     result.clear();
@@ -282,7 +282,7 @@ public class UtilsNGTest
                                            0xbe));
     expected.clear();
     ByteBuffer input = ByteBuffer.allocate(4);
-    result = Utils.hexString2ByteBuffer("ca fe ba be ",
+    result = DCCUtils.hexString2ByteBuffer("ca fe ba be ",
                                         input,
                                         ' ');
     result.clear();
@@ -296,7 +296,7 @@ public class UtilsNGTest
   public void testHexString2ByteBufferBfferOverflow() throws ParseException
   {
     ByteBuffer buffer = ByteBuffer.allocate(2);
-    Utils.hexString2ByteBuffer("cafeba",
+    DCCUtils.hexString2ByteBuffer("cafeba",
                                buffer,
                                (char) 0);
   }
@@ -306,29 +306,29 @@ public class UtilsNGTest
   {
     int i = 0x65432100;
     assertEquals((byte) 0,
-                 Utils.byte1(i));
+                 DCCUtils.byte1(i));
     assertEquals((byte) 0x21,
-                 Utils.byte2(i));
+                 DCCUtils.byte2(i));
     assertEquals((byte) 0x43,
-                 Utils.byte3(i));
+                 DCCUtils.byte3(i));
     assertEquals((byte) 0x65,
-                 Utils.byte4(i));
+                 DCCUtils.byte4(i));
     i = 0x00123456;
     assertEquals((byte) 0x56,
-                 Utils.byte1(i));
+                 DCCUtils.byte1(i));
     assertEquals((byte) 0x34,
-                 Utils.byte2(i));
+                 DCCUtils.byte2(i));
     assertEquals((byte) 0x12,
-                 Utils.byte3(i));
+                 DCCUtils.byte3(i));
     assertEquals((byte) 0x00,
-                 Utils.byte4(i));
+                 DCCUtils.byte4(i));
   }
 
   @Test
   public void testCrc8()
   {
     ByteBuffer buffer = ByteBuffer.wrap(new byte[]{(byte) 0x88, 0x00, 0x01});
-    byte crc = Utils.crc8((byte) 0xff,
+    byte crc = DCCUtils.crc8((byte) 0xff,
                           buffer);
     byte expected = (byte) 0xcb;
     assertEquals(expected,
@@ -338,28 +338,28 @@ public class UtilsNGTest
   @Test
   public void testEncodeLongAddress()
   {
-    int result = Utils.encodeLongAddress(0);
+    int result = DCCUtils.encodeLongAddress(0);
     assertEquals(-1,
                  result);
-    result = Utils.encodeLongAddress(-1);
+    result = DCCUtils.encodeLongAddress(-1);
     assertEquals(-1,
                  result);
-    result = Utils.encodeLongAddress(DCCConstants.ADDRESS_SHORT_MAX);
+    result = DCCUtils.encodeLongAddress(DCCConstants.ADDRESS_SHORT_MAX);
     assertEquals(0xc07f,
                  result);
-    result = Utils.encodeLongAddress(DCCConstants.ADDRESS_SHORT_MAX + 1);
+    result = DCCUtils.encodeLongAddress(DCCConstants.ADDRESS_SHORT_MAX + 1);
     assertEquals(0xc080,
                  result);
-    result = Utils.encodeLongAddress(255);
+    result = DCCUtils.encodeLongAddress(255);
     assertEquals(0xc0ff,
                  result);
-    result = Utils.encodeLongAddress(256);
+    result = DCCUtils.encodeLongAddress(256);
     assertEquals(0xc100,
                  result);
-    result = Utils.encodeLongAddress(DCCConstants.ADDRESS_MAX);
+    result = DCCUtils.encodeLongAddress(DCCConstants.ADDRESS_MAX);
     assertEquals(0xe7ff,
                  result);
-    result = Utils.encodeLongAddress(DCCConstants.ADDRESS_MAX + 1);
+    result = DCCUtils.encodeLongAddress(DCCConstants.ADDRESS_MAX + 1);
     assertEquals(-1,
                  result);
   }
@@ -367,28 +367,28 @@ public class UtilsNGTest
   @Test
   public void testEncodeCV17()
   {
-    int result = Utils.encodeCV17(0);
+    int result = DCCUtils.encodeCV17(0);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV17(-1);
+    result = DCCUtils.encodeCV17(-1);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV17(127);
+    result = DCCUtils.encodeCV17(127);
     assertEquals(0xc0,
                  result);
-    result = Utils.encodeCV17(128);
+    result = DCCUtils.encodeCV17(128);
     assertEquals(0xc0,
                  result);
-    result = Utils.encodeCV17(255);
+    result = DCCUtils.encodeCV17(255);
     assertEquals(0xc0,
                  result);
-    result = Utils.encodeCV17(256);
+    result = DCCUtils.encodeCV17(256);
     assertEquals(0xc1,
                  result);
-    result = Utils.encodeCV17(DCCConstants.ADDRESS_MAX);
+    result = DCCUtils.encodeCV17(DCCConstants.ADDRESS_MAX);
     assertEquals(0xe7,
                  result);
-    result = Utils.encodeCV17(DCCConstants.ADDRESS_MAX + 1);
+    result = DCCUtils.encodeCV17(DCCConstants.ADDRESS_MAX + 1);
     assertEquals(-1,
                  result);
   }
@@ -396,28 +396,28 @@ public class UtilsNGTest
   @Test
   public void testEncodeCV18()
   {
-    int result = Utils.encodeCV18(0);
+    int result = DCCUtils.encodeCV18(0);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV18(-1);
+    result = DCCUtils.encodeCV18(-1);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV18(DCCConstants.ADDRESS_SHORT_MAX);
+    result = DCCUtils.encodeCV18(DCCConstants.ADDRESS_SHORT_MAX);
     assertEquals(0x7f,
                  result);
-    result = Utils.encodeCV18(DCCConstants.ADDRESS_SHORT_MAX + 1);
+    result = DCCUtils.encodeCV18(DCCConstants.ADDRESS_SHORT_MAX + 1);
     assertEquals(0x80,
                  result);
-    result = Utils.encodeCV18(255);
+    result = DCCUtils.encodeCV18(255);
     assertEquals(0xff,
                  result);
-    result = Utils.encodeCV18(256);
+    result = DCCUtils.encodeCV18(256);
     assertEquals(0x00,
                  result);
-    result = Utils.encodeCV18(DCCConstants.ADDRESS_MAX);
+    result = DCCUtils.encodeCV18(DCCConstants.ADDRESS_MAX);
     assertEquals(0xff,
                  result);
-    result = Utils.encodeCV18(DCCConstants.ADDRESS_MAX + 1);
+    result = DCCUtils.encodeCV18(DCCConstants.ADDRESS_MAX + 1);
     assertEquals(-1,
                  result);
   }
@@ -425,55 +425,55 @@ public class UtilsNGTest
   @Test
   public void testDecodeLongAddress()
   {
-    int result = Utils.decodeLongAddress(0,
+    int result = DCCUtils.decodeLongAddress(0,
                                          0);
     assertEquals(0,
                  result);
-    result = Utils.decodeLongAddress(256,
+    result = DCCUtils.decodeLongAddress(256,
                                      0);
     assertEquals(-1,
                  result);
-    result = Utils.decodeLongAddress(0,
+    result = DCCUtils.decodeLongAddress(0,
                                      256);
     assertEquals(-1,
                  result);
-    result = Utils.decodeLongAddress(0x80,
+    result = DCCUtils.decodeLongAddress(0x80,
                                      0);
     assertEquals(0,
                  result);
-    result = Utils.decodeLongAddress(0x40,
+    result = DCCUtils.decodeLongAddress(0x40,
                                      0);
     assertEquals(0,
                  result);
-    result = Utils.decodeLongAddress(0xc0,
+    result = DCCUtils.decodeLongAddress(0xc0,
                                      0x7f);
     assertEquals(127,
                  result);
-    result = Utils.decodeLongAddress(0xc0,
+    result = DCCUtils.decodeLongAddress(0xc0,
                                      0x3);
     assertEquals(3,
                  result);
-    result = Utils.decodeLongAddress(0xc0,
+    result = DCCUtils.decodeLongAddress(0xc0,
                                      128);
     assertEquals(128,
                  result);
-    result = Utils.decodeLongAddress(0xc0,
+    result = DCCUtils.decodeLongAddress(0xc0,
                                      0xff);
     assertEquals(255,
                  result);
-    result = Utils.decodeLongAddress(0xc1,
+    result = DCCUtils.decodeLongAddress(0xc1,
                                      0x00);
     assertEquals(256,
                  result);
-    result = Utils.decodeLongAddress(0xe7,
+    result = DCCUtils.decodeLongAddress(0xe7,
                                      0xff);
     assertEquals(10239,
                  result);
-    result = Utils.decodeLongAddress(0xe8,
+    result = DCCUtils.decodeLongAddress(0xe8,
                                      0);
     assertEquals(-1,
                  result);
-    result = Utils.decodeLongAddress(0xff,
+    result = DCCUtils.decodeLongAddress(0xff,
                                      0xff);
     assertEquals(-1,
                  result);
@@ -483,9 +483,9 @@ public class UtilsNGTest
   public void testRoundTripCV1718()
   {
     for (int i = 1; i < DCCConstants.ADDRESS_MAX + 1; ++i) {
-      int cv17 = Utils.encodeCV17(i);
-      int cv18 = Utils.encodeCV18(i);
-      int result = Utils.decodeLongAddress(cv17,
+      int cv17 = DCCUtils.encodeCV17(i);
+      int cv18 = DCCUtils.encodeCV18(i);
+      int result = DCCUtils.decodeLongAddress(cv17,
                                            cv18);
       assertEquals(i,
                    result);
@@ -495,83 +495,83 @@ public class UtilsNGTest
   @Test
   public void testEncodeConsistsAddress()
   {
-    int result = Utils.encodeConsistAddress(-1,
+    int result = DCCUtils.encodeConsistAddress(-1,
                                             false);
     assertEquals(-1,
                  result);
-    result = Utils.encodeConsistAddress(-1,
+    result = DCCUtils.encodeConsistAddress(-1,
                                         true);
     assertEquals(-1,
                  result);
-    result = Utils.encodeConsistAddress(0,
+    result = DCCUtils.encodeConsistAddress(0,
                                         false);
     assertEquals(0,
                  result);
-    result = Utils.encodeConsistAddress(0,
+    result = DCCUtils.encodeConsistAddress(0,
                                         true);
     assertEquals(0,
                  result);
-    result = Utils.encodeConsistAddress(1,
+    result = DCCUtils.encodeConsistAddress(1,
                                         false);
     assertEquals(1,
                  result);
-    result = Utils.encodeConsistAddress(1,
+    result = DCCUtils.encodeConsistAddress(1,
                                         true);
     assertEquals(129,
                  result);
-    result = Utils.encodeConsistAddress(99,
+    result = DCCUtils.encodeConsistAddress(99,
                                         false);
     assertEquals(99,
                  result);
-    result = Utils.encodeConsistAddress(99,
+    result = DCCUtils.encodeConsistAddress(99,
                                         true);
     assertEquals(99 + 0x80,
                  result);
-    result = Utils.encodeConsistAddress(100,
+    result = DCCUtils.encodeConsistAddress(100,
                                         false);
     assertEquals(100,
                  result);
-    result = Utils.encodeConsistAddress(100,
+    result = DCCUtils.encodeConsistAddress(100,
                                         true);
     assertEquals(100 + 0x80,
                  result);
-    result = Utils.encodeConsistAddress(127,
+    result = DCCUtils.encodeConsistAddress(127,
                                         false);
     assertEquals(127,
                  result);
-    result = Utils.encodeConsistAddress(127,
+    result = DCCUtils.encodeConsistAddress(127,
                                         true);
     assertEquals(127 + 0x80,
                  result);
-    result = Utils.encodeConsistAddress(128,
+    result = DCCUtils.encodeConsistAddress(128,
                                         false);
     assertEquals(0x0100 + 28,
                  result);
-    result = Utils.encodeConsistAddress(128,
+    result = DCCUtils.encodeConsistAddress(128,
                                         true);
     assertEquals(0x0180 + 28,
                  result);
-    result = Utils.encodeConsistAddress(199,
+    result = DCCUtils.encodeConsistAddress(199,
                                         true);
     assertEquals(0x0180 + 99,
                  result);
-    result = Utils.encodeConsistAddress(199,
+    result = DCCUtils.encodeConsistAddress(199,
                                         false);
     assertEquals(0x0100 + 99,
                  result);
-    result = Utils.encodeConsistAddress(DCCConstants.ADDRESS_MAX,
+    result = DCCUtils.encodeConsistAddress(DCCConstants.ADDRESS_MAX,
                                         false);
     assertEquals((102 << 8) + 39,
                  result);
-    result = Utils.encodeConsistAddress(DCCConstants.ADDRESS_MAX,
+    result = DCCUtils.encodeConsistAddress(DCCConstants.ADDRESS_MAX,
                                         true);
     assertEquals((102 << 8) + 39 + 0x80,
                  result);
-    result = Utils.encodeConsistAddress(DCCConstants.ADDRESS_MAX + 1,
+    result = DCCUtils.encodeConsistAddress(DCCConstants.ADDRESS_MAX + 1,
                                         true);
     assertEquals(-1,
                  result);
-    result = Utils.encodeConsistAddress(DCCConstants.ADDRESS_MAX + 1,
+    result = DCCUtils.encodeConsistAddress(DCCConstants.ADDRESS_MAX + 1,
                                         false);
     assertEquals(-1,
                  result);
@@ -580,83 +580,83 @@ public class UtilsNGTest
   @Test
   public void testEncodeCV19()
   {
-    int result = Utils.encodeCV19(-1,
+    int result = DCCUtils.encodeCV19(-1,
                                   false);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV19(-1,
+    result = DCCUtils.encodeCV19(-1,
                               true);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV19(0,
+    result = DCCUtils.encodeCV19(0,
                               false);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV19(0,
+    result = DCCUtils.encodeCV19(0,
                               true);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV19(1,
+    result = DCCUtils.encodeCV19(1,
                               false);
     assertEquals(1,
                  result);
-    result = Utils.encodeCV19(1,
+    result = DCCUtils.encodeCV19(1,
                               true);
     assertEquals(129,
                  result);
-    result = Utils.encodeCV19(99,
+    result = DCCUtils.encodeCV19(99,
                               false);
     assertEquals(99,
                  result);
-    result = Utils.encodeCV19(99,
+    result = DCCUtils.encodeCV19(99,
                               true);
     assertEquals(99 + 0x80,
                  result);
-    result = Utils.encodeCV19(100,
+    result = DCCUtils.encodeCV19(100,
                               false);
     assertEquals(100,
                  result);
-    result = Utils.encodeCV19(100,
+    result = DCCUtils.encodeCV19(100,
                               true);
     assertEquals(100 + 0x80,
                  result);
-    result = Utils.encodeCV19(127,
+    result = DCCUtils.encodeCV19(127,
                               false);
     assertEquals(127,
                  result);
-    result = Utils.encodeCV19(127,
+    result = DCCUtils.encodeCV19(127,
                               true);
     assertEquals(127 + 0x80,
                  result);
-    result = Utils.encodeCV19(128,
+    result = DCCUtils.encodeCV19(128,
                               false);
     assertEquals(28,
                  result);
-    result = Utils.encodeCV19(128,
+    result = DCCUtils.encodeCV19(128,
                               true);
     assertEquals(0x80 + 28,
                  result);
-    result = Utils.encodeCV19(199,
+    result = DCCUtils.encodeCV19(199,
                               true);
     assertEquals(0x80 + 99,
                  result);
-    result = Utils.encodeCV19(199,
+    result = DCCUtils.encodeCV19(199,
                               false);
     assertEquals(99,
                  result);
-    result = Utils.encodeCV19(DCCConstants.ADDRESS_MAX,
+    result = DCCUtils.encodeCV19(DCCConstants.ADDRESS_MAX,
                               false);
     assertEquals(39,
                  result);
-    result = Utils.encodeCV19(DCCConstants.ADDRESS_MAX,
+    result = DCCUtils.encodeCV19(DCCConstants.ADDRESS_MAX,
                               true);
     assertEquals(39 + 0x80,
                  result);
-    result = Utils.encodeCV19(DCCConstants.ADDRESS_MAX + 1,
+    result = DCCUtils.encodeCV19(DCCConstants.ADDRESS_MAX + 1,
                               true);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV19(DCCConstants.ADDRESS_MAX + 1,
+    result = DCCUtils.encodeCV19(DCCConstants.ADDRESS_MAX + 1,
                               false);
     assertEquals(-1,
                  result);
@@ -665,64 +665,64 @@ public class UtilsNGTest
   @Test
   public void testEncodeCV20()
   {
-    int result = Utils.encodeCV20(-1);
+    int result = DCCUtils.encodeCV20(-1);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV20(-1);
+    result = DCCUtils.encodeCV20(-1);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV20(0);
+    result = DCCUtils.encodeCV20(0);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(0);
+    result = DCCUtils.encodeCV20(0);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(1);
+    result = DCCUtils.encodeCV20(1);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(1);
+    result = DCCUtils.encodeCV20(1);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(99);
+    result = DCCUtils.encodeCV20(99);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(99);
+    result = DCCUtils.encodeCV20(99);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(100);
+    result = DCCUtils.encodeCV20(100);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(100);
+    result = DCCUtils.encodeCV20(100);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(127);
+    result = DCCUtils.encodeCV20(127);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(127);
+    result = DCCUtils.encodeCV20(127);
     assertEquals(0,
                  result);
-    result = Utils.encodeCV20(128);
+    result = DCCUtils.encodeCV20(128);
     assertEquals(1,
                  result);
-    result = Utils.encodeCV20(128);
+    result = DCCUtils.encodeCV20(128);
     assertEquals(1,
                  result);
-    result = Utils.encodeCV20(199);
+    result = DCCUtils.encodeCV20(199);
     assertEquals(1,
                  result);
-    result = Utils.encodeCV20(199);
+    result = DCCUtils.encodeCV20(199);
     assertEquals(1,
                  result);
-    result = Utils.encodeCV20(DCCConstants.ADDRESS_MAX);
+    result = DCCUtils.encodeCV20(DCCConstants.ADDRESS_MAX);
     assertEquals(102,
                  result);
-    result = Utils.encodeCV20(DCCConstants.ADDRESS_MAX);
+    result = DCCUtils.encodeCV20(DCCConstants.ADDRESS_MAX);
     assertEquals(102,
                  result);
-    result = Utils.encodeCV20(DCCConstants.ADDRESS_MAX + 1);
+    result = DCCUtils.encodeCV20(DCCConstants.ADDRESS_MAX + 1);
     assertEquals(-1,
                  result);
-    result = Utils.encodeCV20(DCCConstants.ADDRESS_MAX + 1);
+    result = DCCUtils.encodeCV20(DCCConstants.ADDRESS_MAX + 1);
     assertEquals(-1,
                  result);
   }
@@ -730,46 +730,46 @@ public class UtilsNGTest
   @Test
   public void testIsConsistsDirectionInverted()
   {
-    boolean result = Utils.isConsistsDirectionInverted(0);
+    boolean result = DCCUtils.isConsistsDirectionInverted(0);
     assertFalse(result);
-    result = Utils.isConsistsDirectionInverted(1);
+    result = DCCUtils.isConsistsDirectionInverted(1);
     assertFalse(result);
-    result = Utils.isConsistsDirectionInverted(127);
+    result = DCCUtils.isConsistsDirectionInverted(127);
     assertFalse(result);
-    result = Utils.isConsistsDirectionInverted(128);
+    result = DCCUtils.isConsistsDirectionInverted(128);
     assertTrue(result);
-    result = Utils.isConsistsDirectionInverted(255);
+    result = DCCUtils.isConsistsDirectionInverted(255);
     assertTrue(result);
   }
 
   @Test
   public void testDecodeConsistsAddress()
   {
-    int result = Utils.decodeConsistsAddress(0,
+    int result = DCCUtils.decodeConsistsAddress(0,
                                              0);
     assertEquals(-1,
                  result);
-    result = Utils.decodeConsistsAddress(128,
+    result = DCCUtils.decodeConsistsAddress(128,
                                          0);
     assertEquals(-1,
                  result);
-    result = Utils.decodeConsistsAddress(1,
+    result = DCCUtils.decodeConsistsAddress(1,
                                          0);
     assertEquals(1,
                  result);
-    result = Utils.decodeConsistsAddress(-1,
+    result = DCCUtils.decodeConsistsAddress(-1,
                                          -1);
     assertEquals(-1,
                  result);
-    result = Utils.decodeConsistsAddress(39,
+    result = DCCUtils.decodeConsistsAddress(39,
                                          102);
     assertEquals(10239,
                  result);
-    result = Utils.decodeConsistsAddress(39 + 0x80,
+    result = DCCUtils.decodeConsistsAddress(39 + 0x80,
                                          102);
     assertEquals(10239,
                  result);
-    result = Utils.decodeConsistsAddress(40,
+    result = DCCUtils.decodeConsistsAddress(40,
                                          102);
     assertEquals(-1,
                  result);
@@ -779,24 +779,24 @@ public class UtilsNGTest
   public void testRoundTripCV1920()
   {
     for (int i = 1; i < DCCConstants.ADDRESS_MAX + 1; ++i) {
-      int cv19 = Utils.encodeCV19(i,
+      int cv19 = DCCUtils.encodeCV19(i,
                                   false);
-      int cv20 = Utils.encodeCV20(i);
-      int result = Utils.decodeConsistsAddress(cv19,
+      int cv20 = DCCUtils.encodeCV20(i);
+      int result = DCCUtils.decodeConsistsAddress(cv19,
                                                cv20);
       assertEquals(i,
                    result);
-      assertFalse(Utils.isConsistsDirectionInverted(cv19));
+      assertFalse(DCCUtils.isConsistsDirectionInverted(cv19));
     }
     for (int i = 1; i < DCCConstants.ADDRESS_MAX + 1; ++i) {
-      int cv19 = Utils.encodeCV19(i,
+      int cv19 = DCCUtils.encodeCV19(i,
                                   true);
-      int cv20 = Utils.encodeCV20(i);
-      int result = Utils.decodeConsistsAddress(cv19,
+      int cv20 = DCCUtils.encodeCV20(i);
+      int result = DCCUtils.decodeConsistsAddress(cv19,
                                                cv20);
       assertEquals(i,
                    result);
-      assertTrue(Utils.isConsistsDirectionInverted(cv19));
+      assertTrue(DCCUtils.isConsistsDirectionInverted(cv19));
     }
   }
 

@@ -16,7 +16,6 @@
 package at.or.reder.dcc.cv;
 
 import at.or.reder.dcc.util.Descripted;
-import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -35,13 +34,6 @@ public interface CVEntry extends Lookup.Provider, CVAddress, Descripted
    * @return cvType
    */
   public CVType getCVType();
-
-  @Override
-  public default ResourceDescription getFallbackDescription()
-  {
-    return new ResourceDescription("CV " + Integer.toString(getAddress()),
-                                   "");
-  }
 
   public Set<CVFlag> getFlags();
 

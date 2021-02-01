@@ -72,7 +72,8 @@ public final class ZIMOCVSetProvider implements CVSetProvider
     synchronized (this) {
       if (cvsets == null) {
         try (InputStream is = getClass().getResourceAsStream("zimo.xml")) {
-          CVSet set = CVFactories.loadCVSetFromXML(is);
+          CVSet set = CVFactories.loadCVSetFromXML(this,
+                                                   is);
           if (set != null) {
             cvsets = Collections.singletonList(set);
           } else {

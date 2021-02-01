@@ -18,7 +18,7 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.packet.DataGroupRequestPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 
 /**
  *
@@ -68,7 +68,7 @@ final class DataGroupRequestPacketAdapterImpl extends AbstractPacketAdapter impl
   public String toString()
   {
     StringBuilder builder = new StringBuilder("GROUP_COUNT(0x");
-    Utils.appendHexString(getSourceNid() & 0xffff,
+    DCCUtils.appendHexString(getSourceNid() & 0xffff,
                           builder,
                           4);
     builder.append(", ");

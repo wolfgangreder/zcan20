@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.ui;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.packet.Packet;
 import at.or.reder.zcan20.packet.PacketAdapter;
 import java.time.LocalDateTime;
@@ -118,7 +118,7 @@ public final class PacketTableModel implements TableModel
                                                     (i) -> packet.getTimestamp().toString());
       case 1:
         return packet.getLabelMap().computeIfAbsent(columnIndex,
-                                                    (i) -> Utils.appendHexString(packet.getCanId().intValue(),
+                                                    (i) -> DCCUtils.appendHexString(packet.getCanId().intValue(),
                                                                                  new StringBuilder(),
                                                                                  4).toString());
       case 2:
@@ -140,7 +140,7 @@ public final class PacketTableModel implements TableModel
                                                                                                            getMagic() & 0x3)));
       case 5:
         return packet.getLabelMap().computeIfAbsent(columnIndex,
-                                                    (i) -> Utils.appendHexString(packet.getSenderNID() & 0xffff,
+                                                    (i) -> DCCUtils.appendHexString(packet.getSenderNID() & 0xffff,
                                                                                  new StringBuilder(),
                                                                                  4).toString());
       case 6:
@@ -148,7 +148,7 @@ public final class PacketTableModel implements TableModel
                                                     (i) -> Integer.toString(packet.getDLC()));
       case 7:
         return packet.getLabelMap().computeIfAbsent(columnIndex,
-                                                    (i) -> Utils.byteBuffer2HexString(packet.getData(),
+                                                    (i) -> DCCUtils.byteBuffer2HexString(packet.getData(),
                                                                                       new StringBuilder(),
                                                                                       ' ').toString());
       case 8:

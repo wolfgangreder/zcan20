@@ -15,7 +15,7 @@
  */
 package at.or.reder.mx1.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import java.nio.ByteBuffer;
 import static org.testng.AssertJUnit.assertEquals;
 import org.testng.annotations.Test;
@@ -202,9 +202,9 @@ public class MX1PortImplNGTest
                  out.position());
     assertEquals(6,
                  result);
-    String s1 = Utils.byteArray2HexString(new byte[]{(byte) 0, MX1PortImpl.DLE, (byte) (MX1PortImpl.DLE ^ 0x20), (byte) 2,
+    String s1 = DCCUtils.byteArray2HexString(new byte[]{(byte) 0, MX1PortImpl.DLE, (byte) (MX1PortImpl.DLE ^ 0x20), (byte) 2,
                                                      MX1PortImpl.DLE, (byte) (MX1PortImpl.EOT ^ 0x20)});
-    String s2 = Utils.byteBuffer2HexString(out,
+    String s2 = DCCUtils.byteBuffer2HexString(out,
                                            null,
                                            (char) 0).toString();
     assertEquals(s1,
@@ -236,8 +236,8 @@ public class MX1PortImplNGTest
                  out.position());
     assertEquals(3,
                  result);
-    String s1 = Utils.byteArray2HexString(new byte[]{(byte) 0, MX1PortImpl.DLE, (byte) (MX1PortImpl.DLE ^ 0x20)});
-    String s2 = Utils.byteBuffer2HexString(out,
+    String s1 = DCCUtils.byteArray2HexString(new byte[]{(byte) 0, MX1PortImpl.DLE, (byte) (MX1PortImpl.DLE ^ 0x20)});
+    String s2 = DCCUtils.byteBuffer2HexString(out,
                                            null,
                                            (char) 0).toString();
     assertEquals(s1,

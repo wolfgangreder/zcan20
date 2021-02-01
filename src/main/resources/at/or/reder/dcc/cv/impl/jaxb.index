@@ -1,1 +1,5 @@
 XmlCVSet
+XmlCVEntry
+XmlCVBitDescriptor
+XmlCVValue
+XmlEnumeratedValue

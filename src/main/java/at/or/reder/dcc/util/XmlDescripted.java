@@ -17,7 +17,6 @@ package at.or.reder.dcc.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.xml.bind.annotation.XmlElement;
@@ -35,20 +34,20 @@ public class XmlDescripted
   {
   }
 
-  public XmlDescripted(Map<Locale, ResourceDescription> map)
+  public XmlDescripted(Localizable<? extends ResourceDescription> map)
   {
-    map.entrySet().
+    map.getValues().entrySet().
             stream().
             filter((e) -> e.getValue() != null).
             map(XmlResourceDescriptor::new).
             forEach(descriptors::add);
   }
 
-  public Map<Locale, ResourceDescription> toMap()
+  public Localizable<ResourceDescription> toModel()
   {
-    return descriptors.stream().
+    Map<String, ResourceDescription> map = descriptors.stream().
             filter((x) -> x.getName() != null && !x.getName().isEmpty()).
-            collect(Collectors.toMap(XmlResourceDescriptor::getLocale,
+            collect(Collectors.toMap(XmlResourceDescriptor::getLoc,
                                      (x) -> new ResourceDescription(x.getName(),
                                                                     x.getDescription()),
                                      (s1, s2) -> {
@@ -59,6 +58,7 @@ public class XmlDescripted
                                        }
                                      })
             );
+    return new DescriptionLocalizable(true).addValues(map).toImutable();
   }
 
   @XmlElement(name = "descriptor")

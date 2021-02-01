@@ -15,7 +15,7 @@
  */
 package at.or.reder.mx1.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.mx1.MX1Command;
 import at.or.reder.mx1.MX1Packet;
 import at.or.reder.mx1.MX1PacketAdapter;
@@ -48,13 +48,13 @@ final class PacketImpl implements MX1Packet
     this.sequence = sequence & 0xff;
     this.command = Objects.requireNonNull(command,
                                           "command is null");
-    this.flags = Utils.copyToUnmodifiableEnumSet(Objects.requireNonNull(flags,
+    this.flags = DCCUtils.copyToUnmodifiableEnumSet(Objects.requireNonNull(flags,
                                                                         "flags is null"),
                                                  MX1PacketFlags.class,
                                                  null);
     ByteBuffer tmp;
     if (payload != null && payload.remaining() > 0) {
-      tmp = Utils.allocateBEBuffer(payload.remaining());
+      tmp = DCCUtils.allocateBEBuffer(payload.remaining());
       tmp.put(payload);
     } else {
       tmp = ByteBuffer.allocate(0);
@@ -172,7 +172,7 @@ final class PacketImpl implements MX1Packet
         ByteBuffer pl = getData();
         if (pl.hasRemaining()) {
           tmp.append(", ");
-          Utils.byteBuffer2HexString(pl,
+          DCCUtils.byteBuffer2HexString(pl,
                                      tmp,
                                      ' ');
         }

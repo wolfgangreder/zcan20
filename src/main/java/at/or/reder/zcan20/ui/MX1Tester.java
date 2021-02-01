@@ -20,7 +20,7 @@ import at.or.reder.dcc.Direction;
 import at.or.reder.dcc.IdentifyProvider;
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.PowerMode;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.mx1.CommandStationInfo;
 import at.or.reder.mx1.LocoInfo;
 import at.or.reder.mx1.MX1;
@@ -338,7 +338,7 @@ public class MX1Tester
           } else {
             try {
               IdentifyProvider ip = mx1.getLookup().lookup(IdentifyProvider.class);
-              DecoderInfo di = Utils.identifyDecoder(ip,
+              DecoderInfo di = DCCUtils.identifyDecoder(ip,
                                                      0,
                                                      false);
               BitSet functions = new BitSet(13);
@@ -579,7 +579,7 @@ public class MX1Tester
       }
       IdentifyProvider ip = mx1.getLookup().lookup(IdentifyProvider.class
       );
-      DecoderInfo di = Utils.identifyDecoder(ip,
+      DecoderInfo di = DCCUtils.identifyDecoder(ip,
                                              address,
                                              mode == ProgrammingMode.SERVICE);
       if (decoderInfoConsumer != null) {

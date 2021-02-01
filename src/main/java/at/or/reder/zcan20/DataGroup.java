@@ -16,7 +16,7 @@
 package at.or.reder.zcan20;
 
 import at.or.reder.dcc.util.MockEnum;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -51,7 +51,7 @@ public final class DataGroup extends MockEnum implements Serializable
   @Override
   protected String getDefaultToString()
   {
-    return Utils.appendHexString(getMagic(),
+    return DCCUtils.appendHexString(getMagic(),
                                  new StringBuilder("DataGroup 0x"),
                                  4).toString().toUpperCase();
   }

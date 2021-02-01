@@ -16,7 +16,6 @@
 package at.or.reder.dcc.cv.impl;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import org.openide.util.Exceptions;
 
 /**
@@ -35,7 +34,7 @@ public final class JAXBHelper
       JAXBContext tmp = null;
       try {
         tmp = JAXBContext.newInstance("at.or.reder.dcc.cv.impl:" + "at.or.reder.dcc.util");
-      } catch (JAXBException ex) {
+      } catch (Throwable ex) {
         Exceptions.printStackTrace(ex);
       }
       ctx = tmp;

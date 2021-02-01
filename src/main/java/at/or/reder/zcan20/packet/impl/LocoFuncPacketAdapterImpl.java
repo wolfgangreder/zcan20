@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.PacketSelector;
 import at.or.reder.zcan20.packet.LocoFuncPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
@@ -80,7 +80,7 @@ final class LocoFuncPacketAdapterImpl extends AbstractPacketAdapter implements L
   public String toString()
   {
     StringBuilder builder = new StringBuilder("LOCO_FUNC(0x");
-    Utils.appendHexString(getDecoderId(),
+    DCCUtils.appendHexString(getDecoderId(),
                           builder,
                           4);
     builder.append(", ");

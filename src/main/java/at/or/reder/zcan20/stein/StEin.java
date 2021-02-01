@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.stein;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +31,7 @@ public interface StEin
   public default List<StEinGA> getTracks()
   {
     return getObjects().stream().
-            map((o) -> Utils.dynamicCast(o,
+            map((o) -> DCCUtils.dynamicCast(o,
                                          StEinGA.class)).
             filter((o) -> o != null && o.getObjectClass() == ObjectClass.GA).
             collect(Collectors.toUnmodifiableList());
@@ -40,7 +40,7 @@ public interface StEin
   public default List<StEinGA> getTrackTemplates()
   {
     return getObjects().stream().
-            map((o) -> Utils.dynamicCast(o,
+            map((o) -> DCCUtils.dynamicCast(o,
                                          StEinGA.class)).
             filter((o) -> o != null && o.getObjectClass() == ObjectClass.GATYP).
             collect(Collectors.toUnmodifiableList());

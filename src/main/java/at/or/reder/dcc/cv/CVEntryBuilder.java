@@ -15,10 +15,9 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.dcc.util.Localizable;
 import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -58,12 +57,12 @@ public interface CVEntryBuilder
 
   public CVEntryBuilder type(@NotNull CVType type);
 
-  public CVEntryBuilder addDescription(Locale locale,
+  public CVEntryBuilder addDescription(String locale,
                                        @NotNull ResourceDescription description);
 
-  public CVEntryBuilder addDescriptions(@NotNull Map<Locale, ResourceDescription> description);
+  public CVEntryBuilder addDescriptions(Localizable<? extends ResourceDescription> description);
 
-  public CVEntryBuilder removeDescription(Locale locale);
+  public CVEntryBuilder removeDescription(String locale);
 
   public CVEntryBuilder clearDescriptions();
 

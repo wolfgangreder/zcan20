@@ -18,7 +18,7 @@ package at.or.reder.zcan20.impl;
 import at.or.reder.dcc.util.BufferPool;
 import at.or.reder.dcc.util.BufferPool.BufferItem;
 import at.or.reder.dcc.util.CanIdMatcher;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CanId;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.CommandMode;
@@ -109,7 +109,7 @@ public final class VCOMPort implements ZPort
             }
           }
         } catch (PortInUseException | UnsupportedCommOperationException | TooManyListenersException ex) {
-          Utils.LOGGER.log(Level.SEVERE,
+          DCCUtils.LOGGER.log(Level.SEVERE,
                            null,
                            ex);
           throw new IOException(ex);
@@ -166,7 +166,7 @@ public final class VCOMPort implements ZPort
     WRITE_LOGGER.log(Level.FINEST,
                      () -> {
                        StringBuilder builder = new StringBuilder("Sending raw ");
-                       Utils.byteBuffer2HexString(buffer,
+                       DCCUtils.byteBuffer2HexString(buffer,
                                                   builder,
                                                   ' ');
                        return builder.toString();
@@ -188,7 +188,7 @@ public final class VCOMPort implements ZPort
           try {
             in.read(bytesRead);
           } catch (IOException ex) {
-            Utils.LOGGER.log(Level.SEVERE,
+            DCCUtils.LOGGER.log(Level.SEVERE,
                              null,
                              ex);
             return;
@@ -235,7 +235,7 @@ public final class VCOMPort implements ZPort
   {
     ByteBuffer b = receiveBuffer.flip();
     b.limit(b.limit() - 2);
-    short crc = Utils.crc16((short) 0,
+    short crc = DCCUtils.crc16((short) 0,
                             b);
     short crcRead = receiveBuffer.getShort(receiveBuffer.limit() - 2);
     return crc == crcRead;
@@ -274,12 +274,12 @@ public final class VCOMPort implements ZPort
         return ReaderState.TE_READ;
       } else {
         READ_LOGGER.log(Level.WARNING,
-                        () -> "CRC error :" + Utils.byteArray2HexString(receiveBuffer.array()));
+                        () -> "CRC error :" + DCCUtils.byteArray2HexString(receiveBuffer.array()));
         return resetReader();
       }
     } else {
       READ_LOGGER.log(Level.WARNING,
-                      () -> "Framing error :" + Utils.byteArray2HexString(receiveBuffer.array()) + " byteTo append:0x" + Integer.
+                      () -> "Framing error :" + DCCUtils.byteArray2HexString(receiveBuffer.array()) + " byteTo append:0x" + Integer.
                       toHexString(b & 0xff));
       return resetReader();
     }

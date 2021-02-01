@@ -20,7 +20,7 @@ import at.or.reder.dcc.IdentifyProvider;
 import at.or.reder.dcc.LinkState;
 import at.or.reder.dcc.PowerMode;
 import at.or.reder.dcc.SpeedstepSystem;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.mx1.CVPacketAdapter;
 import at.or.reder.mx1.CommandStationInfo;
 import at.or.reder.mx1.LocoInfo;
@@ -182,7 +182,7 @@ public class MX1Impl implements MX1
 
   private void sendSerialInfo(SerialInfoAction action) throws IOException
   {
-    ByteBuffer payload = Utils.allocateBEBuffer(2);
+    ByteBuffer payload = DCCUtils.allocateBEBuffer(2);
     payload.put((byte) 1);
     payload.put(action.getCode());
     payload.rewind();
@@ -265,7 +265,7 @@ public class MX1Impl implements MX1
                        int sequenceReply) throws IOException
   {
     checkConnected();
-    ByteBuffer payLoad = Utils.allocateBEBuffer(1);
+    ByteBuffer payLoad = DCCUtils.allocateBEBuffer(1);
     payLoad.put((byte) sequenceReply);
     payLoad.rewind();
     MX1Packet packet = new PacketImpl((byte) (sequence++),
@@ -283,9 +283,9 @@ public class MX1Impl implements MX1
                      int iCV) throws IOException
   {
     checkConnected();
-    ByteBuffer payLoad = Utils.allocateBEBuffer(4);
-    payLoad.putShort(Utils.short1((address & 0x3fff) | 0x8000)); // force DCC!
-    payLoad.putShort(Utils.short1(iCV));
+    ByteBuffer payLoad = DCCUtils.allocateBEBuffer(4);
+    payLoad.putShort(DCCUtils.short1((address & 0x3fff) | 0x8000)); // force DCC!
+    payLoad.putShort(DCCUtils.short1(iCV));
     payLoad.rewind();
     MX1Packet packet = new PacketImpl((byte) (sequence++),
                                       EnumSet.of(MX1PacketFlags.FROM_PC,
@@ -332,9 +332,9 @@ public class MX1Impl implements MX1
                       int value) throws IOException
   {
     checkConnected();
-    ByteBuffer payLoad = Utils.allocateBEBuffer(5);
-    payLoad.putShort(Utils.short1((address & 0x3fff) | 0x8000)); // force DCC!
-    payLoad.putShort(Utils.short1(iCV));
+    ByteBuffer payLoad = DCCUtils.allocateBEBuffer(5);
+    payLoad.putShort(DCCUtils.short1((address & 0x3fff) | 0x8000)); // force DCC!
+    payLoad.putShort(DCCUtils.short1(iCV));
     payLoad.put((byte) value);
     payLoad.rewind();
     MX1Packet packet = new PacketImpl((byte) (sequence++),
@@ -380,7 +380,7 @@ public class MX1Impl implements MX1
   public void getPowerMode() throws IOException
   {
     checkConnected();
-    ByteBuffer payLoad = Utils.allocateBEBuffer(1);
+    ByteBuffer payLoad = DCCUtils.allocateBEBuffer(1);
     payLoad.put((byte) 3); // query status
     payLoad.rewind();
     MX1Packet packet = new PacketImpl((byte) (sequence++),
@@ -436,7 +436,7 @@ public class MX1Impl implements MX1
         return;
     }
     checkConnected();
-    ByteBuffer payLoad = Utils.allocateBEBuffer(1);
+    ByteBuffer payLoad = DCCUtils.allocateBEBuffer(1);
     payLoad.put(mode); // query status
     payLoad.rewind();
     MX1Packet packet = new PacketImpl((byte) (sequence++),
@@ -473,7 +473,7 @@ public class MX1Impl implements MX1
   public void getCommandStationInfo() throws IOException
   {
     checkConnected();
-    ByteBuffer payLoad = Utils.allocateBEBuffer(1);
+    ByteBuffer payLoad = DCCUtils.allocateBEBuffer(1);
     payLoad.put((byte) 0);
     payLoad.rewind();
     MX1Packet packet = new PacketImpl((byte) (sequence++),
@@ -539,7 +539,7 @@ public class MX1Impl implements MX1
         functions.set(iFunction,
                       val != 0);
       }
-      ByteBuffer payLoad = Utils.allocateBEBuffer(5);
+      ByteBuffer payLoad = DCCUtils.allocateBEBuffer(5);
       payLoad.putShort((short) address);
       payLoad.put((byte) flags);
       payLoad.putShort((short) LocoInfoPacketAdapter.getF112(functions));
@@ -590,7 +590,7 @@ public class MX1Impl implements MX1
                        int speed,
                        SpeedstepSystem speedSystem) throws IOException
   {
-    ByteBuffer payload = Utils.allocateBEBuffer(3);
+    ByteBuffer payload = DCCUtils.allocateBEBuffer(3);
     payload.putShort((short) address);
     payload.put((byte) speedSystem.normalizedToSystem(speed));
     payload.rewind();
@@ -610,7 +610,7 @@ public class MX1Impl implements MX1
   @Override
   public void emergencyStop(int address) throws IOException
   {
-    ByteBuffer payload = Utils.allocateBEBuffer(3);
+    ByteBuffer payload = DCCUtils.allocateBEBuffer(3);
     payload.putShort((short) address);
     payload.put((byte) 0x80);
     payload.rewind();
@@ -634,7 +634,7 @@ public class MX1Impl implements MX1
                           boolean man,
                           BitSet functions) throws IOException
   {
-    ByteBuffer payload = Utils.allocateBEBuffer(6);
+    ByteBuffer payload = DCCUtils.allocateBEBuffer(6);
     payload.putShort((short) address);
     int s = speedSytem.normalizedToSystem(speed);
     payload.put((byte) s);
@@ -667,7 +667,7 @@ public class MX1Impl implements MX1
   @Override
   public void getLocoInfo(int address) throws IOException
   {
-    ByteBuffer payload = Utils.allocateBEBuffer(2);
+    ByteBuffer payload = DCCUtils.allocateBEBuffer(2);
     payload.putShort((short) address);
     payload.rewind();
     MX1Packet packet = new PacketImpl((byte) (sequence++),

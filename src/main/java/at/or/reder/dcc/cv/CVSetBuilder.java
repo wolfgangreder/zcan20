@@ -15,10 +15,9 @@
  */
 package at.or.reder.dcc.cv;
 
+import at.or.reder.dcc.util.Localizable;
 import at.or.reder.dcc.util.ResourceDescription;
 import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
@@ -31,14 +30,16 @@ public interface CVSetBuilder
 
   public CVSetBuilder copy(CVSet set);
 
+  public CVSetBuilder provider(CVSetProvider provider);
+
   public CVSetBuilder id(@NotNull UUID id);
 
-  public CVSetBuilder addDescription(Locale loc,
+  public CVSetBuilder addDescription(String loc,
                                      ResourceDescription name);
 
-  public CVSetBuilder addDescriptions(@NotNull Map<Locale, ResourceDescription> descriptions);
+  public CVSetBuilder addDescriptions(Localizable<? extends ResourceDescription> descriptions);
 
-  public CVSetBuilder removeDescription(Locale loc);
+  public CVSetBuilder removeDescription(String loc);
 
   public CVSetBuilder clearDescriptions();
 

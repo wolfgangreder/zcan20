@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.packet.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.CVReadState;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.PacketSelector;
@@ -106,7 +106,7 @@ final class CVInfoPacketAdpaterImpl extends AbstractPacketAdapter implements CVI
     StringBuilder builder = new StringBuilder("CVInfo(");
     builder.append(getReadState());
     builder.append(", 0x");
-    Utils.appendHexString(getSystemID() & 0xffff,
+    DCCUtils.appendHexString(getSystemID() & 0xffff,
                           builder,
                           4);
     builder.append(", ");

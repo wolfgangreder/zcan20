@@ -17,7 +17,7 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.packet.DataGroupNidPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 
 /**
  *
@@ -68,11 +68,11 @@ final class DataGroupNidPacketAdapterImpl extends AbstractPacketAdapter implemen
   public String toString()
   {
     StringBuilder builder = new StringBuilder("DATAINFO_NID(0x");
-    Utils.appendHexString(getSystemNID(),
+    DCCUtils.appendHexString(getSystemNID(),
                           builder,
                           4);
     builder.append(", 0x");
-    Utils.appendHexString(getObjectNID(),
+    DCCUtils.appendHexString(getObjectNID(),
                           builder,
                           4);
     return builder.append(')').toString();

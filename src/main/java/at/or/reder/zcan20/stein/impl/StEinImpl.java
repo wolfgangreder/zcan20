@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20.stein.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.stein.StEin;
 import at.or.reder.zcan20.stein.StEinObject;
 import java.util.Collection;
@@ -35,7 +35,7 @@ public final class StEinImpl implements StEin
   {
     this.address = address;
     this.moduleNumber = moduleNumber;
-    this.objects = Utils.copyToUnmodifiableList(objects,
+    this.objects = DCCUtils.copyToUnmodifiableList(objects,
                                                 (i) -> i != null);
   }
 

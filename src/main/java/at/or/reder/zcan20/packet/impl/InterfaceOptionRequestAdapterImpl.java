@@ -18,7 +18,7 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.packet.InterfaceOptionRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 
 /**
  *
@@ -68,7 +68,7 @@ final class InterfaceOptionRequestAdapterImpl extends AbstractPacketAdapter impl
   public String toString()
   {
     StringBuilder builder = new StringBuilder("INTERFACE_OPTION(0x");
-    Utils.appendHexString(getObjectNID(),
+    DCCUtils.appendHexString(getObjectNID(),
                           builder,
                           4);
     builder.append(", ");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Wolfgang Reder.
+ * Copyright 2019-2021 Wolfgang Reder.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,6 @@
  */
 package at.or.reder.dcc.util;
 
-import at.or.reder.dcc.util.ResourceDescription;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 /**
  *
  * @author Wolfgang Reder
@@ -28,28 +22,23 @@ import java.util.stream.Collectors;
 public abstract class AbstractDescripted implements Descripted
 {
 
-  private final Map<Locale, ResourceDescription> descriptions;
+  private final Localizable<ResourceDescription> descriptions;
   private ResourceDescription defaultDescription;
 
-  protected AbstractDescripted(Map<Locale, ? extends ResourceDescription> descriptions,
+  protected AbstractDescripted(Localizable<ResourceDescription> descriptions,
                                ResourceDescription defaultDescription)
   {
     this.defaultDescription = defaultDescription;
-    // da null keys erlaubt sind, geht Collectors.toUnmodifiableMap nicht
-    this.descriptions = Collections.unmodifiableMap(descriptions.entrySet().
-            stream().
-            filter((e) -> e.getValue() != null).
-            collect(Collectors.toMap(Map.Entry::getKey,
-                                     Map.Entry::getValue)));
-  }
-
-  @Override
-  public Map<Locale, ResourceDescription> getAllResourceDescriptions()
-  {
-    return descriptions;
+    this.descriptions = descriptions.toImutable();
   }
 
   public abstract String getDefaultName();
+
+  @Override
+  public Localizable<ResourceDescription> getLocalized()
+  {
+    return descriptions;
+  }
 
   public String getDefaultDescription()
   {

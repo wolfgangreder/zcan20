@@ -18,7 +18,7 @@ package at.or.reder.zcan20.packet.impl;
 import at.or.reder.zcan20.CommandGroup;
 import at.or.reder.zcan20.packet.DataGroupInfoPacketAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 
 /**
  *
@@ -87,7 +87,7 @@ final class DataGroupInfoPacketAdapterImpl extends AbstractPacketAdapter impleme
   public String toString()
   {
     StringBuilder builder = new StringBuilder("DATAINFO(0x");
-    Utils.appendHexString(getObjectNid() & 0xffff,
+    DCCUtils.appendHexString(getObjectNid() & 0xffff,
                           builder,
                           4);
     builder.append(", ");

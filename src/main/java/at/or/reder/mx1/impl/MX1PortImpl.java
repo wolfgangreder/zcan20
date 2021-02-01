@@ -15,7 +15,7 @@
  */
 package at.or.reder.mx1.impl;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.mx1.MX1Command;
 import at.or.reder.mx1.MX1Packet;
 import at.or.reder.mx1.MX1PacketFlags;
@@ -93,7 +93,7 @@ final class MX1PortImpl implements MX1Port
   {
     this.portName = Objects.requireNonNull(port,
                                            "port is null");
-    inBuffer = Utils.allocateBEBuffer(BUFFER_SIZE);
+    inBuffer = DCCUtils.allocateBEBuffer(BUFFER_SIZE);
   }
 
   private static Thread createEventThread(Runnable run)
@@ -143,7 +143,7 @@ final class MX1PortImpl implements MX1Port
             }
           }
         } catch (UnsupportedCommOperationException | TooManyListenersException | PortInUseException ex) {
-          Utils.LOGGER.log(Level.SEVERE,
+          DCCUtils.LOGGER.log(Level.SEVERE,
                            null,
                            ex);
           throw new IOException(ex);
@@ -270,7 +270,7 @@ final class MX1PortImpl implements MX1Port
   private ByteBuffer marshalPacket(MX1Packet packet)
   {
     boolean longFrame = packet.isLongFrame();
-    ByteBuffer buffer = Utils.allocateBEBuffer(packet.getDataLength()
+    ByteBuffer buffer = DCCUtils.allocateBEBuffer(packet.getDataLength()
         + 3// sequence,command,flags
         + (longFrame ? 2 : 1));
     buffer.put((byte) packet.getSequence());
@@ -278,10 +278,10 @@ final class MX1PortImpl implements MX1Port
     buffer.put((byte) packet.getCommand().getCmd());
     buffer.put(packet.getData());
     if (longFrame) {
-      buffer.putShort(Utils.crc16((short) CRC_INIT,
+      buffer.putShort(DCCUtils.crc16((short) CRC_INIT,
                                   buffer.slice().limit(buffer.position())));
     } else {
-      buffer.put(Utils.crc8((byte) CRC_INIT,
+      buffer.put(DCCUtils.crc8((byte) CRC_INIT,
                             buffer.slice().limit(buffer.position())));
     }
     return buffer.rewind();
@@ -296,7 +296,7 @@ final class MX1PortImpl implements MX1Port
     int adv = escapeBuffer(buffer,
                            outBuffer != null ? outBuffer.duplicate().position(2) : null);
     if (outBuffer == null || (adv + FRAMING_SIZE) > outBuffer.limit()) {
-      outBuffer = Utils.allocateBEBuffer(adv + FRAMING_SIZE);
+      outBuffer = DCCUtils.allocateBEBuffer(adv + FRAMING_SIZE);
       adv = escapeBuffer(buffer,
                          outBuffer.duplicate().position(2));
     }
@@ -320,7 +320,7 @@ final class MX1PortImpl implements MX1Port
   private void writeBuffer(ByteBuffer buffer) throws IOException
   {
     WRITE_LOGGER.log(Level.FINEST,
-                     () -> "Sending data " + Utils.byteBuffer2HexString(buffer,
+                     () -> "Sending data " + DCCUtils.byteBuffer2HexString(buffer,
                                                                         null,
                                                                         ' ').toString());
     out.write(buffer.array(),
@@ -489,7 +489,7 @@ final class MX1PortImpl implements MX1Port
         inBuffer.put(b);
         result = State.ST_DATA;
       } else {
-        ByteBuffer receivedData = Utils.allocateBEBuffer(inBuffer.position());
+        ByteBuffer receivedData = DCCUtils.allocateBEBuffer(inBuffer.position());
         inBuffer.limit(inBuffer.position());
         inBuffer.rewind();
         receivedData.put(inBuffer);
@@ -533,7 +533,7 @@ final class MX1PortImpl implements MX1Port
   private void processPacketData(ByteBuffer buffer)
   {
     READ_LOGGER.log(Level.FINEST,
-                    () -> "Process data " + Utils.byteBuffer2HexString(buffer,
+                    () -> "Process data " + DCCUtils.byteBuffer2HexString(buffer,
                                                                        null,
                                                                        ' ').toString());
     Set<MX1PacketFlags> flags = MX1PacketFlags.toSet(buffer.get(1));
@@ -547,7 +547,7 @@ final class MX1PortImpl implements MX1Port
       crcIn = buffer.getShort(buffer.limit() - 2) & 0xffff;
       payload = buffer.slice().position(3).limit(datalen);
 
-//      crcCalc = Utils.crc16((short) CRC_INIT,
+//      crcCalc = DCCUtils.crc16((short) CRC_INIT,
 //                            buffer.slice(0,
 //                                         buffer.limit() - 2)) & 0xffff;
       crcCalc = crcIn;
@@ -555,7 +555,7 @@ final class MX1PortImpl implements MX1Port
       int datalen = buffer.limit() - 5;
       crcIn = buffer.get(buffer.limit() - 1) & 0xff;
       payload = buffer.slice().position(3).limit(datalen);
-      crcCalc = Utils.crc8((byte) CRC_INIT,
+      crcCalc = DCCUtils.crc8((byte) CRC_INIT,
                            buffer.slice().limit(buffer.limit() - 1)) & 0xff;
     }
     if (packetConsumer != null) {

@@ -15,7 +15,7 @@
  */
 package at.or.reder.zcan20;
 
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -285,7 +285,7 @@ public final class CommandGroup implements Serializable
   @Override
   public String toString()
   {
-    return "CommandGroup " + getName() + " 0x" + Utils.appendHexString(magic,
+    return "CommandGroup " + getName() + " 0x" + DCCUtils.appendHexString(magic,
                                                                        new StringBuilder(),
                                                                        2);
   }

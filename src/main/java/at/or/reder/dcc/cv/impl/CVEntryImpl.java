@@ -22,6 +22,7 @@ import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
 import at.or.reder.dcc.util.AbstractDescripted;
+import at.or.reder.dcc.util.Localizable;
 import at.or.reder.dcc.util.ResourceDescription;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +30,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -61,7 +61,7 @@ final class CVEntryImpl extends AbstractDescripted implements CVEntry
   private final Map<CVType, Integer> bankAddresses;
 
   public CVEntryImpl(CVType type,
-                     Map<Locale, ResourceDescription> descriptions,
+                     Localizable<ResourceDescription> descriptions,
                      Set<CVFlag> flags,
                      int defaultValue,
                      int rangeMin,

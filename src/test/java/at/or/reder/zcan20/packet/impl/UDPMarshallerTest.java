@@ -16,7 +16,7 @@
 package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.dcc.PowerPort;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import at.or.reder.zcan20.DataGroup;
 import at.or.reder.zcan20.InterfaceOptionType;
 import at.or.reder.zcan20.ModuleInfoType;
@@ -77,7 +77,7 @@ public class UDPMarshallerTest
     assertNotNull(packet);
     assertEquals(10,
                  UDPMarshaller.getRequiredBufferSize(packet));
-    ByteBuffer buffer = Utils.allocateLEBuffer(10);
+    ByteBuffer buffer = DCCUtils.allocateLEBuffer(10);
     int bytesWritten = UDPMarshaller.marshalPacket(packet,
                                                    buffer);
     assertEquals(bytesWritten,
@@ -90,13 +90,13 @@ public class UDPMarshallerTest
                  buffer.get());
     assertEquals((byte) 0x1d,
                  buffer.get());
-    assertEquals(Utils.byte1(nid),
+    assertEquals(DCCUtils.byte1(nid),
                  buffer.get());
-    assertEquals(Utils.byte2(nid),
+    assertEquals(DCCUtils.byte2(nid),
                  buffer.get());
-    assertEquals(Utils.byte1(masterNid),
+    assertEquals(DCCUtils.byte1(masterNid),
                  buffer.get());
-    assertEquals(Utils.byte2(masterNid),
+    assertEquals(DCCUtils.byte2(masterNid),
                  buffer.get());
   }
 
@@ -104,7 +104,7 @@ public class UDPMarshallerTest
   public void testMarshalDataGroupCount()
   {
     final DataGroup grp = DataGroup.MX9;
-    byte[] expected = Utils.toByteArray(4,
+    byte[] expected = DCCUtils.toByteArray(4,
                                         0,
                                         0,
                                         0,
@@ -135,7 +135,7 @@ public class UDPMarshallerTest
   {
     final DataGroup grp = DataGroup.MX9;
     final short index = (short) 0x1234;
-    final byte[] expected = Utils.toByteArray(6,
+    final byte[] expected = DCCUtils.toByteArray(6,
                                               0,
                                               0,
                                               0,
@@ -169,7 +169,7 @@ public class UDPMarshallerTest
   public void testMarshalDataPacketNID()
   {
     final short objectNid = (short) 0x1234;
-    final byte[] expected = Utils.toByteArray(4,
+    final byte[] expected = DCCUtils.toByteArray(4,
                                               0,
                                               0,
                                               0,
@@ -202,30 +202,30 @@ public class UDPMarshallerTest
     int subID = 0x12345678;
     int val1 = 0x9abcdef0;
     int val2 = 0xfedcba98;
-    final byte[] expected = Utils.toByteArray(16,
+    final byte[] expected = DCCUtils.toByteArray(16,
                                               0,
                                               0,
                                               0,
                                               7,
                                               33 << 2,
-                                              Utils.byte1(nid),
-                                              Utils.byte2(nid),
-                                              Utils.byte1(masterNid),
-                                              Utils.byte2(masterNid),
-                                              Utils.byte1(objectNID),
-                                              Utils.byte2(objectNID),
-                                              Utils.byte1(subID),
-                                              Utils.byte2(subID),
-                                              Utils.byte3(subID),
-                                              Utils.byte4(subID),
-                                              Utils.byte1(val1),
-                                              Utils.byte2(val1),
-                                              Utils.byte3(val1),
-                                              Utils.byte4(val1),
-                                              Utils.byte1(val2),
-                                              Utils.byte2(val2),
-                                              Utils.byte3(val2),
-                                              Utils.byte4(val2));
+                                              DCCUtils.byte1(nid),
+                                              DCCUtils.byte2(nid),
+                                              DCCUtils.byte1(masterNid),
+                                              DCCUtils.byte2(masterNid),
+                                              DCCUtils.byte1(objectNID),
+                                              DCCUtils.byte2(objectNID),
+                                              DCCUtils.byte1(subID),
+                                              DCCUtils.byte2(subID),
+                                              DCCUtils.byte3(subID),
+                                              DCCUtils.byte4(subID),
+                                              DCCUtils.byte1(val1),
+                                              DCCUtils.byte2(val1),
+                                              DCCUtils.byte3(val1),
+                                              DCCUtils.byte4(val1),
+                                              DCCUtils.byte1(val2),
+                                              DCCUtils.byte2(val2),
+                                              DCCUtils.byte3(val2),
+                                              DCCUtils.byte4(val2));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildDataNameExt(masterNid,
                                              objectNID,
@@ -249,16 +249,16 @@ public class UDPMarshallerTest
   {
     PowerPort out = PowerPort.OUT_1;
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
-    final byte[] expected = Utils.toByteArray(3,
+    final byte[] expected = DCCUtils.toByteArray(3,
                                               0,
                                               0,
                                               0,
                                               8,
                                               0,
-                                              Utils.byte1(nid),
-                                              Utils.byte2(nid),
-                                              Utils.byte1(masterNid),
-                                              Utils.byte2(masterNid),
+                                              DCCUtils.byte1(nid),
+                                              DCCUtils.byte2(nid),
+                                              DCCUtils.byte1(masterNid),
+                                              DCCUtils.byte2(masterNid),
                                               0);
     Packet packet = builder.buildSystemPowerInfoPacket(masterNid,
                                                        Collections.singleton(out));
@@ -303,18 +303,18 @@ public class UDPMarshallerTest
   {
     short objectNid = (short) 0x1234;
     ModuleInfoType info = ModuleInfoType.HW_VERSION;
-    final byte[] expected = Utils.toByteArray(4,
+    final byte[] expected = DCCUtils.toByteArray(4,
                                               0,
                                               0,
                                               0,
                                               8,
                                               32,
-                                              Utils.byte1(nid),
-                                              Utils.byte2(nid),
-                                              Utils.byte1(objectNid),
-                                              Utils.byte2(objectNid),
-                                              Utils.byte1(info.getMagic()),
-                                              Utils.byte2(info.getMagic()));
+                                              DCCUtils.byte1(nid),
+                                              DCCUtils.byte2(nid),
+                                              DCCUtils.byte1(objectNid),
+                                              DCCUtils.byte2(objectNid),
+                                              DCCUtils.byte1(info.getMagic()),
+                                              DCCUtils.byte2(info.getMagic()));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildModuleInfoPacket(objectNid,
                                                   info);
@@ -330,8 +330,8 @@ public class UDPMarshallerTest
                  buffer.array());
 
     info = ModuleInfoType.SW_BUILD_DATE;
-    expected[expected.length - 2] = Utils.byte1(info.getMagic());
-    expected[expected.length - 1] = Utils.byte2(info.getMagic());
+    expected[expected.length - 2] = DCCUtils.byte1(info.getMagic());
+    expected[expected.length - 1] = DCCUtils.byte2(info.getMagic());
     builder = new DefaultPacketBuilder(nid);
     packet = builder.buildModuleInfoPacket(objectNid,
                                            info);
@@ -347,8 +347,8 @@ public class UDPMarshallerTest
                  buffer.array());
 
     info = ModuleInfoType.SW_BUILD_TIME;
-    expected[expected.length - 2] = Utils.byte1(info.getMagic());
-    expected[expected.length - 1] = Utils.byte2(info.getMagic());
+    expected[expected.length - 2] = DCCUtils.byte1(info.getMagic());
+    expected[expected.length - 1] = DCCUtils.byte2(info.getMagic());
     builder = new DefaultPacketBuilder(nid);
     packet = builder.buildModuleInfoPacket(objectNid,
                                            info);
@@ -364,8 +364,8 @@ public class UDPMarshallerTest
                  buffer.array());
 
     info = ModuleInfoType.SW_VERSION;
-    expected[expected.length - 2] = Utils.byte1(info.getMagic());
-    expected[expected.length - 1] = Utils.byte2(info.getMagic());
+    expected[expected.length - 2] = DCCUtils.byte1(info.getMagic());
+    expected[expected.length - 1] = DCCUtils.byte2(info.getMagic());
     builder = new DefaultPacketBuilder(nid);
     packet = builder.buildModuleInfoPacket(objectNid,
                                            info);
@@ -381,8 +381,8 @@ public class UDPMarshallerTest
                  buffer.array());
 
     info = ModuleInfoType.valueOf(0xbabe);
-    expected[expected.length - 2] = Utils.byte1(info.getMagic());
-    expected[expected.length - 1] = Utils.byte2(info.getMagic());
+    expected[expected.length - 2] = DCCUtils.byte1(info.getMagic());
+    expected[expected.length - 1] = DCCUtils.byte2(info.getMagic());
     builder = new DefaultPacketBuilder(nid);
     packet = builder.buildModuleInfoPacket(objectNid,
                                            info);
@@ -403,18 +403,18 @@ public class UDPMarshallerTest
   {
     short objectNid = (short) 0x1234;
     InterfaceOptionType info = InterfaceOptionType.SW_PROVIDER;
-    final byte[] expected = Utils.toByteArray(4,
+    final byte[] expected = DCCUtils.toByteArray(4,
                                               0,
                                               0,
                                               0,
                                               10,
                                               40,
-                                              Utils.byte1(nid),
-                                              Utils.byte2(nid),
-                                              Utils.byte1(objectNid),
-                                              Utils.byte2(objectNid),
-                                              Utils.byte1(info.getMagic()),
-                                              Utils.byte2(info.getMagic()));
+                                              DCCUtils.byte1(nid),
+                                              DCCUtils.byte2(nid),
+                                              DCCUtils.byte1(objectNid),
+                                              DCCUtils.byte2(objectNid),
+                                              DCCUtils.byte1(info.getMagic()),
+                                              DCCUtils.byte2(info.getMagic()));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildInterfaceOptionPacket(objectNid,
                                                        info);
@@ -438,16 +438,16 @@ public class UDPMarshallerTest
     Set<PowerPort> outputs = EnumSet.of(PowerPort.OUT_1,
                                         PowerPort.OUT_2,
                                         PowerPort.BOOSTER);
-    final byte[] expected = Utils.toByteArray(3,
+    final byte[] expected = DCCUtils.toByteArray(3,
                                               0,
                                               0,
                                               0,
                                               0, // 4
                                               0,
-                                              Utils.byte1(nid),
-                                              Utils.byte2(nid),
-                                              Utils.byte1(objectNid),
-                                              Utils.byte2(objectNid),
+                                              DCCUtils.byte1(nid),
+                                              DCCUtils.byte2(nid),
+                                              DCCUtils.byte1(objectNid),
+                                              DCCUtils.byte2(objectNid),
                                               0x83);
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildGetPowerModePacket(objectNid,
@@ -469,16 +469,16 @@ public class UDPMarshallerTest
   public void testMarshalGetLocoState()
   {
     short locoNid = ZCANFactory.LOCO_MAX - 2;
-    final byte[] expected = Utils.toByteArray(2,
+    final byte[] expected = DCCUtils.toByteArray(2,
                                               0,
                                               0,
                                               0,
                                               2,
                                               0x0,
-                                              Utils.byte1(nid),
-                                              Utils.byte2(nid),
-                                              Utils.byte1(locoNid),
-                                              Utils.byte2(locoNid));
+                                              DCCUtils.byte1(nid),
+                                              DCCUtils.byte2(nid),
+                                              DCCUtils.byte1(locoNid),
+                                              DCCUtils.byte2(locoNid));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildLocoStatePacket(locoNid);
     assertNotNull(packet);
@@ -497,16 +497,16 @@ public class UDPMarshallerTest
   public void testMarshalGetLocoMode()
   {
     short locoNid = ZCANFactory.LOCO_MAX - 1;
-    byte[] expected = Utils.toByteArray(2,
+    byte[] expected = DCCUtils.toByteArray(2,
                                         0,
                                         0,
                                         0,
                                         2,
                                         4,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid));
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildLocoModePacket(locoNid);
     assertNotNull(packet);
@@ -529,16 +529,16 @@ public class UDPMarshallerTest
     Protocol prot = Protocol.MFX;
     SpeedlimitMode limit = SpeedlimitMode.ZIMO;
     int numFunc = 4;
-    byte[] expected = Utils.toByteArray(6,
+    byte[] expected = DCCUtils.toByteArray(6,
                                         0,
                                         0,
                                         0,
                                         2,
                                         5,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid),
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid),
                                         0x44,
                                         4,
                                         0x0b,
@@ -567,16 +567,16 @@ public class UDPMarshallerTest
   public void testMarshalGetLocoSpeed()
   {
     short locoNid = ZCANFactory.LOCO_MAX;
-    byte[] expected = Utils.toByteArray(2,
+    byte[] expected = DCCUtils.toByteArray(2,
                                         0,
                                         0,
                                         0,
                                         2,
                                         8,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid));
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildLocoSpeedPacket(locoNid);
     assertNotNull(packet);
@@ -601,18 +601,18 @@ public class UDPMarshallerTest
                                            SpeedFlags.EMERGENCY_STOP);
     int sf = speed + SpeedFlags.maskOfSet(flags);
     byte div = 2;
-    byte[] expected = Utils.toByteArray(6,
+    byte[] expected = DCCUtils.toByteArray(6,
                                         0,
                                         0,
                                         0,
                                         2,
                                         9,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid),
-                                        Utils.byte1(sf),
-                                        Utils.byte2(sf),
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid),
+                                        DCCUtils.byte1(sf),
+                                        DCCUtils.byte2(sf),
                                         div,
                                         0);
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
@@ -636,16 +636,16 @@ public class UDPMarshallerTest
   public void testMarshalGetLocoFuncInfo()
   {
     short locoNid = 0x123;
-    byte[] expected = Utils.toByteArray(2,
+    byte[] expected = DCCUtils.toByteArray(2,
                                         0,
                                         0,
                                         0,
                                         2,
                                         0xc,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid));
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildLocoFunctionInfoPacket(locoNid);
     assertNotNull(packet);
@@ -664,16 +664,16 @@ public class UDPMarshallerTest
   public void testMarshalGetLocoFunc()
   {
     short locoNid = 0x123;
-    byte[] expected = Utils.toByteArray(2,
+    byte[] expected = DCCUtils.toByteArray(2,
                                         0,
                                         0,
                                         0,
                                         2,
                                         0x10,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid));
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildLocoFunctionPacket(locoNid);
     assertNotNull(packet);
@@ -695,20 +695,20 @@ public class UDPMarshallerTest
     short locoNid = 0x123;
     short fxNr = 254;
     short fxVal = (short) 0x89ab;
-    byte[] expected = Utils.toByteArray(6,
+    byte[] expected = DCCUtils.toByteArray(6,
                                         0,
                                         0,
                                         0,
                                         2,
                                         0x11,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid),
-                                        Utils.byte1(fxNr),
-                                        Utils.byte2(fxNr),
-                                        Utils.byte1(fxVal),
-                                        Utils.byte2(fxVal));
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid),
+                                        DCCUtils.byte1(fxNr),
+                                        DCCUtils.byte2(fxNr),
+                                        DCCUtils.byte1(fxVal),
+                                        DCCUtils.byte2(fxVal));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildLocoFunctionPacket(locoNid,
                                                     fxNr,
@@ -732,22 +732,22 @@ public class UDPMarshallerTest
     short locoNid = 0x123;
     short systemNid = (short) 0xbabe;
     int cvNum = 232860;
-    byte[] expected = Utils.toByteArray(8,
+    byte[] expected = DCCUtils.toByteArray(8,
                                         0,
                                         0,
                                         0,
                                         0x06,
                                         0x21,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(systemNid),
-                                        Utils.byte2(systemNid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid),
-                                        Utils.byte1(cvNum),
-                                        Utils.byte2(cvNum),
-                                        Utils.byte3(cvNum),
-                                        Utils.byte4(cvNum));
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(systemNid),
+                                        DCCUtils.byte2(systemNid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid),
+                                        DCCUtils.byte1(cvNum),
+                                        DCCUtils.byte2(cvNum),
+                                        DCCUtils.byte3(cvNum),
+                                        DCCUtils.byte4(cvNum));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildReadCVPacket(systemNid,
                                               locoNid,
@@ -771,24 +771,24 @@ public class UDPMarshallerTest
     short systemNid = (short) 0xbabe;
     int cvNum = 232860;
     short value = (short) 0xcafe;
-    byte[] expected = Utils.toByteArray(10,
+    byte[] expected = DCCUtils.toByteArray(10,
                                         0,
                                         0,
                                         0,
                                         0x06,
                                         0x25,
-                                        Utils.byte1(nid),
-                                        Utils.byte2(nid),
-                                        Utils.byte1(systemNid),
-                                        Utils.byte2(systemNid),
-                                        Utils.byte1(locoNid),
-                                        Utils.byte2(locoNid),
-                                        Utils.byte1(cvNum),
-                                        Utils.byte2(cvNum),
-                                        Utils.byte3(cvNum),
-                                        Utils.byte4(cvNum),
-                                        Utils.byte1(value),
-                                        Utils.byte2(value));
+                                        DCCUtils.byte1(nid),
+                                        DCCUtils.byte2(nid),
+                                        DCCUtils.byte1(systemNid),
+                                        DCCUtils.byte2(systemNid),
+                                        DCCUtils.byte1(locoNid),
+                                        DCCUtils.byte2(locoNid),
+                                        DCCUtils.byte1(cvNum),
+                                        DCCUtils.byte2(cvNum),
+                                        DCCUtils.byte3(cvNum),
+                                        DCCUtils.byte4(cvNum),
+                                        DCCUtils.byte1(value),
+                                        DCCUtils.byte2(value));
     DefaultPacketBuilder builder = new DefaultPacketBuilder(nid);
     Packet packet = builder.buildWriteCVPacket(systemNid,
                                                locoNid,

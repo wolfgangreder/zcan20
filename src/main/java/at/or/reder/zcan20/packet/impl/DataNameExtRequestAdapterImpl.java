@@ -17,7 +17,7 @@ package at.or.reder.zcan20.packet.impl;
 
 import at.or.reder.zcan20.packet.DataNameExtRequestAdapter;
 import at.or.reder.zcan20.packet.Packet;
-import at.or.reder.dcc.util.Utils;
+import at.or.reder.dcc.util.DCCUtils;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -109,23 +109,23 @@ final class DataNameExtRequestAdapterImpl extends AbstractPacketAdapter implemen
   public String toString()
   {
     StringBuilder builder = new StringBuilder("NAME_EXT(0x");
-    Utils.appendHexString(getMasterNID() & 0xffff,
+    DCCUtils.appendHexString(getMasterNID() & 0xffff,
                           builder,
                           4);
     builder.append(", 0x");
-    Utils.appendHexString(getObjectNID() & 0xffff,
+    DCCUtils.appendHexString(getObjectNID() & 0xffff,
                           builder,
                           4);
     builder.append(", 0x");
-    Utils.appendHexString(getSubID() & 0xffff,
+    DCCUtils.appendHexString(getSubID() & 0xffff,
                           builder,
                           4);
     builder.append(", 0x");
-    Utils.appendHexString(getVal1(),
+    DCCUtils.appendHexString(getVal1(),
                           builder,
                           8);
     builder.append(", 0x");
-    Utils.appendHexString(getVal2(),
+    DCCUtils.appendHexString(getVal2(),
                           builder,
                           8);
     builder.append(", \"");

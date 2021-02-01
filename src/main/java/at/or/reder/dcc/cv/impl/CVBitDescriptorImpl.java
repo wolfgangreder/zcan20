@@ -19,6 +19,7 @@ import at.or.reder.dcc.cv.CVBitDescriptor;
 import at.or.reder.dcc.cv.CVFlag;
 import at.or.reder.dcc.cv.EnumeratedValue;
 import at.or.reder.dcc.util.AbstractDescripted;
+import at.or.reder.dcc.util.Localizable;
 import at.or.reder.dcc.util.Predicates;
 import at.or.reder.dcc.util.ResourceDescription;
 import java.util.ArrayList;
@@ -27,8 +28,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -53,7 +52,7 @@ final class CVBitDescriptorImpl extends AbstractDescripted implements CVBitDescr
                              int max,
                              Collection<? extends EnumeratedValue> allowedValues,
                              Collection<CVFlag> flags,
-                             Map<Locale, ResourceDescription> valueDescriptions)
+                             Localizable<ResourceDescription> valueDescriptions)
   {
     super(valueDescriptions,
           null);

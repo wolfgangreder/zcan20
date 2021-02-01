@@ -20,6 +20,7 @@ import at.or.reder.dcc.cv.CVType;
 import at.or.reder.dcc.cv.CVUtils;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -29,18 +30,41 @@ import java.util.stream.Collectors;
 public final class SimpleCVAddress implements CVAddress
 {
 
+  private static final Map<Integer, CVAddress> cache = new ConcurrentHashMap<>();
   private final int address;
   private final Map<CVType, Integer> bankAddresses;
   private final long flatAddress;
 
-  public SimpleCVAddress(int address)
+  public static CVAddress valueOf(int address)
+  {
+    if (address <= 1024) {
+      return cache.computeIfAbsent(address,
+                                   SimpleCVAddress::new);
+    } else {
+      return new SimpleCVAddress(address);
+    }
+  }
+
+  public static CVAddress valueOf(int address,
+                                  Map<CVType, Integer> bankAddresses)
+  {
+    if (bankAddresses == null || bankAddresses.isEmpty() || bankAddresses.values().stream().filter((i) -> i != 0).findAny().
+            isEmpty()) {
+      return valueOf(address);
+    } else {
+      return new SimpleCVAddress(address,
+                                 bankAddresses);
+    }
+  }
+
+  private SimpleCVAddress(int address)
   {
     this(address,
          null);
   }
 
-  public SimpleCVAddress(int address,
-                         Map<CVType, Integer> bankAddresses)
+  private SimpleCVAddress(int address,
+                          Map<CVType, Integer> bankAddresses)
   {
     this.address = address;
     if (bankAddresses != null && !bankAddresses.isEmpty()) {
@@ -112,6 +136,33 @@ public final class SimpleCVAddress implements CVAddress
   public String toString()
   {
     return "CVAddress{" + address + '}';
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 3;
+    hash = 79 * hash + (int) (this.flatAddress ^ (this.flatAddress >>> 32));
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final SimpleCVAddress other = (SimpleCVAddress) obj;
+    if (this.flatAddress != other.flatAddress) {
+      return false;
+    }
+    return true;
   }
 
 }
